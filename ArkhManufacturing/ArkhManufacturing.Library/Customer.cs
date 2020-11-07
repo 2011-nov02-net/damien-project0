@@ -14,6 +14,11 @@
             Name = name;
         }
 
-        public override string ToString() => $"Customer#{Id}: '{Name}'{(DefaultStoreLocation?.ToString() ?? "")}";
+        public override string ToString()
+        {
+            // TODO: I have no idea if this actually works
+            string defaultStoreLocationString = DefaultStoreLocation?.ToString() ?? "";
+            return $"Customer#{Id}: '{Name}'{defaultStoreLocationString}";
+        }
     }
 }

@@ -11,11 +11,30 @@ namespace ArkhManufacturing.ConsoleApp
         {
             // On start-up, ask the user for a configuration file
             ConsoleUI.SetRetryCount(3);
-            string dataFilepath = ConsoleUI.PromptForInput("Please enter a filepath where data is stored/will be stored: ", true);
+            string[] options = { "xml", "json" };
+            int fileType = ConsoleUI.PromptForMenuSelection(options, true, true);
+            
+            if (fileType == -1)
+                return;
 
-            FranchiseManager franchiseManager = new FranchiseManager(new JsonDataSerializer<Franchise>(dataFilepath));
+            string dataFilepath = ConsoleUI.PromptForInput("Please enter a filepath where data is stored/will be stored, or press enter: ", true);
 
-            franchiseManager.Run();
+            IDataSerializer<Franchise> dataSerializer = null;
+
+            switch(fileType)
+            {
+                case 0:
+                    dataSerializer = new XmlDataSerializer<Franchise>(dataFilepath);
+                    break;
+
+                case 1:
+                    dataSerializer = new JsonDataSerializer<Franchise>(dataFilepath);
+                    break;
+            }
+
+            FranchiseManager franchiseManager = new FranchiseManager(dataSerializer);
+
+            await franchiseManager.Run();
         }
     }
 }

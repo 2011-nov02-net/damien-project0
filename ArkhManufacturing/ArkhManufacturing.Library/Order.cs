@@ -10,9 +10,9 @@ namespace ArkhManufacturing.Library
         public Customer Customer { get; set; }
         public Store StoreLocation { get; set; }
         public DateTime OrderDate { get; set; }
-        public Dictionary<int, int> ProductsRequested { get; set; }
+        public Dictionary<Product, int> ProductsRequested { get; set; }
 
-        public Order(Customer customer, Store storeLocation, DateTime orderDate, Dictionary<int, int> productsRequested) :
+        public Order(Customer customer, Store storeLocation, DateTime orderDate, Dictionary<Product, int> productsRequested) :
             base(_idGenerator)
         {
             Customer = customer;
@@ -21,6 +21,6 @@ namespace ArkhManufacturing.Library
             ProductsRequested = productsRequested;
         }
 
-        public override string ToString() => $"Order#{Id}:\n  {{\n    StoreLocation: {StoreLocation}\n  }}";
+        public override string ToString() => $"Order#{Id} for {Customer}";
     }
 }

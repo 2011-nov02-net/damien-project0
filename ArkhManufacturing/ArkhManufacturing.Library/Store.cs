@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ArkhManufacturing.Library.Exceptions;
+using System.Collections.Generic;
 
 namespace ArkhManufacturing.Library
 {
@@ -10,7 +11,7 @@ namespace ArkhManufacturing.Library
 
         public Location Location { get; }
         public List<Order> Orders { get; private set; }
-        public Dictionary<int, int> Inventory { get; private set; }
+        public Dictionary<Product, int> Inventory { get; private set; }
 
         private int _productCountThreshold;
 
@@ -20,7 +21,7 @@ namespace ArkhManufacturing.Library
             private set => _productCountThreshold = value > 0 ? value : _productCountThreshold;
         }
 
-        public Store(int productCountThreshold, Location location, List<Order> orders, Dictionary<int, int> inventory) :
+        public Store(int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory) :
             base(_idGenerator)
         {
             ProductCountThreshold = productCountThreshold;
@@ -29,7 +30,7 @@ namespace ArkhManufacturing.Library
             Inventory = inventory;
         }
 
-        public OrderStatus SubmitOrder(Order order)
+        public void SubmitOrder(Order order)
         {
             foreach (var kv in order.ProductsRequested)
             {
@@ -37,11 +38,11 @@ namespace ArkhManufacturing.Library
                 if (Inventory.ContainsKey(kv.Key))
                 {
                     // Check if the number of items requested isn't too much
-                    if (kv.Value < Inventory[kv.Key])
-                        return OrderStatus.Rejected_TooManyRequested;
+                    if (kv.Value > Inventory[kv.Key])
+                        throw new ProductRequestExcessiveException(kv.Key, kv.Value, Inventory[kv.Key]);
                 }
                 // We don't have the product
-                else return OrderStatus.Rejected_ProductNotOffered;
+                else throw new ProductNotOfferedException(kv.Key);
             }
 
             // Update the inventory, since the order is acceptable
@@ -50,8 +51,6 @@ namespace ArkhManufacturing.Library
 
             // Add the order
             Orders.Add(order);
-
-            return OrderStatus.Accepted;
         }
 
         public override string ToString() => $"Store#{Id} at {Location}";
