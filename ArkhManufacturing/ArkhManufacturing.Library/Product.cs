@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ArkhManufacturing.Library
+﻿namespace ArkhManufacturing.Library
 {
     public class Product : IdentifiableBase
     {

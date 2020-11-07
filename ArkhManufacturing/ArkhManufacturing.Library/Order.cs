@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace ArkhManufacturing.Library
 {
@@ -9,10 +7,10 @@ namespace ArkhManufacturing.Library
     {
         private static readonly IdGenerator _idGenerator = new IdGenerator();
 
-        public Customer Customer { get; private set; }
-        public Store StoreLocation { get; private set; }
-        public DateTime OrderDate { get; private set; }
-        public Dictionary<int, int> ProductsRequested { get; private set; }
+        public Customer Customer { get; set; }
+        public Store StoreLocation { get; set; }
+        public DateTime OrderDate { get; set; }
+        public Dictionary<int, int> ProductsRequested { get; set; }
 
         public Order(Customer customer, Store storeLocation, DateTime orderDate, Dictionary<int, int> productsRequested) :
             base(_idGenerator)
