@@ -1,4 +1,5 @@
 ﻿using ArkhManufacturing.Library;
+using ArkhManufacturing.UserInterface.Exceptions;
 using ArkhManufacturing.UserInterface.Serializers;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,13 @@ namespace ArkhManufacturing.UserInterface
 
         private Customer GetCustomerById(string message)
         {
-            long customerId = ConsoleUI.PromptRange(message, 0, _franchise.Customers.Count);
+            if (_franchise.Customers.Count == 0)
+                return null;
+
+            long customerId = ConsoleUI.PromptRange(message, -1, _franchise.Customers.Count);
+            if (customerId == -1)
+                throw new UserExitException();
+
             return _franchise.GetCustomerById(customerId);
         }
 
@@ -40,7 +47,9 @@ namespace ArkhManufacturing.UserInterface
             try
             {
                 // Get the customer of the order
-                Customer customer = GetCustomerById("Please enter the customer ID that is ordering: ");
+                Customer customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
+                while(customer == null)
+                    customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
 
                 // Get the store of the order
                 string defaultStore = customer.DefaultStoreLocation == null ? "" : $"(default: {customer.DefaultStoreLocation})";
@@ -111,6 +120,11 @@ namespace ArkhManufacturing.UserInterface
 
                 DisplaySuccessMessage();
             }
+            catch(UserExitException)
+            {
+                Console.WriteLine("Exiting to menu...");
+                throw;
+            }
             catch (ArgumentException)
             {
                 // Means there are no customers
@@ -151,10 +165,10 @@ namespace ArkhManufacturing.UserInterface
 
         private void DisplayCustomerDetails()
         {
-            Customer customer = GetCustomerById("Please enter the customer ID: ");
+            Customer customer = GetCustomerById("Please enter the customer ID, or -1 to return to menu: ");
             if(customer != null)
                 Console.WriteLine($"{customer}");
-            else Console.WriteLine("Customer with not found");
+            else Console.WriteLine("Customer was not found");
         }
 
         private void DisplayStoreOrderHistory()
@@ -174,7 +188,10 @@ namespace ArkhManufacturing.UserInterface
         private void DisplayCustomerOrderHistory()
         {
             // Prompt for a Customer
-            Customer customer = GetCustomerById("Please enter a customer id: ");
+            Customer customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
+            while(customer == null)
+                customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
+
             // Get its associated orders
             List<Order> orders = _franchise.GetCustomerOrderHistory(customer.Id);
             if(orders.Count > 0)
@@ -217,9 +234,16 @@ namespace ArkhManufacturing.UserInterface
                 Console.WriteLine("Welcome to Arkh Manufacturing! What would you like to do?");
                 int userInput = ConsoleUI.PromptForMenuSelection(options, true, false);
 
-                if (userInput == -1)
+                try
+                {
+                    if (userInput == -1)
+                        quit = true;
+                    else actions[userInput]();
+                }
+                catch(UserExitException)
+                {
                     quit = true;
-                else actions[userInput]();
+                }
 
             } while (!quit);
 
