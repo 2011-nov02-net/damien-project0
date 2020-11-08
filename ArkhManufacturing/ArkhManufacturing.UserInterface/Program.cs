@@ -16,6 +16,7 @@ namespace ArkhManufacturing.ConsoleApp
             if (fileType == -1)
                 return;
 
+            // Get the filepath where the data will be stored, if empty, data only lasts for the lifetime of the application
             string dataFilepath = ConsoleUI.PromptForInput("Please enter a filepath where data is stored/will be stored, or press enter: ", true);
 
             IDataSerializer<Franchise> dataSerializer = null;
@@ -27,6 +28,9 @@ namespace ArkhManufacturing.ConsoleApp
 
                 case 1:
                     dataSerializer = new JsonDataSerializer<Franchise>(dataFilepath);
+                    break;
+
+                default: 
                     break;
             }
 

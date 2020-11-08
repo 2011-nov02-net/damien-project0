@@ -4,24 +4,28 @@ using System.Linq;
 
 namespace ArkhManufacturing.Library
 {
+    // TODO: Add comment here
     public class Store : IdentifiableBase
     {
         private static readonly IdGenerator _idGenerator = new IdGenerator();
 
-        public static List<Product> Catalog;
-
+        // TODO: Add comment here
         public Location Location { get; }
+        // TODO: Add comment here
         public List<Order> Orders { get; private set; }
+        // TODO: Add comment here
         public Dictionary<Product, int> Inventory { get; private set; }
 
         private int _productCountThreshold;
 
+        // TODO: Add comment here
         public int ProductCountThreshold
         {
             get => _productCountThreshold;
             private set => _productCountThreshold = value > 0 ? value : _productCountThreshold;
         }
 
+        // TODO: Add comment here
         public Store(int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory) :
             base(_idGenerator) {
             ProductCountThreshold = productCountThreshold;
@@ -30,12 +34,16 @@ namespace ArkhManufacturing.Library
             Inventory = inventory;
         }
 
+        // TODO: Add comment here
         public bool HasStock() => Inventory.All(kv => kv.Value > 0);
 
+        // TODO: Add comment here
         public List<Product> ProductsInInventory() => Inventory.Where(kv => kv.Value > 0).Select(kv => kv.Key).ToList();
 
+        // TODO: Add comment here
         public Product GetProductById(long productId) => Inventory.FirstOrDefault(kv => kv.Value > 0 && kv.Key.Id == productId).Key;
 
+        // TODO: Add comment here
         public void SubmitOrder(Order order) {
             foreach (var kv in order.ProductsRequested) {
                 // Check if we have the product
@@ -56,6 +64,7 @@ namespace ArkhManufacturing.Library
             Orders.Add(order);
         }
 
+        // TODO: Add comment here
         public override string ToString() => $"Store#{Id} at {Location}";
     }
 }

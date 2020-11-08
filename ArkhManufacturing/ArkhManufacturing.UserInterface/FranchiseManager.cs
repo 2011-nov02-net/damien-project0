@@ -9,11 +9,13 @@ using System.Threading.Tasks;
 
 namespace ArkhManufacturing.UserInterface
 {
+    // TODO: Add comment here
     public class FranchiseManager
     {
         private readonly IDataSerializer<Franchise> _dataSerializer;
-        private Franchise _franchise;
+        private readonly Franchise _franchise;
 
+        // TODO: Add comment here
         public FranchiseManager(IDataSerializer<Franchise> dataSerializer) {
             _dataSerializer = dataSerializer;
             try {
@@ -23,8 +25,10 @@ namespace ArkhManufacturing.UserInterface
             }
         }
 
+        // TODO: Add comment here
         private void DisplaySuccessMessage() => Console.WriteLine("Operation completed successfully.\n");
 
+        // TODO: Add comment here
         private Customer GetCustomerById(string message) {
             if (_franchise.Customers.Count == 0)
                 return null;
@@ -36,6 +40,7 @@ namespace ArkhManufacturing.UserInterface
             return _franchise.GetCustomerById(customerId);
         }
 
+        // TODO: Add comment here
         private Store GetStoreById(string message) {
             if (_franchise.Stores.Count == 0)
                 return null;
@@ -47,6 +52,7 @@ namespace ArkhManufacturing.UserInterface
             return _franchise.GetStoreById(storeId);
         }
 
+        // TODO: Add comment here
         private Store CreateStore() {
             // int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory
             int productCountThreshold = 0;
@@ -66,6 +72,7 @@ namespace ArkhManufacturing.UserInterface
             return new Store(productCountThreshold, location, new List<Order>(), inventory);
         }
 
+        // TODO: Add comment here
         private Customer CreateCustomer() {
             CustomerName customerName = PromptCustomerName();
             Location storeLocation = null;
@@ -77,6 +84,7 @@ namespace ArkhManufacturing.UserInterface
             return new Customer(customerName, storeLocation);
         }
 
+        // TODO: Add comment here
         private void PromptOrder() {
             try {
                 // Get the customer of the order
@@ -98,11 +106,17 @@ namespace ArkhManufacturing.UserInterface
                 Store store = null;
                 if (customer.DefaultStoreLocation == null) {
                     bool noStoresExist = _franchise.Stores.Count == 0;
-                    bool createNewStore = ConsoleUI.PromptForBool("Do you wish to create a new store, or use an existing store?", "create", "existing");
-                    if (createNewStore && noStoresExist) {
+                    if(noStoresExist) {
+                        // only allow creating along, since there are no stores
                         store = CreateStore();
                         _franchise.AddStore(store);
-                    } else store = GetStoreById("Please enter the store you wish to place the order to: ");
+                    } else {
+                        bool createNewStore = ConsoleUI.PromptForBool("Do you wish to create a new store, or use an existing store?", "create", "existing");
+                        if (createNewStore && noStoresExist) {
+                            store = CreateStore();
+                            _franchise.AddStore(store);
+                        } else store = GetStoreById("Please enter the store you wish to place the order to: ");
+                    }
                 } else {
                     long storeId;
                     if (ConsoleUI.PromptForBool($"Do you wish use the default store ({customer.DefaultStoreLocation})? ", "yes", "no"))
@@ -175,12 +189,14 @@ namespace ArkhManufacturing.UserInterface
             }
         }
 
+        // TODO: Add comment here
         private CustomerName PromptCustomerName() {
             string firstName = ConsoleUI.PromptForInput("Please enter their first name: ", false);
             string lastName = ConsoleUI.PromptForInput("Please enter their last name: ", false);
             return new CustomerName(firstName, lastName);
         }
 
+        // TODO: Add comment here
         private Location PromptStoreLocation() {
             string planet = ConsoleUI.PromptForInput("Please enter a planet: ", false);
             string province = ConsoleUI.PromptForInput("Please enter a province: ", false);
@@ -188,22 +204,26 @@ namespace ArkhManufacturing.UserInterface
             return new Location(planet, province, city);
         }
 
+        // TODO: Add comment here
         private void PromptCustomer() {
             _franchise.AddCustomer(CreateCustomer());
             DisplaySuccessMessage();
         }
 
+        // TODO: Add comment here
         private void SearchCustomer() {
             string userInput = ConsoleUI.PromptForInput("Please enter the name of the customer in the form of 'last, first': ", false);
             List<Customer> customers = _franchise.GetCustomersByName(userInput);
             Console.WriteLine($"{customers.Count} results found:\n\t{string.Join(",\n\t", customers)}");
         }
 
+        // TODO: Add comment here
         private void DisplayCustomerDetails() {
             Customer customer = GetCustomerById("Please enter the customer ID, or -1 to return to menu: ");
             Console.WriteLine(customer != null ? $"{customer}" : "Customer was not found");
         }
 
+        // TODO: Add comment here
         private void DisplayStoreOrderHistory() {
             // Prompt for a store
             long storeId = ConsoleUI.PromptRange("Please enter a store id: ", 0, _franchise.Stores.Count);
@@ -215,6 +235,7 @@ namespace ArkhManufacturing.UserInterface
             } else Console.WriteLine("There are no orders for that store");
         }
 
+        // TODO: Add comment here
         private void DisplayCustomerOrderHistory() {
             Customer customer = null;
             try {
@@ -235,6 +256,7 @@ namespace ArkhManufacturing.UserInterface
             } else Console.WriteLine("There are no orders for that customer");
         }
 
+        // TODO: Add comment here
         public async Task Run() {
             bool quit = false;
 
@@ -277,6 +299,7 @@ namespace ArkhManufacturing.UserInterface
             await Save();
         }
 
+        // TODO: Add comment here
         private async Task Save() {
             try {
                 await Task.Run(() => _dataSerializer?.Write(_franchise));
