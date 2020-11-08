@@ -25,11 +25,12 @@ public static class ConsoleUI
     /// <returns>An int value that the user entered</returns>
     public static int PromptForMenuSelection(string[] options, bool withQuit, bool singleLine)
     {
+        if (options.Length <= 1)
+            throw new ArgumentException("Options must have more than 1 passed in.");
+
         List<string> prompts = new List<string>(options);
-        if (withQuit)
-            prompts.Add("Quit");
         int current = 0;
-        string prompt = string.Join(singleLine ? ", " : ",\n", prompts.Select(prompt => $"{current++} - {prompt}"));
+        string prompt = $"{(singleLine ? "-1 = Quit, " : "")}{string.Join(singleLine ? ", " : ",\n", prompts.Select(prompt => $"{current++} - {prompt}"))}";
 
         Console.WriteLine(prompt);
 

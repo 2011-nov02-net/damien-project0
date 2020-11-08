@@ -27,16 +27,12 @@ namespace ArkhManufacturing.UserInterface
             }
         }
 
+        private void DisplaySuccessMessage() => Console.WriteLine("Operation completed successfully.\n");
+
         private Customer GetCustomerById(string message)
         {
             long customerId = ConsoleUI.PromptRange(message, 0, _franchise.Customers.Count);
             return _franchise.GetCustomerById(customerId);
-        }
-
-        private Store GetStoreById(string message)
-        {
-            long storeId = ConsoleUI.PromptRange(message, 0, _franchise.Customers.Count);
-            return _franchise.GetStoreById(storeId);
         }
 
         private void PromptOrder()
@@ -112,6 +108,8 @@ namespace ArkhManufacturing.UserInterface
                 // Add the Order after its creation
                 Order order = new Order(customer, store, date, productsRequested);
                 store.SubmitOrder(order);
+
+                DisplaySuccessMessage();
             }
             catch (ArgumentException)
             {
@@ -139,6 +137,7 @@ namespace ArkhManufacturing.UserInterface
         {
             Customer customer = new Customer(PromptCustomerName(), PromptStoreLocation());
             _franchise.AddCustomer(customer);
+            DisplaySuccessMessage();
         }
 
         private void SearchCustomer()
