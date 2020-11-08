@@ -20,5 +20,12 @@
             string defaultStoreLocationString = DefaultStoreLocation?.ToString() ?? "";
             return $"Customer#{Id}: '{Name}'{defaultStoreLocationString}";
         }
+        
+        public override bool Equals(object obj)
+        {
+            if (obj is Customer)
+                return (obj as Customer).Id == Id;
+            else return false;
+        }
     }
 }

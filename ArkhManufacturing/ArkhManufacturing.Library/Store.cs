@@ -1,5 +1,6 @@
 ﻿using ArkhManufacturing.Library.Exceptions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ArkhManufacturing.Library
 {
@@ -29,6 +30,12 @@ namespace ArkhManufacturing.Library
             Orders = orders;
             Inventory = inventory;
         }
+
+        public bool HasStock() => Inventory.All(kv => kv.Value > 0);
+
+        public List<Product> ProductsInInventory() => Inventory.Where(kv => kv.Value > 0).Select(kv => kv.Key).ToList();
+
+        public Product GetProductById(long productId) => Inventory.FirstOrDefault(kv => kv.Value > 0 && kv.Key.Id == productId).Key;
 
         public void SubmitOrder(Order order)
         {
