@@ -61,7 +61,13 @@ namespace ArkhManufacturing.Library
                 Customers.Add(customer);
         }
 
-        public Customer GetCustomerById(long customerId) => Customers.First(c => c.Id == customerId);
+        public void AddStore(Store store)
+        {
+            if (Stores.First(s => s.Id == store.Id) == null)
+                Stores.Add(store);
+        }
+
+        public Customer GetCustomerById(long customerId) => Customers.FirstOrDefault(c => c.Id == customerId);
 
         public List<Customer> GetCustomersByName(string name) => Customers.Where(c => c.Name.ToString() == name).ToList();
 

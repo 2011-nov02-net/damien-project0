@@ -14,11 +14,12 @@
             Name = name;
         }
 
+        public bool HasDefaultStoreLocation() => DefaultStoreLocation != null;
+
         public override string ToString()
         {
-            // TODO: I have no idea if this actually works
             string defaultStoreLocationString = DefaultStoreLocation?.ToString() ?? "";
-            return $"Customer#{Id}: '{Name}'{defaultStoreLocationString}";
+            return $"Customer#{Id}: '{Name}' {defaultStoreLocationString}";
         }
         
         public override bool Equals(object obj)

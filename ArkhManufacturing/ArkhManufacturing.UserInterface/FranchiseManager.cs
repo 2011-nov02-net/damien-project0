@@ -42,18 +42,61 @@ namespace ArkhManufacturing.UserInterface
             return _franchise.GetCustomerById(customerId);
         }
 
+        private Store CreateStore()
+        {
+            // int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory
+            int productCountThreshold = 0;
+            Location location = null;
+            Dictionary<Product, int> inventory = new Dictionary<Product, int>();
+
+            bool setProductCountThreshold = ConsoleUI.PromptForBool("Do you wish to set a product count threshold?", "yes", "no");
+            if (setProductCountThreshold)
+            {
+                productCountThreshold = ConsoleUI.PromptRange("Please enter a product count threshold: ", 0, int.MaxValue);
+            }
+
+            bool createNewLocation = ConsoleUI.PromptForBool("Do you wish to create a new location, or use an existing one?", "create", "existing");
+            if (createNewLocation)
+            {
+                location = PromptStoreLocation();
+            }
+
+            return new Store(productCountThreshold, location, new List<Order>(), inventory);
+        }
+
         private void PromptOrder()
         {
             try
             {
                 // Get the customer of the order
                 Customer customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
-                while(customer == null)
+                while (customer == null)
+                {
+                    Console.WriteLine($"Customer ID is invalid; please try again.");
                     customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
+                }
 
                 // Get the store of the order
-                string defaultStore = customer.DefaultStoreLocation == null ? "" : $"(default: {customer.DefaultStoreLocation})";
-                long storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to, or leave as default {defaultStore}: ", 0, _franchise.Customers.Count);
+                string defaultStore = customer.HasDefaultStoreLocation() ? $" (default: {customer.DefaultStoreLocation})" : "";
+                long storeId;
+                if (customer.DefaultStoreLocation == null)
+                {
+                    bool createNewStore = ConsoleUI.PromptForBool("Do you wish to create a new store, or use an existing store?", "new", "existing");
+                    if (createNewStore)
+                    {
+                        Store newStore = CreateStore();
+                        _franchise.AddStore(newStore);
+                        storeId = newStore.Id;
+                    }
+                    else storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to: ", 0, _franchise.Customers.Count);
+                }
+                else
+                {
+                    bool useDefaultLocationIfPresent = ConsoleUI.PromptForBool($"Do you wish use the default store ({customer.DefaultStoreLocation})? ", "yes", "no");
+                    if (useDefaultLocationIfPresent)
+                        storeId = customer.DefaultStoreLocation.Id;
+                    else storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to: ", 0, _franchise.Customers.Count);
+                }
                 Store store = _franchise.GetStoreById(storeId);
 
                 // Check if the store has anything in stock
@@ -120,7 +163,7 @@ namespace ArkhManufacturing.UserInterface
 
                 DisplaySuccessMessage();
             }
-            catch(UserExitException)
+            catch (UserExitException)
             {
                 Console.WriteLine("Exiting to menu...");
                 throw;
@@ -149,26 +192,28 @@ namespace ArkhManufacturing.UserInterface
 
         private void PromptCustomer()
         {
-            Customer customer = new Customer(PromptCustomerName(), PromptStoreLocation());
-            _franchise.AddCustomer(customer);
+            CustomerName customerName = PromptCustomerName();
+            Location storeLocation = null;
+
+            bool doPrompt = ConsoleUI.PromptForBool("Do you wish to add a default store location for this customer: ", "yes", "no");
+            if (doPrompt)
+                storeLocation = PromptStoreLocation();
+
+            _franchise.AddCustomer(new Customer(customerName, storeLocation));
             DisplaySuccessMessage();
         }
 
         private void SearchCustomer()
         {
-            string userInput = ConsoleUI.PromptForInput("Please enter the name of the customer: ", false);
+            string userInput = ConsoleUI.PromptForInput("Please enter the name of the customer in the form of 'last, first': ", false);
             List<Customer> customers = _franchise.GetCustomersByName(userInput);
-
-            string output = $"{customers.Count} results found:\n\t{string.Join(",\n\t", customers)}";
-            Console.WriteLine(output);
+            Console.WriteLine($"{customers.Count} results found:\n\t{string.Join(",\n\t", customers)}");
         }
 
         private void DisplayCustomerDetails()
         {
             Customer customer = GetCustomerById("Please enter the customer ID, or -1 to return to menu: ");
-            if(customer != null)
-                Console.WriteLine($"{customer}");
-            else Console.WriteLine("Customer was not found");
+            Console.WriteLine(customer != null ? $"{customer}" : "Customer was not found");
         }
 
         private void DisplayStoreOrderHistory()
@@ -187,14 +232,23 @@ namespace ArkhManufacturing.UserInterface
 
         private void DisplayCustomerOrderHistory()
         {
-            // Prompt for a Customer
-            Customer customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
-            while(customer == null)
+            Customer customer = null;
+            try
+            {
+                // Prompt for a Customer
                 customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
+                while (customer == null)
+                    customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
+            }
+            catch (UserExitException)
+            {
+                Console.WriteLine("Exiting to menu...");
+                return;
+            }
 
             // Get its associated orders
             List<Order> orders = _franchise.GetCustomerOrderHistory(customer.Id);
-            if(orders.Count > 0)
+            if (orders.Count > 0)
             {
                 string ordersString = $"Orders for Customer#{customer.Id}:\n\t{string.Join(",\n\t", orders)}";
                 Console.WriteLine(ordersString);
@@ -204,7 +258,6 @@ namespace ArkhManufacturing.UserInterface
 
         public async Task Run()
         {
-            // A brunt of the application will be here
             bool quit = false;
 
             do
@@ -240,7 +293,7 @@ namespace ArkhManufacturing.UserInterface
                         quit = true;
                     else actions[userInput]();
                 }
-                catch(UserExitException)
+                catch (UserExitException)
                 {
                     quit = true;
                 }
