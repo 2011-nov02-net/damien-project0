@@ -1,5 +1,6 @@
 ﻿namespace ArkhManufacturing.Library
 {
+    // TODO: Add comment here
     public class Customer : IdentifiableBase
     {
         protected static readonly IdGenerator _idGenerator = new IdGenerator();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace ArkhManufacturing.Library
 {
+    // TODO: Add comment here
     public class Order : IdentifiableBase
     {
         private static readonly IdGenerator _idGenerator = new IdGenerator();
@@ -14,10 +15,10 @@ namespace ArkhManufacturing.Library
         // TODO: Add comment here
         public DateTime OrderDate { get; set; }
         // TODO: Add comment here
-        public Dictionary<Product, int> ProductsRequested { get; set; }
+        public Dictionary<long, int> ProductsRequested { get; set; }
 
         // TODO: Add comment here
-        public Order(Customer customer, Store storeLocation, DateTime orderDate, Dictionary<Product, int> productsRequested) :
+        public Order(Customer customer, Store storeLocation, DateTime orderDate, Dictionary<long, int> productsRequested) :
             base(_idGenerator) {
             Customer = customer;
             StoreLocation = storeLocation;

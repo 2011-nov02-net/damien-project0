@@ -98,7 +98,6 @@ namespace ArkhManufacturing.UserInterface
 
         // TODO: Add comment here
         private Store CreateStore() {
-            // int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory
             int productCountThreshold = 0;
             Location location = null;
 
@@ -143,111 +142,147 @@ namespace ArkhManufacturing.UserInterface
         }
 
         // TODO: Add comment here
-        private void PromptOrder() {
-            try {
-                // Get the customer of the order
-                Customer customer = null;
-                if (_franchise.Customers.Count == 0) {
-                    Console.WriteLine("No customers exist; please create one.");
-                    customer = CreateCustomer();
-                } else if (ConsoleUI.PromptForBool("Do you wish to create a new customer, or use an existing customer? ", "create", "existing")) {
-                    // User wishes to create a new one
-                    customer = CreateCustomer();
-                } else {
-                    // User wishes to use an existing one
+        private Customer PromptForCustomer() {
+            Customer customer = null;
+            bool noCustomersPresent = _franchise.Customers.Count == 0;
+            bool createNewCustomer = false;
+
+            if (!noCustomersPresent)
+                createNewCustomer = ConsoleUI.PromptForBool("Do you wish to create a new customer, or use an existing customer? ", "create", "existing");
+
+            if (noCustomersPresent || createNewCustomer) {
+                Console.WriteLine("No customers exist; please create one.");
+                customer = CreateCustomer();
+            } else {
+                bool success = false;
+
+                do {
                     try {
                         customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
-                    } catch (NonExistentIndentifiableException ex) {
-                        Console.WriteLine(ex.Message);
-                    }
-
-                    while (customer == null) {
+                        success = true;
+                    } catch (NonExistentIndentifiableException) {
                         Console.WriteLine($"Customer ID is invalid; please try again.");
-                        try {
-                            customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
-                        } catch (NonExistentIndentifiableException ex) {
-                            Console.WriteLine(ex.Message);
-                        }
                     }
-                }
+                } while (!success);
+            }
 
-                // Get the store of the order
-                Store store = null;
-                if (customer.DefaultStoreLocation == null) {
-                    if (_franchise.Stores.Count == 0) {
-                        // only allow creating along, since there are no stores
-                        Console.WriteLine("No stores exist; please create one.");
+            return customer;
+        }
+
+        // TODO: Add comment here
+        private Store PromptForStore(long customerId) {
+            Store store = null;
+            var customer = _franchise.GetCustomerById(customerId);
+
+            if (customer.DefaultStoreLocation == null) {
+                if (_franchise.Stores.Count == 0) {
+                    // only allow creating along, since there are no stores
+                    Console.WriteLine("No stores exist; please create one.");
+                    store = CreateStore();
+                } else {
+                    bool createNewStore = ConsoleUI.PromptForBool("Do you wish to create a new store, or use an existing store?", "create", "existing");
+                    if (createNewStore) {
                         store = CreateStore();
                     } else {
-                        if (ConsoleUI.PromptForBool("Do you wish to create a new store, or use an existing store?", "create", "existing")) {
-                            store = CreateStore();
-                        } else {
-                            store = GetStoreById("Please enter the store you wish to place the order to: ");
-                            if (store == null) {
-                                // going to need to reprompt for a store
+                        bool success = false;
 
+                        do {
+                            try {
+                                store = GetStoreById("Please enter the store you wish to place the order to: ");
+                                success = true;
+                            } catch (NonExistentIndentifiableException ex) {
+                                Console.WriteLine(ex.Message);
                             }
-                        }
+                        } while (!success);
                     }
-                } else {
-                    long storeId;
-                    if (ConsoleUI.PromptForBool($"Do you wish use the default store ({customer.DefaultStoreLocation})? ", "yes", "no"))
-                        storeId = customer.DefaultStoreLocation.Id;
-                    else storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to: ", 0, _franchise.Customers.Count);
-                    store = _franchise.GetStoreById(storeId);
                 }
+            } else {
+                long storeId;
+                if (ConsoleUI.PromptForBool($"Do you wish use the default store ({customer.DefaultStoreLocation})? ", "yes", "no"))
+                    storeId = customer.DefaultStoreLocation.Id;
+                else {
+                    storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to, or -1 to exit: ", -1, _franchise.Customers.Count);
 
-                // Check if the store has anything in stock
-                while (!store.HasStock()) {
-                    // if not, prompt for another store
-                    long storeId = ConsoleUI.PromptRange($"That store does not have anything in stock; enter a different id: ", 0, _franchise.Customers.Count);
-                    store = _franchise.GetStoreById(storeId);
+                    if (storeId == -1)
+                        throw new UserExitException();
                 }
+                store = _franchise.GetStoreById(storeId);
+            }
 
-                DateTime date = DateTime.Now;
+            // Check if the store has anything in stock
+            while (!store.HasStock()) {
+                // if not, prompt for another store
+                long storeId = ConsoleUI.PromptRange($"That store does not have anything in stock; enter a different id, or -1 to return to menu: ", -1, _franchise.Customers.Count);
 
+                if (storeId == -1)
+                    throw new UserExitException();
+
+                store = _franchise.GetStoreById(storeId);
+            }
+
+            return store;
+        }
+
+        private Dictionary<long, int> PromptForInventory(long storeId) {
+            Dictionary<long, int> productsRequested = new Dictionary<long, int>();
+            var store = _franchise.GetStoreById(storeId);
+            bool done = false;
+
+            do {
                 string inventory = $"{string.Join(",\n", store.Inventory.Select(kv => $"{kv.Key} x{kv.Value}"))}";
                 Console.WriteLine(inventory);
 
-                // Get all the products they wish to associate with the order
-                bool done = false;
-                Dictionary<Product, int> productsRequested = new Dictionary<Product, int>();
+                long targetProduct;
+                int productCount;
 
-                do {
-                    long targetProduct = 0;
-                    int productCount = 0;
+                // Get the product ID
+                targetProduct = ConsoleUI.PromptRange(">", -1, store.Inventory.Count);
+                // get the product from the product ID
+                Product product = store.GetProductById(targetProduct);
 
-                    // Get the product ID
-                    targetProduct = ConsoleUI.PromptRange(">", -1, store.Inventory.Count);
-                    // get the product from the product ID
-                    Product product = store.GetProductById(targetProduct);
+                if (targetProduct == -1)
+                    throw new UserExitException();
 
-                    if (targetProduct == -1)
+                if (product != null) {
+                    // Get the count of the product
+                    productCount = ConsoleUI.PromptRange("Specify a count, or -1 to stop adding products: ", -1, store.Inventory[product.Id]);
+
+                    if (productCount == -1)
                         done = true;
-
-                    if (product != null) {
-                        // Get the count of the product
-                        productCount = ConsoleUI.PromptRange("Specify a count, or -1 to stop adding products: ", -1, store.Inventory[product]);
-
-                        if (productCount == -1)
-                            done = true;
-                        else if (productCount != 0)
-                            // Add the product
-                            productsRequested.Add(product, productCount);
-                    } else {
-                        Console.WriteLine($"Invalid product ID specified (got '{targetProduct}'); please try again.");
-                        continue;
-                    }
-
-                } while (!done);
+                    else if (productCount != 0)
+                        // Add the product
+                        productsRequested[product.Id] = productCount;
+                } else {
+                    Console.WriteLine($"Invalid product ID specified (got '{targetProduct}'); please try again.");
+                    continue;
+                }
 
                 // No products added
                 if (productsRequested.Count == 0) {
                     bool tryAgain = ConsoleUI.PromptForBool("No products were entered, do you wish to retry?", "yes", "no");
                     if (tryAgain)
-                        PromptOrder();
-                    else return;
+                        return PromptForInventory(storeId);
+                    else throw new UserExitException();
                 }
+            } while (!done);
+
+            return productsRequested;
+        }
+
+        // TODO: Add comment here
+        private void PromptOrder() {
+            try {
+                // Get the customer of the order
+                Customer customer = PromptForCustomer();
+
+                // Get the store of the order
+                var store = PromptForStore(customer.Id);
+
+                // Get the current date
+                DateTime date = DateTime.Now;
+
+                // Get all the products they wish to associate with the order
+                Dictionary<long, int> productsRequested = PromptForInventory(store.Id);
 
                 // Add the Order after its creation
                 store.SubmitOrder(new Order(customer, store, date, productsRequested));
@@ -321,7 +356,7 @@ namespace ArkhManufacturing.UserInterface
                     try {
                         customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
                         success = true;
-                    } catch(NonExistentIndentifiableException ex) {
+                    } catch (NonExistentIndentifiableException ex) {
                         Console.WriteLine(ex.Message);
                     }
                 } while (!success);

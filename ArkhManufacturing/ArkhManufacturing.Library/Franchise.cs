@@ -103,15 +103,14 @@ namespace ArkhManufacturing.Library
         // Create
         // TODO: Add comment here
         public long CreateStore(string name, int productCountThreshold, Location location) {
-            var store = new Store(name, productCountThreshold, location);
+            var store = new Store(this, name, productCountThreshold, location);
             Stores.Add(store);
             return store.Id;
         }
 
         // TODO: Add comment here
         public long CreateStore(string name, int productCountThreshold, Location location, Dictionary<long, int> inventory) {
-            Dictionary<Product, int> storeInventory = inventory.ToDictionary(kv0 => Products.First(p => p.Id == kv0.Key), kv1 => kv1.Value);
-            var store = new Store(name, productCountThreshold, location, null, storeInventory);
+            var store = new Store(this, name, productCountThreshold, location, null, inventory);
             return store.Id;
         }
 
@@ -175,9 +174,7 @@ namespace ArkhManufacturing.Library
             // }
             #endregion
 
-            Dictionary<Product, int> orderProductsRequested = productsRequested.ToDictionary(kv0 => targetStore.Inventory.First(kv1 => kv0.Key == kv1.Key.Id).Key, kv => kv.Value);
-
-            Order order = new Order(targetCustomer, targetStore, DateTime.Now, orderProductsRequested);
+            Order order = new Order(targetCustomer, targetStore, DateTime.Now, productsRequested);
             targetStore.SubmitOrder(order);
             return order.Id;
         }
@@ -202,16 +199,17 @@ namespace ArkhManufacturing.Library
         }
 
         // Update
+        // TODO: Add comment here
         public void UpdateOrder(long orderId, Dictionary<long, int> productsRequested) {
             var order = GetOrderById(orderId);
             var store = GetStoreByLocationId(order.StoreLocation.Id);
             if (productsRequested != null) {
-                Dictionary<Product, int> orderProductsRequested = productsRequested.ToDictionary(kv0 => store.Inventory.First(kv1 => kv0.Key == kv1.Key.Id).Key, kv => kv.Value);
-                order.ProductsRequested = orderProductsRequested;
+                order.ProductsRequested = productsRequested;
             }
         }
 
         // Delete
+        // TODO: Add comment here
         public void DeleteOrderById(long orderId) {
             var order = GetOrderById(orderId);
             var store = Stores.First(s => s.Orders.FirstOrDefault(o => o.Id == orderId) != null);
@@ -222,6 +220,7 @@ namespace ArkhManufacturing.Library
 
         #region Location CRUD Operations
         // Create
+        // TODO: Add comment here
         public long CreateLocation(string planet, string province, string city) {
             var location = new Location(planet, province, city);
             Locations.Add(location);
@@ -229,6 +228,7 @@ namespace ArkhManufacturing.Library
         }
 
         // Read
+        // TODO: Add comment here
         public Location GetLocationById(long locationId) {
             var location = Locations.First(l => l.Id == locationId);
             return location;
@@ -244,6 +244,7 @@ namespace ArkhManufacturing.Library
         public List<Location> GetLocationsByCity(string cityName) => Locations.Where(l => l.City == cityName).ToList();
 
         // Update
+        // TODO: Add comment here
         public void UpdateLocation(long locationId, string planet, string province, string city) {
             var location = GetLocationById(locationId);
             if (planet != null)
@@ -255,6 +256,7 @@ namespace ArkhManufacturing.Library
         }
 
         // Delete
+        // TODO: Add comment here
         public void DeleteLocation(long locationId) {
             var location = GetLocationById(locationId);
             Locations.Remove(location);
@@ -265,12 +267,14 @@ namespace ArkhManufacturing.Library
         #region Product CRUD Operations
 
         // Create
+        // TODO: Add comment here
         public long CreateProduct(string productName, double price, double? discount = null) {
             var product = new Product(productName, price, discount);
             Products.Add(product);
             return product.Id;
         }
 
+        // TODO: Add comment here
         public long CreateProduct(long storeId, int count, string productName, double price, double? discount = null) {
             var store = GetStoreById(storeId);
             var product = new Product(productName, price, discount);
@@ -279,10 +283,33 @@ namespace ArkhManufacturing.Library
         }
 
         // Read
+        // TODO: Add comment here
+        public Product GetProductById(long productId) {
+            var product = Products.FirstOrDefault(p => p.Id == productId);
+            return product ?? throw new NonExistentIndentifiableException(productId);
+        }
 
         // Update
+        // TODO: Add comment here
+        public void UpdateProduct(long productId, string productName, double? price, double? discount) {
+            var product = GetProductById(productId);
+            if (!string.IsNullOrWhiteSpace(productName))
+                product.Name = productName;
+            if (price != null)
+                product.Price = price.Value;
+            if (discount != null)
+                product.Discount = discount.Value;
+        }
 
         // Delete
+        // TODO: Add comment here
+        public void DeleteProductById(long productId) {
+            var product = GetProductById(productId);
+            Products.Remove(product);
+            foreach(var store in Stores.Where(s => s.Inventory.Keys.Contains(productId))) {
+                store.Inventory.Remove(productId);
+            }
+        }
 
         #endregion
     }
