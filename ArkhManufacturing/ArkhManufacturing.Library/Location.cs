@@ -9,8 +9,7 @@
         public string City { get; set; }
 
         public Location(string planet, string province, string city) :
-            base(_idGenerator)
-        {
+            base(_idGenerator) {
             Planet = planet;
             Province = province;
             City = city;

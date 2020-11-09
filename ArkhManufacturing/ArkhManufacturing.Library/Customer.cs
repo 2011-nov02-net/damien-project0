@@ -8,22 +8,19 @@
         public CustomerName Name { get; set; }
 
         public Customer(CustomerName name, Location defaultStoreLocation = null) :
-            base(_idGenerator)
-        {
+            base(_idGenerator) {
             DefaultStoreLocation = defaultStoreLocation;
             Name = name;
         }
 
         public bool HasDefaultStoreLocation() => DefaultStoreLocation != null;
 
-        public override string ToString()
-        {
+        public override string ToString() {
             string defaultStoreLocationString = DefaultStoreLocation?.ToString() ?? "";
             return $"Customer#{Id}: '{Name}' {defaultStoreLocationString}";
         }
-        
-        public override bool Equals(object obj)
-        {
+
+        public override bool Equals(object obj) {
             if (obj is Customer)
                 return (obj as Customer).Id == Id;
             else return false;
