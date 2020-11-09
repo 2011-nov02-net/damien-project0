@@ -29,7 +29,8 @@ public static class ConsoleUI
 
         List<string> prompts = new List<string>(options);
         int current = 0;
-        string prompt = $"{(singleLine ? "-1 = Quit, " : "")}{string.Join(singleLine ? ", " : ",\n", prompts.Select(prompt => $"{current++} - {prompt}"))}";
+        string withQuitOption = withQuit ? $"-1 = Quit,{(singleLine ? "" : "\n")}" : "";
+        string prompt = $"{withQuitOption}{string.Join(singleLine ? ", " : ",\n", prompts.Select(prompt => $"{current++} - {prompt}"))}";
 
         Console.WriteLine(prompt);
 

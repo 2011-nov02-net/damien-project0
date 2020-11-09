@@ -11,21 +11,13 @@ namespace ArkhManufacturing.Library
     public class Franchise
     {
         // TODO: Add comment here
-        public List<Store> Stores { get; }
+        public List<Store> Stores { get; internal set; }
         // TODO: Add comment here
-        public List<Order> Orders
-        {
-            get
-            {
-                List<Order> orders = new List<Order>();
-                Stores.ForEach(store => orders.AddRange(store.Orders));
-                return orders;
-            }
-        }
+        public List<Customer> Customers { get; internal set; }
         // TODO: Add comment here
-        public List<Customer> Customers { get; }
-        public List<Location> Locations { get; set; }
-        public List<Product> Products { get; set; }
+        public List<Location> Locations { get; internal set; }
+        // TODO: Add comment here
+        public List<Product> Products { get; internal set; }
 
         // TODO: Add comment here
         public Franchise() {
@@ -36,8 +28,16 @@ namespace ArkhManufacturing.Library
         }
 
         // TODO: Add comment here
-        public Franchise(List<Product> productCatalog, List<Customer> customers, List<Location> locations, List<Product> products) {
+        public Franchise(List<Customer> customers, List<Location> locations, List<Product> products) {
             Stores = new List<Store>();
+            Customers = customers;
+            Locations = locations;
+            Products = products;
+        }
+
+        // TODO: Add comment here
+        public Franchise(List<Store> stores, List<Customer> customers, List<Location> locations, List<Product> products) {
+            Stores = stores;
             Customers = customers;
             Locations = locations;
             Products = products;
@@ -48,7 +48,7 @@ namespace ArkhManufacturing.Library
         // TODO: Add comment here
         public long CreateCustomer(string firstName, string lastName) {
             var customerName = new CustomerName(firstName, lastName);
-            Customer customer = new Customer(customerName, null);
+            Customer customer = new Customer(customerName, -1);
             Customers.Add(customer);
             return customer.Id;
         }
@@ -57,8 +57,22 @@ namespace ArkhManufacturing.Library
         public long CreateCustomer(string firstName, string lastName, string planet, string province, string city) {
             var customerName = new CustomerName(firstName, lastName);
             var location = new Location(planet, province, city);
-            Customer customer = new Customer(customerName, location);
+            Customer customer = new Customer(customerName, location.Id);
             Customers.Add(customer);
+            Locations.Add(location);
+            return customer.Id;
+        }
+
+        // TODO: Add comment here
+        public long CreateCustomer(CustomerName customerName, Location defaultStoreLocation) {
+            long storeId = -1;
+
+            if (defaultStoreLocation != null)
+                storeId = defaultStoreLocation.Id;
+
+            var customer = new Customer(customerName, storeId);
+            Customers.Add(customer);
+            Locations.Add(defaultStoreLocation);
             return customer.Id;
         }
 
@@ -87,7 +101,7 @@ namespace ArkhManufacturing.Library
         public void UpdateCustomer(long customerId, long locationId) {
             var customer = GetCustomerById(customerId);
             var location = GetLocationById(locationId);
-            customer.DefaultStoreLocation = location;
+            customer.DefaultStoreLocation = location.Id;
         }
 
         // TODO: Add comment here
@@ -120,6 +134,9 @@ namespace ArkhManufacturing.Library
             var store = Stores.FirstOrDefault(s => s.Id == storeId);
             return store ?? throw new NonExistentIndentifiableException(storeId);
         }
+
+        // TODO: Add comment here
+        public List<Store> GetStores() => Stores;
 
         // TODO: Add comment here
         public List<Store> GetStoresByName(string storeName) => Stores.Where(s => s.Name == storeName).ToList();
@@ -182,14 +199,23 @@ namespace ArkhManufacturing.Library
         // Read
         // TODO: Add comment here
         public Order GetOrderById(long orderId) {
-            var order = Orders.FirstOrDefault(o => o.Id == orderId);
+            var orders = GetOrders();
+            var order = orders.FirstOrDefault(o => o.Id == orderId);
             return order ?? throw new NonExistentIndentifiableException(orderId);
+        }
+
+        // TODO: Add comment here
+        public List<Order> GetOrders() {
+            List<Order> orders = new List<Order>();
+            Stores.ForEach(store => orders.AddRange(store.Orders));
+            return orders;
         }
 
         // TODO: Add comment here
         public List<Order> GetOrdersByCustomerId(long customerId) {
             var customer = GetCustomerById(customerId);
-            return Orders.Where(o => o.Customer == customer).ToList();
+            var orders = GetOrders();
+            return orders.Where(o => o.Customer == customer).ToList();
         }
 
         // TODO: Add comment here
@@ -233,6 +259,9 @@ namespace ArkhManufacturing.Library
             var location = Locations.First(l => l.Id == locationId);
             return location;
         }
+
+        // TODO: Add comment here
+        public List<Location> GetLocations() => Locations;
 
         // TODO: Add comment here
         public List<Location> GetLocationsByPlanet(string planetName) => Locations.Where(l => l.Planet == planetName).ToList();
@@ -289,6 +318,9 @@ namespace ArkhManufacturing.Library
             return product ?? throw new NonExistentIndentifiableException(productId);
         }
 
+        // TODO: Add comment here
+        public List<Product> GetProducts() => Products;
+
         // Update
         // TODO: Add comment here
         public void UpdateProduct(long productId, string productName, double? price, double? discount) {
@@ -306,7 +338,7 @@ namespace ArkhManufacturing.Library
         public void DeleteProductById(long productId) {
             var product = GetProductById(productId);
             Products.Remove(product);
-            foreach(var store in Stores.Where(s => s.Inventory.Keys.Contains(productId))) {
+            foreach (var store in Stores.Where(s => s.Inventory.Keys.Contains(productId))) {
                 store.Inventory.Remove(productId);
             }
         }
