@@ -12,15 +12,13 @@ namespace ArkhManufacturing.UserInterface.Serializers
 
         public XmlDataSerializer(string filepath) => _filepath = filepath;
 
-        public T Read()
-        {
+        public T Read() {
             var dataContractSerializer = new DataContractSerializer(typeof(T));
             using var xmlReader = XmlReader.Create(_filepath);
             return (T)dataContractSerializer.ReadObject(xmlReader);
         }
 
-        public void Write(T data)
-        {
+        public void Write(T data) {
             var dataContractSerializer = new DataContractSerializer(typeof(T));
             using var xmlWriter = XmlWriter.Create(_filepath);
             dataContractSerializer.WriteObject(xmlWriter, data);

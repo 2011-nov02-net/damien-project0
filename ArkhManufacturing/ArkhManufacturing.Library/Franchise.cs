@@ -18,21 +18,18 @@ namespace ArkhManufacturing.Library
         }
         public List<Customer> Customers { get; }
 
-        public Franchise()
-        {
+        public Franchise() {
             Stores = new List<Store>();
             Customers = new List<Customer>();
         }
 
-        public Franchise(List<Product> productCatalog, List<Customer> customers)
-        {
+        public Franchise(List<Product> productCatalog, List<Customer> customers) {
             Stores = new List<Store>();
             Customers = customers;
         }
 
         // Customer customer, Store storeLocation, DateTime orderDate, Dictionary<Product, int> productsRequested
-        public void AddOrder(long customerId, long? storeId, Dictionary<long, int> productsRequested)
-        {
+        public void AddOrder(long customerId, long? storeId, Dictionary<long, int> productsRequested) {
             Customer targetCustomer = Customers.First(c => c.Id == customerId);
             // TODO: Make sure the target store is NOT null
             Store targetStore = Stores.First(s =>
@@ -45,8 +42,7 @@ namespace ArkhManufacturing.Library
             // TODO: Come back later and simplify this in LINQ, perhaps
             Dictionary<Product, int> orderProductsRequested = new Dictionary<Product, int>();
 
-            foreach (var kv in productsRequested)
-            {
+            foreach (var kv in productsRequested) {
                 Product targetProduct = targetStore.Inventory.Select(productCountPair => productCountPair.Key).First(p => p.Id == kv.Key);
                 orderProductsRequested.Add(targetProduct, kv.Value);
             }
@@ -55,14 +51,12 @@ namespace ArkhManufacturing.Library
             targetStore.SubmitOrder(order);
         }
 
-        public void AddCustomer(Customer customer)
-        {
+        public void AddCustomer(Customer customer) {
             if (Customers.Select(c => c.Name).Count(n => n == customer.Name) == 0)
                 Customers.Add(customer);
         }
 
-        public void AddStore(Store store)
-        {
+        public void AddStore(Store store) {
             if (Stores.First(s => s.Id == store.Id) == null)
                 Stores.Add(store);
         }

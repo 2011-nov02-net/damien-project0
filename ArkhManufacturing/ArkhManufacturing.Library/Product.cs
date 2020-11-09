@@ -3,7 +3,7 @@
     public class Product : IdentifiableBase
     {
         private static readonly IdGenerator _idGenerator = new IdGenerator();
-        
+
         public string Name { get; set; }
         public double? Discount { get; set; }
 
@@ -15,8 +15,7 @@
         }
 
         public Product(string name, double price, double? discount = null) :
-            base(_idGenerator)
-        {
+            base(_idGenerator) {
             Name = name;
             Discount = discount;
             _price = price;

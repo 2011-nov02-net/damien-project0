@@ -23,8 +23,7 @@ namespace ArkhManufacturing.Library
         }
 
         public Store(int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory) :
-            base(_idGenerator)
-        {
+            base(_idGenerator) {
             ProductCountThreshold = productCountThreshold;
             Location = location;
             Orders = orders;
@@ -37,13 +36,10 @@ namespace ArkhManufacturing.Library
 
         public Product GetProductById(long productId) => Inventory.FirstOrDefault(kv => kv.Value > 0 && kv.Key.Id == productId).Key;
 
-        public void SubmitOrder(Order order)
-        {
-            foreach (var kv in order.ProductsRequested)
-            {
+        public void SubmitOrder(Order order) {
+            foreach (var kv in order.ProductsRequested) {
                 // Check if we have the product
-                if (Inventory.ContainsKey(kv.Key))
-                {
+                if (Inventory.ContainsKey(kv.Key)) {
                     // Check if the number of items requested isn't too much
                     if (kv.Value > Inventory[kv.Key])
                         throw new ProductRequestExcessiveException(kv.Key, kv.Value, Inventory[kv.Key]);
@@ -53,7 +49,7 @@ namespace ArkhManufacturing.Library
             }
 
             // Update the inventory, since the order is acceptable
-            foreach(var kv in order.ProductsRequested)
+            foreach (var kv in order.ProductsRequested)
                 Inventory[kv.Key] -= kv.Value;
 
             // Add the order

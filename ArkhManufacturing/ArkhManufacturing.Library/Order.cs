@@ -13,8 +13,7 @@ namespace ArkhManufacturing.Library
         public Dictionary<Product, int> ProductsRequested { get; set; }
 
         public Order(Customer customer, Store storeLocation, DateTime orderDate, Dictionary<Product, int> productsRequested) :
-            base(_idGenerator)
-        {
+            base(_idGenerator) {
             Customer = customer;
             StoreLocation = storeLocation;
             OrderDate = orderDate;

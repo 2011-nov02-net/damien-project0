@@ -7,13 +7,12 @@ namespace ArkhManufacturing.ConsoleApp
 {
     class Program
     {
-        static async Task Main(string[] args)
-        {
+        static async Task Main(string[] args) {
             // On start-up, ask the user for a configuration file
             ConsoleUI.SetRetryCount(3);
             string[] options = { "xml", "json" };
             int fileType = ConsoleUI.PromptForMenuSelection(options, true, true);
-            
+
             if (fileType == -1)
                 return;
 
@@ -21,8 +20,7 @@ namespace ArkhManufacturing.ConsoleApp
 
             IDataSerializer<Franchise> dataSerializer = null;
 
-            switch(fileType)
-            {
+            switch (fileType) {
                 case 0:
                     dataSerializer = new XmlDataSerializer<Franchise>(dataFilepath);
                     break;

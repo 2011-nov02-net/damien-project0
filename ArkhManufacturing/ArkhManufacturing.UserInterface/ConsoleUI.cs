@@ -23,8 +23,7 @@ public static class ConsoleUI
     /// <param name="options">A list of strings that represents the options that the user is prompted with</param>
     /// <param name="withQuit">Allow an option to quit out of the menu</param>
     /// <returns>An int value that the user entered</returns>
-    public static int PromptForMenuSelection(string[] options, bool withQuit, bool singleLine)
-    {
+    public static int PromptForMenuSelection(string[] options, bool withQuit, bool singleLine) {
         if (options.Length <= 1)
             throw new ArgumentException("Options must have more than 1 passed in.");
 
@@ -44,12 +43,10 @@ public static class ConsoleUI
     /// <param name="trueString">A string that returns true when the user enters it</param>
     /// <param name="falseString">A string that returns false when the user enters it</param>
     /// <returns>A boolean value that the user answered with</returns>
-    public static bool PromptForBool(string prompt, string trueString, string falseString)
-    {
+    public static bool PromptForBool(string prompt, string trueString, string falseString) {
         int tries = 0;
 
-        do
-        {
+        do {
             string userInput = PromptForInput(prompt, false);
 
             if (userInput.ToLower() == trueString.ToLower())
@@ -74,19 +71,16 @@ public static class ConsoleUI
     /// <param name="max">The maximum value that is accepted</param>
     /// <returns>A value between the min and max specified</returns>
     public static T PromptRange<T>(string prompt, T min, T max)
-        where T : IComparable<T>, IConvertible
-    {
+        where T : IComparable<T>, IConvertible {
         if (min.CompareTo(max) >= 0)
             throw new ArgumentException($"Improper arguments entered; max is less than min passed in (min: {min}, max: {max})");
 
         int tries = 0;
 
-        do
-        {
+        do {
             string userInput = PromptForInput(prompt, false);
 
-            try
-            {
+            try {
                 T result = (T)Convert.ChangeType(userInput, typeof(T));
 
                 if (result.CompareTo(min) < 0)
@@ -96,9 +90,7 @@ public static class ConsoleUI
                 else return result;
 
                 ++tries;
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 Console.WriteLine($"Invalid input entered (got '{userInput}')");
                 ++tries;
             }
@@ -114,12 +106,10 @@ public static class ConsoleUI
     /// <param name="message">The prompt the user is shown</param>
     /// <param name="allowEmpty">Allow the user to enter nothing</param>
     /// <returns>Input that the user entered</returns>
-    public static string PromptForInput(string message, bool allowEmpty)
-    {
+    public static string PromptForInput(string message, bool allowEmpty) {
         int tries = 0;
 
-        do
-        {
+        do {
             Console.Write(message);
             string userInput = Console.ReadLine();
 

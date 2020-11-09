@@ -12,14 +12,12 @@ namespace ArkhManufacturing.UserInterface.Serializers
 
         public JsonDataSerializer(string filepath) => _filepath = filepath;
 
-        public T Read()
-        {
+        public T Read() {
             string json = File.ReadAllText(_filepath);
             return JsonSerializer.Deserialize<T>(json);
         }
 
-        public void Write(T data)
-        {
+        public void Write(T data) {
             string json = JsonSerializer.Serialize<T>(data, new JsonSerializerOptions { WriteIndented = true });
             using var writer = new StreamWriter(_filepath);
             writer.Write(json);
