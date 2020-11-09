@@ -47,7 +47,7 @@ public static class ConsoleUI
         int tries = 0;
 
         do {
-            string userInput = PromptForInput(prompt, false);
+            string userInput = PromptForInput($"{prompt} (enter '{trueString}' or '{falseString}'): ", false);
 
             if (userInput.ToLower() == trueString.ToLower())
                 return true;

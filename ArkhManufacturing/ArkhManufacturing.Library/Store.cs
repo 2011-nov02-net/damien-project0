@@ -10,11 +10,13 @@ namespace ArkhManufacturing.Library
         private static readonly IdGenerator _idGenerator = new IdGenerator();
 
         // TODO: Add comment here
-        public Location Location { get; }
+        public string Name { get; internal set; }
+        // TODO: Add comment here
+        public Location Location { get; internal set; }
         // TODO: Add comment here
         public List<Order> Orders { get; private set; }
         // TODO: Add comment here
-        public Dictionary<Product, int> Inventory { get; private set; }
+        public Dictionary<Product, int> Inventory { get; internal set; }
 
         private int _productCountThreshold;
 
@@ -22,12 +24,23 @@ namespace ArkhManufacturing.Library
         public int ProductCountThreshold
         {
             get => _productCountThreshold;
-            private set => _productCountThreshold = value > 0 ? value : _productCountThreshold;
+            set => _productCountThreshold = value > 0 ? value : _productCountThreshold;
         }
 
         // TODO: Add comment here
-        public Store(int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory) :
+        public Store(string name, int productCountThreshold, Location location) :
             base(_idGenerator) {
+            Name = name;
+            ProductCountThreshold = productCountThreshold;
+            Location = location;
+            Orders = new List<Order>();
+            Inventory = new Dictionary<Product, int>();
+        }
+
+        // TODO: Add comment here
+        public Store(string name, int productCountThreshold, Location location, List<Order> orders, Dictionary<Product, int> inventory) :
+            base(_idGenerator) {
+            Name = name;
             ProductCountThreshold = productCountThreshold;
             Location = location;
             Orders = orders;
@@ -42,6 +55,11 @@ namespace ArkhManufacturing.Library
 
         // TODO: Add comment here
         public Product GetProductById(long productId) => Inventory.FirstOrDefault(kv => kv.Value > 0 && kv.Key.Id == productId).Key;
+
+        // TODO: Add comment here
+        public void AddProduct(Product product, int count) {
+            Inventory[product] = count;
+        }
 
         // TODO: Add comment here
         public void SubmitOrder(Order order) {

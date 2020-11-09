@@ -10,7 +10,7 @@
         public CustomerName Name { get; set; }
 
         // TODO: Add comment here
-        public Customer(CustomerName name, Location defaultStoreLocation = null) :
+        public Customer(CustomerName name, Location defaultStoreLocation) :
             base(_idGenerator) {
             DefaultStoreLocation = defaultStoreLocation;
             Name = name;
