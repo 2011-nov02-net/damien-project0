@@ -21,7 +21,7 @@ namespace ArkhManufacturing.Library
 
         // TODO: Add comment here
         public override string ToString() {
-            string defaultStoreLocationString = $" with Default Store Location ID#{DefaultStoreLocation}" ?? "";
+            string defaultStoreLocationString = DefaultStoreLocation != -1 ? $" with Default Store Location ID#{DefaultStoreLocation}" : "";
             return $"Customer#{Id}: '{Name}'{defaultStoreLocationString}";
         }
 

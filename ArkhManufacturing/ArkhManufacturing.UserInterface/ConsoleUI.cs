@@ -29,7 +29,7 @@ public static class ConsoleUI
 
         List<string> prompts = new List<string>(options);
         int current = 0;
-        string withQuitOption = withQuit ? $"-1 = Quit,{(singleLine ? "" : "\n")}" : "";
+        string withQuitOption = withQuit ? $"-1 = Quit,{(singleLine ? " " : "\n")}" : "";
         string prompt = $"{withQuitOption}{string.Join(singleLine ? ", " : ",\n", prompts.Select(prompt => $"{current++} - {prompt}"))}";
 
         Console.WriteLine(prompt);
@@ -54,7 +54,7 @@ public static class ConsoleUI
                 return true;
             else if (userInput.ToLower() == falseString.ToLower())
                 return false;
-            else Console.WriteLine($"Invalid input (got '{userInput}', expects: '{trueString}' or 'falseString').");
+            else Console.WriteLine($"Invalid input (got '{userInput}', expects: '{trueString}' or '{falseString}').");
 
             ++tries;
 

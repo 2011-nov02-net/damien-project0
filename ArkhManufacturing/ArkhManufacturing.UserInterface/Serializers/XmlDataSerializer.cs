@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
+﻿using System.Runtime.Serialization;
 using System.Xml;
 
 namespace ArkhManufacturing.UserInterface.Serializers
@@ -23,7 +20,8 @@ namespace ArkhManufacturing.UserInterface.Serializers
         // TODO: Add comment here
         public void Write(T data) {
             var dataContractSerializer = new DataContractSerializer(typeof(T));
-            using var xmlWriter = XmlWriter.Create(_filepath);
+            var settings = new XmlWriterSettings { Indent = true };
+            using var xmlWriter = XmlWriter.Create(_filepath, settings);
             dataContractSerializer.WriteObject(xmlWriter, data);
         }
     }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-
 using ArkhManufacturing.Library.Exceptions;
 
 namespace ArkhManufacturing.Library
@@ -72,7 +70,11 @@ namespace ArkhManufacturing.Library
 
             var customer = new Customer(customerName, storeId);
             Customers.Add(customer);
-            Locations.Add(defaultStoreLocation);
+            if(Locations.Count > 0) {
+                if(Locations.FirstOrDefault(l => l == defaultStoreLocation) == null) {
+                    Locations.Add(defaultStoreLocation);
+                }
+            }
             return customer.Id;
         }
 
@@ -125,6 +127,7 @@ namespace ArkhManufacturing.Library
         // TODO: Add comment here
         public long CreateStore(string name, int productCountThreshold, Location location, Dictionary<long, int> inventory) {
             var store = new Store(this, name, productCountThreshold, location, null, inventory);
+            Stores.Add(store);
             return store.Id;
         }
 
@@ -228,9 +231,13 @@ namespace ArkhManufacturing.Library
         // TODO: Add comment here
         public void UpdateOrder(long orderId, Dictionary<long, int> productsRequested) {
             var order = GetOrderById(orderId);
-            var store = GetStoreByLocationId(order.StoreLocation.Id);
+            var store = GetStoreByLocationId(order.Store.Id);
             if (productsRequested != null) {
                 order.ProductsRequested = productsRequested;
+
+                foreach(var kv in productsRequested) {
+                    store.Inventory[kv.Key] += kv.Value;
+                }
             }
         }
 

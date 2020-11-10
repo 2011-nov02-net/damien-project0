@@ -34,11 +34,17 @@ namespace ArkhManufacturing.UserInterface
         private void DisplaySuccessMessage() => Console.WriteLine("Operation completed successfully.\n");
 
         // TODO: Add comment here
+        private bool PromptForNewOrExisting(string targetType) => ConsoleUI.PromptForBool($"Do you wish to create a new {targetType}, or use an existing one?", "create", "existing");
+
+        // TODO: Add comment here
+        private bool PromptActionForItem(string action, string target) => ConsoleUI.PromptForBool($"Do you wish to {action} a {target}?", "yes", "no");
+
+        // TODO: Add comment here
         private Customer GetCustomerById(string message) {
             if (_franchise.Customers.Count == 0)
                 throw new IndexOutOfRangeException("There are no existing customers in this franchise.");
 
-            long customerId = ConsoleUI.PromptRange(message, -1, _franchise.Customers.Max(c => c.Id));
+            long customerId = ConsoleUI.PromptRange(message, -1, _franchise.Customers.Max(c => c.Id) + 1);
             if (customerId == -1)
                 throw new UserExitException();
 
@@ -50,7 +56,7 @@ namespace ArkhManufacturing.UserInterface
             if (_franchise.Stores.Count == 0)
                 throw new IndexOutOfRangeException("There are no existing stores in this franchise.");
 
-            long storeId = ConsoleUI.PromptRange(message, -1, _franchise.Stores.Max(s => s.Id));
+            long storeId = ConsoleUI.PromptRange(message, -1, _franchise.Stores.Max(s => s.Id) + 1);
             if (storeId == -1)
                 throw new UserExitException();
 
@@ -62,7 +68,7 @@ namespace ArkhManufacturing.UserInterface
             double price = ConsoleUI.PromptRange("Please enter a price", 0, double.MaxValue);
             double? discount = null;
 
-            bool addDiscount = ConsoleUI.PromptForBool("Do you wish to add a discount on the product?", "yes", "no");
+            bool addDiscount = PromptActionForItem("add", "discount");
             if (addDiscount)
                 discount = ConsoleUI.PromptRange("Please enter the discount percentage you wish to give", 0, 100);
 
@@ -71,23 +77,23 @@ namespace ArkhManufacturing.UserInterface
             bool done = false;
 
             while (!done) {
-                bool noStoresCreated = _franchise.Stores.Count == 0;
-                if (noStoresCreated) {
-                    bool createNewStore = ConsoleUI.PromptForBool("Do you wish to create a new store?", "yes", "no");
-                    if (createNewStore) {
-                        // Call the create new Store
-                        var store = CreateStore();
-                        int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
-                        store.AddProduct(product, count);
-                    }
-                } else {
+                bool createNewStore = ConsoleUI.PromptForBool("No stores found; do you wish to create a new store?", "yes", "no");
+                
+                if (createNewStore) {
+                    // Call the create new Store
+                    var store = CreateStore();
+                    int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
+                    store.AddProduct(product, count);
+                } else if(_franchise.Stores.Count > 0) {
                     bool addToStore = ConsoleUI.PromptForBool("Do you wish to add this item to a store or stores?", "yes", "no");
                     if (addToStore) {
-                        long storeId = ConsoleUI.PromptRange("Please enter the store ID: ", 0, _franchise.Stores.Max(s => s.Id));
+                        long storeId = ConsoleUI.PromptRange("Please enter the store ID: ", 0, _franchise.Stores.Max(s => s.Id) + 1);
                         int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
                         var store = _franchise.GetStoreById(storeId);
                         store.AddProduct(product, count);
                     }
+                } else {
+                    Console.WriteLine("No stores exist.");
                 }
             }
 
@@ -101,7 +107,7 @@ namespace ArkhManufacturing.UserInterface
 
             string storeName = ConsoleUI.PromptForInput("Please enter a store name: ", false);
 
-            bool setProductCountThreshold = ConsoleUI.PromptForBool("Do you wish to set a product count threshold?", "yes", "no");
+            bool setProductCountThreshold = PromptActionForItem("set", "product count threshold");
             if (setProductCountThreshold) {
                 productCountThreshold = ConsoleUI.PromptRange("Please enter a product count threshold: ", 0, int.MaxValue);
             } else {
@@ -110,22 +116,19 @@ namespace ArkhManufacturing.UserInterface
 
             // if there are no locations, create one
             bool noLocationsCreated = _franchise.Locations.Count == 0;
-            bool createNewLocation = false;
-            
-            if(noLocationsCreated)
-                createNewLocation = ConsoleUI.PromptForBool("Do you wish to create a new location, or use an existing one?", "create", "existing");
+            bool createNewLocation = noLocationsCreated ? noLocationsCreated : PromptForNewOrExisting("location");
 
-            if (noLocationsCreated || createNewLocation) {
+            if (createNewLocation) {
                 location = PromptStoreLocation();
             } else {
-                var locationId = ConsoleUI.PromptRange("Please enter the location ID: ", 0, _franchise.Locations.Max(l => l.Id));
+                var locationId = ConsoleUI.PromptRange("Please enter the location ID: ", 0, _franchise.Locations.Max(l => l.Id) + 1);
                 location = _franchise.GetLocationById(locationId);
             }
 
             bool addInventory = ConsoleUI.PromptForBool("Do you wish to add items to the store?", "yes", "no");
             Dictionary<long, int> inventory = new Dictionary<long, int>();
             if (addInventory) {
-                bool createNewProduct = ConsoleUI.PromptForBool("Do you wish to create a new product?", "yes", "no");
+                bool createNewProduct = PromptActionForItem("create", "new product");
                 if (createNewProduct) {
                     var product = CreateProduct();
                     int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
@@ -159,7 +162,7 @@ namespace ArkhManufacturing.UserInterface
             bool createNewCustomer = false;
 
             if (!noCustomersPresent)
-                createNewCustomer = ConsoleUI.PromptForBool("Do you wish to create a new customer, or use an existing customer? ", "create", "existing");
+                createNewCustomer = PromptForNewOrExisting("customer");
 
             if (noCustomersPresent || createNewCustomer) {
                 Console.WriteLine("No customers exist; please create one.");
@@ -185,13 +188,13 @@ namespace ArkhManufacturing.UserInterface
             Store store = null;
             var customer = _franchise.GetCustomerById(customerId);
 
-            if (customer.DefaultStoreLocation != -1) {
+            if (customer.DefaultStoreLocation == -1) {
                 if (_franchise.Stores.Count == 0) {
                     // only allow creating along, since there are no stores
                     Console.WriteLine("No stores exist; please create one.");
                     store = CreateStore();
                 } else {
-                    bool createNewStore = ConsoleUI.PromptForBool("Do you wish to create a new store, or use an existing store?", "create", "existing");
+                    bool createNewStore = PromptForNewOrExisting("store");
                     if (createNewStore) {
                         store = CreateStore();
                     } else {
@@ -209,21 +212,22 @@ namespace ArkhManufacturing.UserInterface
                 }
             } else {
                 long storeId;
-                if (ConsoleUI.PromptForBool($"Do you wish use the default store ({customer.DefaultStoreLocation})? ", "yes", "no"))
+                if (ConsoleUI.PromptForBool($"Do you wish to use the default store ({customer.DefaultStoreLocation})? ", "yes", "no")) {
                     storeId = customer.DefaultStoreLocation;
-                else {
-                    storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to, or -1 to exit: ", -1, _franchise.Customers.Max(c => c.Id));
+                } else {
+                    storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to, or -1 to exit: ", -1, _franchise.Customers.Max(c => c.Id) + 1);
 
                     if (storeId == -1)
                         throw new UserExitException();
                 }
+
                 store = _franchise.GetStoreById(storeId);
             }
 
             // Check if the store has anything in stock
             while (!store.HasStock()) {
                 // if not, prompt for another store
-                long storeId = ConsoleUI.PromptRange($"That store does not have anything in stock; enter a different id, or -1 to return to menu: ", -1, _franchise.Customers.Max(c => c.Id));
+                long storeId = ConsoleUI.PromptRange($"That store does not have anything in stock; enter a different id, or -1 to return to menu: ", -1, _franchise.Customers.Max(c => c.Id) + 1);
 
                 if (storeId == -1)
                     throw new UserExitException();
@@ -240,8 +244,14 @@ namespace ArkhManufacturing.UserInterface
             bool done = false;
 
             do {
-                string inventory = $"{string.Join(",\n", store.Inventory.Select(kv => $"{kv.Key} x{kv.Value}"))}";
-                Console.WriteLine(inventory);
+                // Get and print out the inventory
+                if (store.HasStock()) {
+                    string inventory = $"{string.Join(",\n", store.Inventory.Select(kv => $"{kv.Key} x{kv.Value}"))}";
+                    Console.WriteLine(inventory);
+                } else {
+                    Console.WriteLine("This store does not have anything in stock.");
+                    throw new UserExitException();
+                }
 
                 long targetProduct;
                 int productCount;
@@ -286,8 +296,14 @@ namespace ArkhManufacturing.UserInterface
                 // Get the customer of the order
                 Customer customer = PromptForCustomer();
 
+                // New line between blocks of data
+                Console.WriteLine();
+
                 // Get the store of the order
                 var store = PromptForStore(customer.Id);
+
+                // New line between blocks of data
+                Console.WriteLine();
 
                 // Get the current date
                 DateTime date = DateTime.Now;
@@ -316,23 +332,34 @@ namespace ArkhManufacturing.UserInterface
 
         // TODO: Add comment here
         private Location PromptStoreLocation() {
-            bool useExisting = ConsoleUI.PromptForBool("Do you wish to use an existing location?", "yes", "no");
-            if(useExisting) {
-                long locationId = ConsoleUI.PromptRange("Please enter the location id:", 0, _franchise.Locations.Max(l => l.Id));
+            bool noLocationsExist = _franchise.Locations.Count == 0;
+
+            bool createNewLocation = false;
+            if (!noLocationsExist)
+                createNewLocation = PromptActionForItem("create", "new location");
+
+            if (createNewLocation) {
+                string planet = ConsoleUI.PromptForInput("Please enter a planet: ", false);
+                string province = ConsoleUI.PromptForInput("Please enter a province: ", false);
+                string city = ConsoleUI.PromptForInput("Please enter a city: ", false);
+                var locationId = _franchise.CreateLocation(planet, province, city);
+                return _franchise.GetLocationById(locationId);
+            } else if(_franchise.Locations.Count > 0) {
+                long locationId = ConsoleUI.PromptRange("Please enter the location id:", 0, _franchise.Locations.Max(l => l.Id) + 1);
                 var location = _franchise.GetLocationById(locationId);
                 return location;
             } else {
-                string planet = ConsoleUI.PromptForInput("Please enter a planet: ", false);
-                string province = ConsoleUI.PromptForInput("Please enter a province: ", false);
-                string city = ConsoleUI.PromptForInput("Please enter their a city: ", false);
-                return new Location(planet, province, city);
+                createNewLocation = ConsoleUI.PromptForBool("No stores exist; one must be created. Do you wish to create one now?", "yes", "no");
+                if (createNewLocation)
+                    return PromptStoreLocation();
+                else throw new UserExitException();
             }
         }
 
         // TODO: Add comment here
         private void PromptCustomer() {
-            CreateCustomer();
-            DisplaySuccessMessage();
+            var customer = CreateCustomer();
+            Console.WriteLine($"Customer '{customer.Name}' was created successfully.\n");
         }
 
         // TODO: Add comment here
@@ -355,7 +382,7 @@ namespace ArkhManufacturing.UserInterface
         // TODO: Add comment here
         private void DisplayStoreOrderHistory() {
             // Prompt for a store
-            long storeId = ConsoleUI.PromptRange("Please enter a store id: ", 0, _franchise.Stores.Max(s => s.Id));
+            long storeId = ConsoleUI.PromptRange("Please enter a store id: ", 0, _franchise.Stores.Max(s => s.Id) + 1);
             // Get its associated orders
             List<Order> orders = _franchise.GetOrdersByCustomerId(storeId);
             if (orders.Count > 0) {
@@ -428,6 +455,8 @@ namespace ArkhManufacturing.UserInterface
                 } catch (UserExitException) {
                     quit = true;
                 }
+
+                await Save();
 
             } while (!quit);
 
