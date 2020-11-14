@@ -11,24 +11,24 @@ namespace StoreManager.Library.Data
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
-        public Address Address { get; set; }
+        public long AddressId { get; set; }
         public DateTime BirthDate { get; set; }
-        public OperatingLocation DefaultStoreLocation { get; set; }
-        public List<Order> Orders { get; set; }
+        public long DefaultStoreLocationId { get; set; }
+        public List<long> OrderIds { get; set; }
 
-        public CustomerData(string firstName, string lastName, string email, string phoneNumber, Address address, DateTime birthDate, OperatingLocation defaultStoreLocation, List<Order> orders) {
+        public CustomerData(string firstName, string lastName, string email, string phoneNumber, long address, DateTime birthDate, long defaultStoreLocationId, List<long> orderIds) {
             FirstName = firstName;
             LastName = lastName;
             Email = email;
             PhoneNumber = phoneNumber;
-            Address = address;
+            AddressId = address;
             BirthDate = birthDate;
-            DefaultStoreLocation = defaultStoreLocation;
-            Orders = orders;
+            DefaultStoreLocationId = defaultStoreLocationId;
+            OrderIds = orderIds;
         }
 
         public CustomerData(CustomerData data) :
-            this(data.FirstName, data.LastName, data.Email, data.PhoneNumber, data.Address, data.BirthDate, data.DefaultStoreLocation, data.Orders) {
+            this(data.FirstName, data.LastName, data.Email, data.PhoneNumber, data.AddressId, data.BirthDate, data.DefaultStoreLocationId, data.OrderIds) {
         }
     }
 }

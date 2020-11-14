@@ -4,6 +4,7 @@ using System.Linq;
 
 using StoreManager.Library;
 using StoreManager.Library.Data;
+using StoreManager.Library.Entity;
 
 // ALias ConsoleUI.ConsoleUI as CUI so it will be easier to reference, as it\
 //  will be used often in this class
@@ -16,14 +17,11 @@ namespace StoreManager.UserInterface
     /// </summary>
     public class StoreManagerApplicationInterface
     {
-        // Use a singleton pattern to manager another singleton pattern
-        private StoreManagerApplicationInterface s_applicationInterface = new StoreManagerApplicationInterface();
-
-        private StoreManagerApplicationInterface() {
+        public StoreManagerApplicationInterface() {
             StoreManagerApplication.Initialize();
         }
 
-        public static void Run() {
+        public void Run() {
             // Set up all of the methods that will be used here
 
             // Set this up in a config file, or something else?
@@ -92,7 +90,9 @@ namespace StoreManager.UserInterface
         #region Data Prompts
 
         public void CustomerPrompt() {
-
+            // What are the prompts for, entirely?
+            var customerData = CreateCustomerPrompt();
+            StoreManagerApplication.Create<Customer>(customerData);
         }
 
         public void StorePrompt() {
