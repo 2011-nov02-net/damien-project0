@@ -23,6 +23,15 @@ namespace StoreManager.UserInterface.StorageRepository
             Filepath = filepath;
         }
 
+        public void Configure(IConfigurationOptions configurationOptions) {
+            if (configurationOptions is not XMLConfigurationOptions)
+                return;
+
+            /*var configOptions */
+            _ = configurationOptions as XMLConfigurationOptions;
+
+        }
+
         public async Task<DataBundle> Read() {
             return await Task.Run(() => new DataBundle());
         }

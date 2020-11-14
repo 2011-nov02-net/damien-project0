@@ -12,9 +12,6 @@ using CUI = ConsoleUI.ConsoleUI;
 
 namespace StoreManager.UserInterface
 {
-    /// <summary>
-    /// Represents a class that handles the interface with the StoreManager Singleton
-    /// </summary>
     public class StoreManagerApplicationInterface
     {
         public StoreManagerApplicationInterface() {

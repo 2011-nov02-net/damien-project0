@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using StoreManager.Library;
 using StoreManager.Library.Data;
 using StoreManager.Library.Entity;
 
@@ -13,29 +14,29 @@ namespace StoreManager.UserInterface.ApplicationInterface
 {
     public abstract class ApplicationInterfaceBase
     {
-        protected readonly bool _allowTengentialPrompts;
+        protected readonly bool _allowTangentialPrompts;
         protected readonly Dictionary<Type, string> _typeNames;
 
         public abstract void Run();
 
         public ApplicationInterfaceBase() {
             // Prompt to see if the user wishes to have rabbit-hole prompts
-            _allowTengentialPrompts = CUI.PromptForBool("Allow the prompts to detour from the original prompt?", "yes", "no");
-            // TODO: Perhaps resort to Regex or something akin to that? This is simpler, for now?
+            _allowTangentialPrompts = CUI.PromptForBool("Allow the prompts to detour from the original prompt?", "yes", "no");
             _typeNames = new Dictionary<Type, string>
             {
                 { typeof(Customer), "customer" },
                 { typeof(Store), "store" },
-                { typeof(Product), "product" },
+                { typeof(Order), "order" },
                 { typeof(Address), "address" },
                 { typeof(OperatingLocation), "operating location" },
-                { typeof(Order), "order" }
+                { typeof(Product), "product" }
             };
         }
 
         public long PromptForId<T>()
             where T : SEntity {
-            return default;
+            // TODO: Find a way to get the typename of the SEntity being passed into here
+            return CUI.PromptRange($"Please enter the ID for {_typeNames[typeof(T)]}", 0, StoreManagerApplication.MaxId<T>());
         }
 
         public CustomerData CreateCustomerData() {

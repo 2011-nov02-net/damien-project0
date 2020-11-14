@@ -62,6 +62,22 @@ namespace StoreManager.Library
             }
         }
 
+        public long MaxId(Type type) {
+            if (type == typeof(Customer)) {
+                return _customerFactory.Items.Max(c => c.Id);
+            } else if (type == typeof(Order)) {
+                return _orderFactory.Items.Max(c => c.Id);
+            } else if (type == typeof(Address)) {
+                return _addressFactory.Items.Max(c => c.Id);
+            } else if (type == typeof(Store)) {
+                return _storeFactory.Items.Max(c => c.Id);
+            } else if (type == typeof(Product)) {
+                return _productFactory.Items.Max(c => c.Id);
+            } else if (type == typeof(OperatingLocation)) {
+                return _operatingLocationFactory.Items.Max(c => c.Id);
+            } else throw new ArgumentException($"Invalid type passed in; got {type}");
+        }
+
         public void Create(Type type, IData data) {
             if (type == typeof(Customer)) {
                 _customerFactory.Create(data);
@@ -73,7 +89,7 @@ namespace StoreManager.Library
                 _storeFactory.Create(data);
             } else if (type == typeof(Product)) {
                 _productFactory.Create(data);
-            } else if(type == typeof(OperatingLocation)) {
+            } else if (type == typeof(OperatingLocation)) {
                 _operatingLocationFactory.Create(data);
             } else throw new ArgumentException($"Invalid type passed in; got {type}");
         }

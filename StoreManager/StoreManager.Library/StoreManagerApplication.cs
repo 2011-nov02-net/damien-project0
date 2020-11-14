@@ -21,6 +21,10 @@ namespace StoreManager.Library
             s_storeManager ??= new StoreManagerApplication(storage, configurationOptions, saveFrequency);
         }
 
+        public static long MaxId<T>() {
+            return s_storeManager.MaxEntityId<T>() + 1;
+        }
+
         public static void Create<T>(IData data)
             where T : SEntity {
             s_storeManager.CreateEntity<T>(data);
@@ -68,6 +72,10 @@ namespace StoreManager.Library
 
         ~StoreManagerApplication() {
             Task.Run(() => Save());
+        }
+
+        private long MaxEntityId<T>() {
+            return _factoryManager.MaxId(typeof(T));
         }
 
         private void CreateEntity<T>(IData data)

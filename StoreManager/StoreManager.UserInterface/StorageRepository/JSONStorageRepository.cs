@@ -20,6 +20,14 @@ namespace StoreManager.UserInterface.StorageRepository
             Filepath = filepath;
         }
 
+        public void Configure(IConfigurationOptions configurationOptions) {
+            if (configurationOptions is not JSONConfigurationOptions)
+                return;
+
+            /*var configOptions */ _ = configurationOptions as JSONConfigurationOptions;
+
+        }
+
         public async Task<DataBundle> Read() {
             string json = File.ReadAllText(_filepath);
             var stores = JsonSerializer.Deserialize<DataBundle>(json);
