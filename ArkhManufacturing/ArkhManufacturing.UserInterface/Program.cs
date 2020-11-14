@@ -13,7 +13,7 @@ namespace ArkhManufacturing.ConsoleApp
             // On start-up, ask the user for a configuration file
             ConsoleUI.SetRetryCount(3);
             bool setupDataStorage = ConsoleUI.PromptForBool("Do you wish to set up data storage?", "yes", "no");
-            IDataSerializer<Franchise> dataSerializer = null;
+            IDataStorage<Franchise> dataSerializer = null;
 
             if (setupDataStorage) {
                 string[] options = { "xml", "json" };

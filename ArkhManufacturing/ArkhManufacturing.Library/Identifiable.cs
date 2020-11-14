@@ -1,12 +1,12 @@
 ﻿namespace ArkhManufacturing.Library
 {
     // TODO: Add comment here
-    public abstract class IdentifiableBase
+    public abstract class Identifiable
     {
         // TODO: Add comment here
         public long Id { get; private set; }
         // TODO: Add comment here
-        public IdentifiableBase(IdGenerator idGenerator) {
+        public Identifiable(IdGenerator idGenerator) {
             Id = idGenerator.NextId();
         }
     }

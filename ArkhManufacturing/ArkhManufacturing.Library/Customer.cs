@@ -3,26 +3,30 @@
 namespace ArkhManufacturing.Library
 {
     // TODO: Add comment here
-    public class Customer : IdentifiableBase
+    public class Customer : Identifiable
     {
         protected static readonly IdGenerator _idGenerator = new IdGenerator();
 
         // TODO: Add comment here
-        public long DefaultStoreLocation { get; set; }
+        public Location DefaultStoreLocation { get; set; }
         // TODO: Add comment here
-        public CustomerName Name { get; set; }
+        public string FirstName { get; set; }
+        // TODO: Add comment here
+        public string LastName { get; set; }
+        public string FullName { get => $"{LastName}, {FirstName}"; }
 
         // TODO: Add comment here
-        public Customer(CustomerName name, long defaultStoreLocation) :
+        internal Customer(string firstName, string lastName, Location defaultStoreLocation) :
             base(_idGenerator) {
+            FirstName = firstName;
+            LastName = lastName;
             DefaultStoreLocation = defaultStoreLocation;
-            Name = name;
         }
 
         // TODO: Add comment here
         public override string ToString() {
-            string defaultStoreLocationString = DefaultStoreLocation != -1 ? $" with Default Store Location ID#{DefaultStoreLocation}" : "";
-            return $"Customer#{Id}: '{Name}'{defaultStoreLocationString}";
+            string defaultStoreLocationString = DefaultStoreLocation != null ? $" with Default Store Location ID#{DefaultStoreLocation}" : "";
+            return $"Customer#{Id}: '{FullName}'{defaultStoreLocationString}";
         }
 
         // TODO: Add comment here
@@ -33,8 +37,6 @@ namespace ArkhManufacturing.Library
         }
 
         // TODO: Add comment here
-        public override int GetHashCode() {
-            return HashCode.Combine(Id, DefaultStoreLocation, Name);
-        }
+        public override int GetHashCode() => HashCode.Combine(Id, DefaultStoreLocation, FirstName, LastName);
     }
 }

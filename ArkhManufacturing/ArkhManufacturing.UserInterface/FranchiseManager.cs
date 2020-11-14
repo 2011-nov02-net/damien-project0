@@ -1,5 +1,5 @@
 ﻿using ArkhManufacturing.Library;
-using ArkhManufacturing.Library.Exceptions;
+using ArkhManufacturing.Library.Exception;
 using ArkhManufacturing.UserInterface.Exceptions;
 using ArkhManufacturing.UserInterface.Serializers;
 
@@ -11,18 +11,22 @@ using System.Threading.Tasks;
 
 namespace ArkhManufacturing.UserInterface
 {
+    /* 
+     * This needs to be extrapolated into a manager, and a user interface
+     */
+
     // TODO: Add comment here
     public class FranchiseManager
     {
-        private readonly IDataSerializer<Franchise> _dataSerializer;
+        private readonly IDataStorage<Franchise> _dataStorage;
         private readonly Franchise _franchise;
 
         // TODO: Add comment here
-        public FranchiseManager(IDataSerializer<Franchise> dataSerializer) {
-            _dataSerializer = dataSerializer;
+        public FranchiseManager(IDataStorage<Franchise> dataStorage) {
+            _dataStorage = dataStorage;
 
             try {
-                _franchise = _dataSerializer?.Read();
+                _franchise = _dataStorage?.Read();
             } catch (IOException) {
 
             } finally {
@@ -30,392 +34,96 @@ namespace ArkhManufacturing.UserInterface
             }
         }
 
-        // TODO: Add comment here
-        private void DisplaySuccessMessage() => Console.WriteLine("Operation completed successfully.\n");
+        private Location CreateLocation() => null;
 
-        // TODO: Add comment here
-        private bool PromptForNewOrExisting(string targetType) => ConsoleUI.PromptForBool($"Do you wish to create a new {targetType}, or use an existing one?", "create", "existing");
-
-        // TODO: Add comment here
-        private bool PromptActionForItem(string action, string target) => ConsoleUI.PromptForBool($"Do you wish to {action} a {target}?", "yes", "no");
-
-        // TODO: Add comment here
-        private Customer GetCustomerById(string message) {
-            if (_franchise.Customers.Count == 0)
-                throw new IndexOutOfRangeException("There are no existing customers in this franchise.");
-
-            long customerId = ConsoleUI.PromptRange(message, -1, _franchise.Customers.Max(c => c.Id) + 1);
-            if (customerId == -1)
-                throw new UserExitException();
-
-            return _franchise.GetCustomerById(customerId);
-        }
-
-        // TODO: Add comment here
-        private Store GetStoreById(string message) {
-            if (_franchise.Stores.Count == 0)
-                throw new IndexOutOfRangeException("There are no existing stores in this franchise.");
-
-            long storeId = ConsoleUI.PromptRange(message, -1, _franchise.Stores.Max(s => s.Id) + 1);
-            if (storeId == -1)
-                throw new UserExitException();
-
-            return _franchise.GetStoreById(storeId);
-        }
-
-        private Product CreateProduct() {
-            string productName = ConsoleUI.PromptForInput("Please enter a product name: ", false);
-            double price = ConsoleUI.PromptRange("Please enter a price", 0, double.MaxValue);
-            double? discount = null;
-
-            bool addDiscount = PromptActionForItem("add", "discount");
-            if (addDiscount)
-                discount = ConsoleUI.PromptRange("Please enter the discount percentage you wish to give", 0, 100);
-
-            var product = new Product(productName, price, discount);
-
-            bool done = false;
-
-            while (!done) {
-                bool createNewStore = ConsoleUI.PromptForBool("No stores found; do you wish to create a new store?", "yes", "no");
-                
-                if (createNewStore) {
-                    // Call the create new Store
-                    var store = CreateStore();
-                    int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
-                    store.AddProduct(product, count);
-                } else if(_franchise.Stores.Count > 0) {
-                    bool addToStore = ConsoleUI.PromptForBool("Do you wish to add this item to a store or stores?", "yes", "no");
-                    if (addToStore) {
-                        long storeId = ConsoleUI.PromptRange("Please enter the store ID: ", 0, _franchise.Stores.Max(s => s.Id) + 1);
-                        int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
-                        var store = _franchise.GetStoreById(storeId);
-                        store.AddProduct(product, count);
-                    }
-                } else {
-                    Console.WriteLine("No stores exist.");
-                }
-            }
-
-            return product;
-        }
-
-        // TODO: Add comment here
-        private Store CreateStore() {
-            int productCountThreshold;
-            Location location;
-
-            string storeName = ConsoleUI.PromptForInput("Please enter a store name: ", false);
-
-            bool setProductCountThreshold = PromptActionForItem("set", "product count threshold");
-            if (setProductCountThreshold) {
-                productCountThreshold = ConsoleUI.PromptRange("Please enter a product count threshold: ", 0, int.MaxValue);
-            } else {
-                productCountThreshold = int.MaxValue;
-            }
-
-            // if there are no locations, create one
-            bool noLocationsCreated = _franchise.Locations.Count == 0;
-            bool createNewLocation = noLocationsCreated ? noLocationsCreated : PromptForNewOrExisting("location");
-
-            if (createNewLocation) {
-                location = PromptStoreLocation();
-            } else {
-                var locationId = ConsoleUI.PromptRange("Please enter the location ID: ", 0, _franchise.Locations.Max(l => l.Id) + 1);
-                location = _franchise.GetLocationById(locationId);
-            }
-
-            bool addInventory = ConsoleUI.PromptForBool("Do you wish to add items to the store?", "yes", "no");
-            Dictionary<long, int> inventory = new Dictionary<long, int>();
-            if (addInventory) {
-                bool createNewProduct = PromptActionForItem("create", "new product");
-                if (createNewProduct) {
-                    var product = CreateProduct();
-                    int count = ConsoleUI.PromptRange("Please enter the number you wish to place in stock: ", 0, int.MaxValue);
-                    inventory[product.Id] = count;
-                }
-            }
-
-            long storeId = _franchise.CreateStore(storeName, productCountThreshold, location, inventory);
-            var store = _franchise.GetStoreById(storeId);
-
-            return store;
-        }
-
-        // TODO: Add comment here
         private Customer CreateCustomer() {
-            CustomerName customerName = PromptCustomerName();
-            Location storeLocation = null;
+            string firstName = ConsoleUI.PromptForInput("Please enter the customer's first name: ", false);
+            string lastName = ConsoleUI.PromptForInput("Please enter the customer's last name:  ", false);
+            
+            bool createNewLocation = ConsoleUI.PromptForBool("Do you wish to create a default store location for the customer?", "yes", "no");
+            Location location = createNewLocation ? CreateLocation() : null;
 
-            bool doPrompt = ConsoleUI.PromptForBool("Do you wish to add a default store location for this customer?", "yes", "no");
-            if (doPrompt)
-                storeLocation = PromptStoreLocation();
-
-            var customerId = _franchise.CreateCustomer(customerName, storeLocation);
+            var customerId = _franchise.CreateCustomer(firstName, lastName, location);
             return _franchise.GetCustomerById(customerId);
         }
 
-        // TODO: Add comment here
-        private Customer PromptForCustomer() {
-            Customer customer = null;
-            bool noCustomersPresent = _franchise.Customers.Count == 0;
-            bool createNewCustomer = false;
+        private T PromptCreateOrRetrieveExisting<T>(List<T> itemCollection) {
+            bool noItemsExist = itemCollection.Count == 0;
+            bool createNewItem = true;
 
-            if (!noCustomersPresent)
-                createNewCustomer = PromptForNewOrExisting("customer");
+            // if none are found, one must be created
+            if (!noItemsExist)
+                createNewItem = ConsoleUI.PromptForBool("", "yes", "no");
 
-            if (noCustomersPresent || createNewCustomer) {
-                Console.WriteLine("No customers exist; please create one.");
-                customer = CreateCustomer();
+            // if some are found, user can choose
+            if (createNewItem) {
+                // Create the new item
             } else {
-                bool success = false;
-
-                do {
-                    try {
-                        customer = GetCustomerById("Please enter the customer ID that is ordering, or -1 to quit: ");
-                        success = true;
-                    } catch (NonExistentIndentifiableException) {
-                        Console.WriteLine($"Customer ID is invalid; please try again.");
-                    }
-                } while (!success);
+                // Get the item by its id
             }
 
-            return customer;
+            return default;
         }
 
-        // TODO: Add comment here
-        private Store PromptForStore(long customerId) {
-            Store store = null;
-            var customer = _franchise.GetCustomerById(customerId);
-
-            if (customer.DefaultStoreLocation == -1) {
-                if (_franchise.Stores.Count == 0) {
-                    // only allow creating along, since there are no stores
-                    Console.WriteLine("No stores exist; please create one.");
-                    store = CreateStore();
-                } else {
-                    bool createNewStore = PromptForNewOrExisting("store");
-                    if (createNewStore) {
-                        store = CreateStore();
-                    } else {
-                        bool success = false;
-
-                        do {
-                            try {
-                                store = GetStoreById("Please enter the store you wish to place the order to: ");
-                                success = true;
-                            } catch (NonExistentIndentifiableException ex) {
-                                Console.WriteLine(ex.Message);
-                            }
-                        } while (!success);
-                    }
-                }
-            } else {
-                long storeId;
-                if (ConsoleUI.PromptForBool($"Do you wish to use the default store ({customer.DefaultStoreLocation})? ", "yes", "no")) {
-                    storeId = customer.DefaultStoreLocation;
-                } else {
-                    storeId = ConsoleUI.PromptRange($"Please enter the store you wish to place the order to, or -1 to exit: ", -1, _franchise.Customers.Max(c => c.Id) + 1);
-
-                    if (storeId == -1)
-                        throw new UserExitException();
-                }
-
-                store = _franchise.GetStoreById(storeId);
-            }
-
-            // Check if the store has anything in stock
-            while (!store.HasStock()) {
-                // if not, prompt for another store
-                long storeId = ConsoleUI.PromptRange($"That store does not have anything in stock; enter a different id, or -1 to return to menu: ", -1, _franchise.Customers.Max(c => c.Id) + 1);
-
-                if (storeId == -1)
-                    throw new UserExitException();
-
-                store = _franchise.GetStoreById(storeId);
-            }
-
-            return store;
+        private void CreateCustomerPrompt() {
+            // Prompt for a customer
+            var customer = CreateCustomer();
+            Console.WriteLine($"Customer '{customer}' created successfully.");
         }
 
-        private Dictionary<long, int> PromptForInventory(long storeId) {
-            Dictionary<long, int> productsRequested = new Dictionary<long, int>();
-            var store = _franchise.GetStoreById(storeId);
+        private Customer GetCustomerPrompt() {
+            if (_franchise.Customers.Count > 0) {
+                var customerId = ConsoleUI.PromptRange("Please enter the id of the customer: ", 0, _franchise.GetMaxId<Customer>());
+                return _franchise.GetCustomerById(customerId);
+            } else {
+                // No customers exist
+                return null;
+            }
+        }
+
+        private void CreateOrderPrompt() {
+            // Create/Get Customer
+            var customer = PromptCreateOrRetrieveExisting(_franchise.Customers);
+
+            // Create/Get Store
+            var store = PromptCreateOrRetrieveExisting(_franchise.Stores);
+
+            // Get the Products that are being ordered
             bool done = false;
-
+            Dictionary<long, int> productsRequested = new Dictionary<long, int>();
             do {
-                // Get and print out the inventory
-                if (store.HasStock()) {
-                    string inventory = $"{string.Join(",\n", store.Inventory.Select(kv => $"{kv.Key} x{kv.Value}"))}";
-                    Console.WriteLine(inventory);
-                } else {
-                    Console.WriteLine("This store does not have anything in stock.");
-                    throw new UserExitException();
-                }
-
-                long targetProduct;
-                int productCount;
-
-                // Get the product ID
-                targetProduct = ConsoleUI.PromptRange(">", -1, store.Inventory.Count);
-                // get the product from the product ID
-                Product product = store.GetProductById(targetProduct);
-
-                if (targetProduct == -1)
-                    throw new UserExitException();
-
-                if (product != null) {
-                    // Get the count of the product
-                    productCount = ConsoleUI.PromptRange("Specify a count, or -1 to stop adding products: ", -1, store.Inventory[product.Id]);
-
-                    if (productCount == -1)
-                        done = true;
-                    else if (productCount != 0)
-                        // Add the product
-                        productsRequested[product.Id] = productCount;
-                } else {
-                    Console.WriteLine($"Invalid product ID specified (got '{targetProduct}'); please try again.");
-                    continue;
-                }
-
-                // No products added
-                if (productsRequested.Count == 0) {
-                    bool tryAgain = ConsoleUI.PromptForBool("No products were entered, do you wish to retry?", "yes", "no");
-                    if (tryAgain)
-                        return PromptForInventory(storeId);
-                    else throw new UserExitException();
+                done = !ConsoleUI.PromptForBool("Do you wish to add a product?", "yes", "no");
+                if (!done) {
+                    var storeProducts = store.Inventory.Keys.Select(id => _franchise.Products.First(p => p.Id == id)).ToList();
+                    var product = PromptCreateOrRetrieveExisting(storeProducts);
+                    int max = store.Inventory[product.Id];
+                    int count = ConsoleUI.PromptRange($"Please enter the number of products you wish to add ({max} max):", 0, max);
+                    if (count > 0)
+                        productsRequested[product.Id] = count;
+                    else { /* Don't add the item */ }
                 }
             } while (!done);
 
-            return productsRequested;
-        }
-
-        // TODO: Add comment here
-        private void PromptOrder() {
-            try {
-                // Get the customer of the order
-                Customer customer = PromptForCustomer();
-
-                // New line between blocks of data
-                Console.WriteLine();
-
-                // Get the store of the order
-                var store = PromptForStore(customer.Id);
-
-                // New line between blocks of data
-                Console.WriteLine();
-
-                // Get the current date
-                DateTime date = DateTime.Now;
-
-                // Get all the products they wish to associate with the order
-                Dictionary<long, int> productsRequested = PromptForInventory(store.Id);
-
-                // Add the Order after its creation
-                store.SubmitOrder(new Order(customer, store, date, productsRequested));
-                DisplaySuccessMessage();
-            } catch (UserExitException) {
-                Console.WriteLine("Exiting to menu...");
-                throw;
-            } catch (ArgumentException) {
-                // Means there are no customers
-                Console.WriteLine("There are no customers in the system; returning to the main menu.");
+            if (productsRequested.Count > 0) {
+                // Create the order
+                _franchise.CreateOrder(customer.Id, store.Id, productsRequested);
             }
         }
 
-        // TODO: Add comment here
-        private CustomerName PromptCustomerName() {
-            string firstName = ConsoleUI.PromptForInput("Please enter their first name: ", false);
-            string lastName = ConsoleUI.PromptForInput("Please enter their last name: ", false);
-            return new CustomerName(firstName, lastName);
+        private void ViewCustomerDataPrompt() {
+
         }
 
-        // TODO: Add comment here
-        private Location PromptStoreLocation() {
-            bool noLocationsExist = _franchise.Locations.Count == 0;
+        private void DisplayOrderDetailsPrompt() {
 
-            bool createNewLocation = false;
-            if (!noLocationsExist)
-                createNewLocation = PromptActionForItem("create", "new location");
-
-            if (createNewLocation) {
-                string planet = ConsoleUI.PromptForInput("Please enter a planet: ", false);
-                string province = ConsoleUI.PromptForInput("Please enter a province: ", false);
-                string city = ConsoleUI.PromptForInput("Please enter a city: ", false);
-                var locationId = _franchise.CreateLocation(planet, province, city);
-                return _franchise.GetLocationById(locationId);
-            } else if(_franchise.Locations.Count > 0) {
-                long locationId = ConsoleUI.PromptRange("Please enter the location id:", 0, _franchise.Locations.Max(l => l.Id) + 1);
-                var location = _franchise.GetLocationById(locationId);
-                return location;
-            } else {
-                createNewLocation = ConsoleUI.PromptForBool("No stores exist; one must be created. Do you wish to create one now?", "yes", "no");
-                if (createNewLocation)
-                    return PromptStoreLocation();
-                else throw new UserExitException();
-            }
         }
 
-        // TODO: Add comment here
-        private void PromptCustomer() {
-            var customer = CreateCustomer();
-            Console.WriteLine($"Customer '{customer.Name}' was created successfully.\n");
+        private void DisplayStoreOrderHistoryPrompt() {
+
         }
 
-        // TODO: Add comment here
-        private void SearchCustomer() {
-            string userInput = ConsoleUI.PromptForInput("Please enter the name of the customer in the form of 'last, first': ", false);
-            List<Customer> customers = _franchise.GetCustomersByName(userInput);
-            Console.WriteLine($"{customers.Count} results found:\n\t{string.Join(",\n\t", customers)}");
-        }
+        private void DisplayCustomerOrderHistorPrompt() {
 
-        // TODO: Add comment here
-        private void DisplayCustomerDetails() {
-            try {
-                Customer customer = GetCustomerById("Please enter the customer ID, or -1 to return to menu: ");
-                Console.WriteLine($"{customer}");
-            } catch (NonExistentIndentifiableException) {
-                Console.WriteLine("Customer was not found.");
-            }
-        }
-
-        // TODO: Add comment here
-        private void DisplayStoreOrderHistory() {
-            // Prompt for a store
-            long storeId = ConsoleUI.PromptRange("Please enter a store id: ", 0, _franchise.Stores.Max(s => s.Id) + 1);
-            // Get its associated orders
-            List<Order> orders = _franchise.GetOrdersByCustomerId(storeId);
-            if (orders.Count > 0) {
-                string ordersString = $"Store for Store#{storeId}:\n\t{string.Join(",\n\t", orders)}";
-                Console.WriteLine(ordersString);
-            } else Console.WriteLine("There are no orders for that store");
-        }
-
-        // TODO: Add comment here
-        private void DisplayCustomerOrderHistory() {
-            Customer customer = null;
-            try {
-                // Prompt for a Customer
-                bool success = false;
-                do {
-                    try {
-                        customer = GetCustomerById("Please enter a customer id, or -1 to return to menu: ");
-                        success = true;
-                    } catch (NonExistentIndentifiableException ex) {
-                        Console.WriteLine(ex.Message);
-                    }
-                } while (!success);
-            } catch (UserExitException) {
-                Console.WriteLine("Exiting to menu...");
-                return;
-            }
-
-            // Get its associated orders
-            List<Order> orders = _franchise.GetOrdersByCustomerId(customer.Id);
-            if (orders.Count > 0) {
-                string ordersString = $"Orders for Customer#{customer.Id}:\n\t{string.Join(",\n\t", orders)}";
-                Console.WriteLine(ordersString);
-            } else Console.WriteLine("There are no orders for that customer.");
         }
 
         // TODO: Add comment here
@@ -423,50 +131,39 @@ namespace ArkhManufacturing.UserInterface
             bool quit = false;
 
             do {
-                var actions = new List<Action>
+                var actions = new List<Tuple<string, Action>>
                 {
-                    PromptCustomer,
-                    PromptOrder,
-                    SearchCustomer,
-                    DisplayCustomerDetails,
-                    DisplayStoreOrderHistory,
-                    DisplayCustomerOrderHistory,
-                    Console.Clear
-                };
-
-                var options = new[]
-                {
-                    "Add a new customer",
-                    "Place an order",
-                    "Search for a customer",
-                    "Display the details of an order",
-                    "Display the order history for a store location",
-                    "Display the order history of a customer",
-                    "Clear the Console"
+                    new Tuple<string, Action>("Create a customer", CreateCustomerPrompt),
+                    new Tuple<string, Action>("Place an order", CreateOrderPrompt),
+                    new Tuple<string, Action>("View customer data", ViewCustomerDataPrompt),
+                    new Tuple<string, Action>("Display the details of an order", DisplayOrderDetailsPrompt),
+                    new Tuple<string, Action>("Display the order history of a store", DisplayStoreOrderHistoryPrompt),
+                    new Tuple<string, Action>("Display the order histpry of a customer", DisplayCustomerOrderHistorPrompt),
+                    new Tuple<string, Action>("Clear Console", Console.Clear)
                 };
 
                 Console.WriteLine("Welcome to Arkh Manufacturing! What would you like to do?");
-                int userInput = ConsoleUI.PromptForMenuSelection(options, true, false);
+                int userInput = ConsoleUI.PromptForMenuSelection(actions.Select(t => t.Item1).ToArray(), true, false);
 
                 try {
                     if (userInput == -1)
                         quit = true;
-                    else actions[userInput]();
+                    else actions[userInput].Item2();
                 } catch (UserExitException) {
                     quit = true;
                 }
 
-                await Save();
+                await Commit();
 
             } while (!quit);
 
-            await Save();
+            await Commit();
         }
 
         // TODO: Add comment here
-        private async Task Save() {
+        private async Task Commit() {
             try {
-                await Task.Run(() => _dataSerializer?.Write(_franchise));
+                await Task.Run(() => _dataStorage?.Commit(_franchise));
             } catch (IOException) { }
         }
     }

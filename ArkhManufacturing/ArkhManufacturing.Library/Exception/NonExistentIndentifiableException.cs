@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ArkhManufacturing.Library.Exceptions
+namespace ArkhManufacturing.Library.Exception
 {
     // TODO: Add comment here
-    public class NonExistentIndentifiableException : Exception
+    public class NonExistentIndentifiableException : System.Exception
     {
         // TODO: Add comment here
         public NonExistentIndentifiableException(long itemId) :

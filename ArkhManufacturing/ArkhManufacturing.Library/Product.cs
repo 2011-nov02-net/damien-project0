@@ -1,7 +1,9 @@
-﻿namespace ArkhManufacturing.Library
+﻿using System;
+
+namespace ArkhManufacturing.Library
 {
     // TODO: Add comment here
-    public class Product : IdentifiableBase
+    public class Product : Identifiable
     {
         private static readonly IdGenerator _idGenerator = new IdGenerator();
 
@@ -19,7 +21,7 @@
         }
 
         // TODO: Add comment here
-        public Product(string name, double price, double? discount = null) :
+        internal Product(string name, double price, double? discount = null) :
             base(_idGenerator) {
             Name = name;
             Discount = discount;
@@ -28,5 +30,13 @@
 
         // TODO: Add comment here
         public override string ToString() => $"Product: Name: {Name}, Price: ${_price}{(Discount.HasValue ? $" at a {Discount * 100}% discount" : "")}";
+
+        public override bool Equals(object obj) {
+            if (obj is Product) {
+                return (obj as Product).Id == Id;
+            } else return false;
+        }
+
+        public override int GetHashCode() => HashCode.Combine(Id, Name, Discount, _price, Price);
     }
 }

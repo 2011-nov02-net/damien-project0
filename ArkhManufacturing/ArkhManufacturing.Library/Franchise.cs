@@ -1,17 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ArkhManufacturing.Library.Exceptions;
+
+using ArkhManufacturing.Library.CreationData;
+using ArkhManufacturing.Library.Creator;
+using ArkhManufacturing.Library.Creators;
+using ArkhManufacturing.Library.Exception;
 
 namespace ArkhManufacturing.Library
 {
     // TODO: Add comment here
     public class Franchise
     {
+        private Dictionary<Type, long> _maxIds;
+        private Dictionary<Type, ICreator<Identifiable>> _creators;
+
         // TODO: Add comment here
         public List<Store> Stores { get; internal set; }
         // TODO: Add comment here
         public List<Customer> Customers { get; internal set; }
+        // TODO: Add comment here
+        public List<Order> Orders { get; internal set; }
         // TODO: Add comment here
         public List<Location> Locations { get; internal set; }
         // TODO: Add comment here
@@ -23,6 +32,8 @@ namespace ArkhManufacturing.Library
             Customers = new List<Customer>();
             Locations = new List<Location>();
             Products = new List<Product>();
+
+            Init();
         }
 
         // TODO: Add comment here
@@ -31,50 +42,124 @@ namespace ArkhManufacturing.Library
             Customers = customers;
             Locations = locations;
             Products = products;
+
+            Init();
         }
 
         // TODO: Add comment here
-        public Franchise(List<Store> stores, List<Customer> customers, List<Location> locations, List<Product> products) {
+        public Franchise(List<Store> stores, List<Customer> customers, List<Order> orders, List<Location> locations, List<Product> products) {
             Stores = stores;
             Customers = customers;
             Locations = locations;
+            Orders = orders;
             Products = products;
+
+            Init();
         }
+
+        // TODO: Add comment here
+        private void Init() {
+            _maxIds = new Dictionary<Type, long>
+            {
+                { typeof(Customer), -1 },
+                { typeof(Store), -1 },
+                { typeof(Product), -1 },
+                { typeof(Order), -1 },
+                { typeof(Location), -1 }
+            };
+
+            _creators = new Dictionary<Type, ICreator<Identifiable>>
+            {
+                { typeof(Customer), new CustomerCreator() },
+                { typeof(Store), new StoreCreator() },
+                { typeof(Order), null },
+                { typeof(Product), null },
+                { typeof(Location), null }
+            };
+        }
+
+        private void NewIdCheck<T>(long id)
+            where T : Identifiable {
+            bool newIdGreater = _maxIds[typeof(T)] < id;
+            if (newIdGreater)
+                _maxIds[typeof(T)] = id;
+        }
+
+        private void UpdateMaxId<T>(long id)
+            where T : Identifiable {
+            long maxId = _maxIds[typeof(T)];
+            if (maxId == id)
+                _maxIds[typeof(T)]--;
+        }
+
+        // TODO: Add comment here
+        public long GetMaxId<T>()
+            where T : Identifiable {
+            return _maxIds[typeof(T)];
+        }
+
+        #region Generic CRUD Methods
+
+        /*  How would the paramters be entered? CreationData 
+         *      and something that consumes the CreationData and produces the item?
+         *      
+         *  ICreatable:
+         *      Identifiable Create(ICreationData creationData)
+         *  
+         */
+
+        public void Create<T>(ICreationData creationData)
+            where T : Identifiable, new() {
+            // Alright, how will we call create on the generic type?
+            // Use the ICreator interface to create 
+            var newItem = _creators[typeof(T)].Create(creationData) as T;
+            NewIdCheck<T>(newItem.Id);
+            // Add the item
+        }
+
+        public T GetById<T>(long id) {
+
+        }
+
+        //  public long Create<T>()
+
+        #endregion
 
         #region Customer CRUD Operations
 
         // TODO: Add comment here
         public long CreateCustomer(string firstName, string lastName) {
-            var customerName = new CustomerName(firstName, lastName);
-            Customer customer = new Customer(customerName, -1);
+            Customer customer = new Customer(firstName, lastName, null);
             Customers.Add(customer);
+
+            NewIdCheck<Customer>(customer.Id);
+
             return customer.Id;
         }
 
         // TODO: Add comment here
         public long CreateCustomer(string firstName, string lastName, string planet, string province, string city) {
-            var customerName = new CustomerName(firstName, lastName);
-            var location = new Location(planet, province, city);
-            Customer customer = new Customer(customerName, location.Id);
+            long locationId = CreateLocation(planet, province, city);
+            Customer customer = new Customer(firstName, lastName, GetLocationById(locationId));
             Customers.Add(customer);
-            Locations.Add(location);
+
+            NewIdCheck<Customer>(customer.Id);
+
             return customer.Id;
         }
 
         // TODO: Add comment here
-        public long CreateCustomer(CustomerName customerName, Location defaultStoreLocation) {
-            long storeId = -1;
+        public long CreateCustomer(string firstName, string lastName, Location defaultStoreLocation) {
+            long locationId = -1;
 
             if (defaultStoreLocation != null)
-                storeId = defaultStoreLocation.Id;
+                locationId = defaultStoreLocation.Id;
 
-            var customer = new Customer(customerName, storeId);
+            var customer = new Customer(firstName, lastName, locationId);
             Customers.Add(customer);
-            if(Locations.Count > 0) {
-                if(Locations.FirstOrDefault(l => l == defaultStoreLocation) == null) {
-                    Locations.Add(defaultStoreLocation);
-                }
-            }
+
+            NewIdCheck<Customer>(customer.Id);
+
             return customer.Id;
         }
 
@@ -82,7 +167,7 @@ namespace ArkhManufacturing.Library
         public List<Customer> GetCustomers() => Customers;
 
         // TODO: Add comment here
-        public List<Customer> GetCustomersByName(string customerName) => Customers.Where(c => c.Name.ToString() == customerName).ToList();
+        public List<Customer> GetCustomersByName(string customerName) => Customers.Where(c => c.FullName == customerName).ToList();
 
         // TODO: Add comment here
         public Customer GetCustomerById(long customerId) {
@@ -94,9 +179,9 @@ namespace ArkhManufacturing.Library
         public void UpdateCustomer(long customerId, string firstName, string lastName) {
             var customer = GetCustomerById(customerId);
             if (firstName != null)
-                customer.Name.FirstName = firstName;
+                customer.FirstName = firstName;
             if (lastName != null)
-                customer.Name.LastName = lastName;
+                customer.LastName = lastName;
         }
 
         // TODO: Add comment here
@@ -108,8 +193,12 @@ namespace ArkhManufacturing.Library
 
         // TODO: Add comment here
         public void DeleteCustomer(long customerId) {
+            // First, check if the customer even exists
             var customer = GetCustomerById(customerId);
             Customers.Remove(customer);
+
+            // Update the max id if they are equal
+            UpdateMaxId<Customer>(customerId);
         }
 
         #endregion
@@ -119,15 +208,21 @@ namespace ArkhManufacturing.Library
         // Create
         // TODO: Add comment here
         public long CreateStore(string name, int productCountThreshold, Location location) {
-            var store = new Store(this, name, productCountThreshold, location);
+            var store = new Store(this, name, productCountThreshold, location.Id);
             Stores.Add(store);
+
+            NewIdCheck<Store>(store.Id);
+
             return store.Id;
         }
 
         // TODO: Add comment here
         public long CreateStore(string name, int productCountThreshold, Location location, Dictionary<long, int> inventory) {
-            var store = new Store(this, name, productCountThreshold, location, null, inventory);
+            var store = new Store(this, name, productCountThreshold, location.Id, null, inventory);
             Stores.Add(store);
+
+            NewIdCheck<Store>(store.Id);
+
             return store.Id;
         }
 
@@ -146,7 +241,10 @@ namespace ArkhManufacturing.Library
 
         // TODO: Add comment here
         public Store GetStoreByLocationId(long locationId) {
-            return Stores.First(s => s.Location.Id == locationId);
+            // Check if the location exists
+            var location = GetLocationById(locationId);
+            // Check to see the first store that has the location
+            return Stores.First(s => s.Location == location);
         }
 
         // Update
@@ -157,8 +255,7 @@ namespace ArkhManufacturing.Library
                 store.Name = name;
             if (productCountThreshold != null)
                 store.ProductCountThreshold = productCountThreshold.Value;
-            if (location != null)
-                store.Location = location;
+            store.Location = location;
         }
 
         // Delete
@@ -166,11 +263,14 @@ namespace ArkhManufacturing.Library
         public void DeleteStore(long storeId) {
             var store = GetStoreById(storeId);
             Stores.Remove(store);
+
+            UpdateMaxId<Store>(storeId);
         }
 
         // TODO: Add comment here
         public void DeleteStoreByLocation(long locationId) {
             var store = GetStoreByLocationId(locationId);
+            UpdateMaxId<Store>(store.Id);
             Stores.Remove(store);
         }
 
@@ -183,19 +283,19 @@ namespace ArkhManufacturing.Library
         public long CreateOrder(long customerId, long storeId, Dictionary<long, int> productsRequested) {
             Customer targetCustomer = GetCustomerById(customerId);
             Store targetStore = GetStoreById(storeId);
+            Order order = new Order(targetCustomer.Id, targetStore.Id, DateTime.Now, productsRequested);
 
-            // TODO: Ensure the LINQ query works as intended
-            #region Old Products Requested Code
-            // Dictionary<Product, int> orderProductsRequested = new Dictionary<Product, int>();
-            // 
-            // foreach (var kv in productsRequested) {
-            //     Product targetProduct = targetStore.Inventory.Select(productCountPair => productCountPair.Key).First(p => p.Id == kv.Key);
-            //     orderProductsRequested.Add(targetProduct, kv.Value);
-            // }
-            #endregion
+            try {
+                targetStore.SubmitOrder(order);
+            } catch (System.Exception ex) {
+                if (ex is ProductNotOfferedException || ex is ProductRequestExcessiveException) {
+                    // Order Failed
+                    return -1;
+                }
+            }
 
-            Order order = new Order(targetCustomer, targetStore, DateTime.Now, productsRequested);
-            targetStore.SubmitOrder(order);
+            UpdateMaxId<Order>(order.Id);
+
             return order.Id;
         }
 
@@ -209,33 +309,33 @@ namespace ArkhManufacturing.Library
 
         // TODO: Add comment here
         public List<Order> GetOrders() {
-            List<Order> orders = new List<Order>();
-            Stores.ForEach(store => orders.AddRange(store.Orders));
-            return orders;
+            List<long> orderIds = new List<long>();
+            Stores.ForEach(store => orderIds.AddRange(store.Orders));
+            return orderIds.Select(orderId => Orders.First(o => o.Id == orderId)).ToList();
         }
 
         // TODO: Add comment here
         public List<Order> GetOrdersByCustomerId(long customerId) {
             var customer = GetCustomerById(customerId);
             var orders = GetOrders();
-            return orders.Where(o => o.Customer == customer).ToList();
+            return orders.Where(o => o.CustomerId == customer.Id).ToList();
         }
 
         // TODO: Add comment here
         public List<Order> GetOrdersFromStoreId(long storeId) {
             var store = GetStoreById(storeId);
-            return store.Orders;
+            return store.Orders.Select(orderId => Orders.First(o => o.Id == orderId)).ToList();
         }
 
         // Update
         // TODO: Add comment here
         public void UpdateOrder(long orderId, Dictionary<long, int> productsRequested) {
             var order = GetOrderById(orderId);
-            var store = GetStoreByLocationId(order.Store.Id);
+            var store = GetStoreByLocationId(order.StoreId);
             if (productsRequested != null) {
                 order.ProductsRequested = productsRequested;
 
-                foreach(var kv in productsRequested) {
+                foreach (var kv in productsRequested) {
                     store.Inventory[kv.Key] += kv.Value;
                 }
             }
@@ -245,13 +345,15 @@ namespace ArkhManufacturing.Library
         // TODO: Add comment here
         public void DeleteOrderById(long orderId) {
             var order = GetOrderById(orderId);
-            var store = Stores.First(s => s.Orders.FirstOrDefault(o => o.Id == orderId) != null);
-            store.Orders.Remove(order);
+            var store = Stores.First(s => s.Orders.FirstOrDefault(o => o == orderId) != -1);
+            store.Orders.Remove(order.Id);
+            Orders.Remove(order);
         }
 
         #endregion
 
         #region Location CRUD Operations
+
         // Create
         // TODO: Add comment here
         public long CreateLocation(string planet, string province, string city) {
@@ -307,6 +409,11 @@ namespace ArkhManufacturing.Library
         public long CreateProduct(string productName, double price, double? discount = null) {
             var product = new Product(productName, price, discount);
             Products.Add(product);
+
+            bool newProductIdGreater = _maxIds[typeof(Product)] < product.Id;
+            if (newProductIdGreater)
+                _maxIds[typeof(Product)] = product.Id;
+
             return product.Id;
         }
 
@@ -314,7 +421,13 @@ namespace ArkhManufacturing.Library
         public long CreateProduct(long storeId, int count, string productName, double price, double? discount = null) {
             var store = GetStoreById(storeId);
             var product = new Product(productName, price, discount);
-            store.AddProduct(product, count);
+            var productId = CreateProduct(productName, price, discount);
+            store.AddProduct(GetProductById(productId), count);
+
+            bool newIdGreater = _maxIds[typeof(Store)] < store.Id;
+            if (newIdGreater)
+                _maxIds[typeof(Store)] = store.Id;
+
             return product.Id;
         }
 

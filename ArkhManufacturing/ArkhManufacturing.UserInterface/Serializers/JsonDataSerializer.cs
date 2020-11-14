@@ -5,7 +5,7 @@ using ArkhManufacturing.UserInterface.Converters;
 
 namespace ArkhManufacturing.UserInterface.Serializers
 {
-    public class JsonDataSerializer<T> : IDataSerializer<T>
+    public class JsonDataSerializer<T> : IDataStorage<T>
     {
         private readonly string _filepath;
 
@@ -21,7 +21,7 @@ namespace ArkhManufacturing.UserInterface.Serializers
         }
 
         // TODO: Add comment here
-        public void Write(T data) {
+        public void Commit(T data) {
             var jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
             jsonSerializerOptions.Converters.Add(new DictionaryInt64Converter());
             string json = JsonSerializer.Serialize<T>(data, jsonSerializerOptions);

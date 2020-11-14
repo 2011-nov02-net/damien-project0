@@ -3,7 +3,7 @@
 namespace ArkhManufacturing.Library
 {
     // TODO: Add comment here
-    public class Location : IdentifiableBase
+    public class Location : Identifiable
     {
         protected static readonly IdGenerator _idGenerator = new IdGenerator();
 
@@ -15,7 +15,7 @@ namespace ArkhManufacturing.Library
         public string City { get; set; }
 
         // TODO: Add comment here
-        public Location(string planet, string province, string city) :
+        internal Location(string planet, string province, string city) :
             base(_idGenerator) {
             Planet = planet;
             Province = province;
@@ -33,8 +33,6 @@ namespace ArkhManufacturing.Library
         }
 
         // TODO: Add comment here
-        public override int GetHashCode() {
-            return HashCode.Combine(Id, Planet, Province, City);
-        }
+        public override int GetHashCode() => HashCode.Combine(Id, Planet, Province, City);
     }
 }

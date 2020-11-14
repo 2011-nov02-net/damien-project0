@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace ArkhManufacturing.Library.Exceptions
+namespace ArkhManufacturing.Library.Exception
 {
     // TODO: Add comment here
-    public class ProductNotOfferedException : Exception
+    public class ProductNotOfferedException : System.Exception
     {
         // TODO: Add comment here
         public ProductNotOfferedException(Product product) :

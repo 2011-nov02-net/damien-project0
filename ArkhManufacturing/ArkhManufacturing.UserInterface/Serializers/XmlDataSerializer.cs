@@ -3,7 +3,7 @@ using System.Xml;
 
 namespace ArkhManufacturing.UserInterface.Serializers
 {
-    public class XmlDataSerializer<T> : IDataSerializer<T>
+    public class XmlDataSerializer<T> : IDataStorage<T>
     {
         private readonly string _filepath;
 
@@ -18,7 +18,7 @@ namespace ArkhManufacturing.UserInterface.Serializers
         }
 
         // TODO: Add comment here
-        public void Write(T data) {
+        public void Commit(T data) {
             var dataContractSerializer = new DataContractSerializer(typeof(T));
             var settings = new XmlWriterSettings { Indent = true };
             using var xmlWriter = XmlWriter.Create(_filepath, settings);
