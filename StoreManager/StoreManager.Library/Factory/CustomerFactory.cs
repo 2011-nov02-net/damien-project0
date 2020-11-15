@@ -22,9 +22,10 @@ namespace StoreManager.Library.Factory
 
         public List<Customer> Items { get; set; }
 
-        public void Create(IData data) {
+        public long Create(IData data) {
             var customer = new Customer(_idGenerator, data as CustomerData);
             Items.Add(customer);
+            return customer.Id;
         }
 
         public Customer Get(long id) {

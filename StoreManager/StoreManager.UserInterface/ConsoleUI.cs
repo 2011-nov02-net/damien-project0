@@ -125,7 +125,7 @@ namespace ConsoleUI
             int tries = 0;
 
             do {
-                string userInput = PromptForInput($"{prompt} (enter '{trueString}' or '{falseString}'): ", false);
+                string userInput = PromptForInput($"{prompt} (enter '{trueString}' or '{falseString}')", false);
 
                 if (userInput.ToLower() == trueString.ToLower())
                     return true;
@@ -156,7 +156,7 @@ namespace ConsoleUI
             int tries = 0;
 
             do {
-                string userInput = PromptForInput(prompt, false);
+                string userInput = PromptForInput($"{prompt} (min: {min}, max: {max})", false);
 
                 try {
                     T result = (T)Convert.ChangeType(userInput, typeof(T));
@@ -186,9 +186,9 @@ namespace ConsoleUI
         /// <returns>Input that the user entered</returns>
         public static string PromptForInput(string message, bool allowEmpty) {
             int tries = 0;
-
+            string orLeaveEmpty = allowEmpty ? " (or leave empty)" : "";
             do {
-                Console.Write(message);
+                Console.Write($"{message}{orLeaveEmpty}: ");
                 string userInput = Console.ReadLine();
 
                 if (!allowEmpty && string.IsNullOrWhiteSpace(userInput))

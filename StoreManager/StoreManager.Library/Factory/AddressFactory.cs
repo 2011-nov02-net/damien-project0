@@ -23,9 +23,10 @@ namespace StoreManager.Library.Factory
 
         public List<Address> Items { get; set; }
 
-        public void Create(IData data) {
+        public long Create(IData data) {
             var address = new Address(_idGenerator, data as AddressData);
             Items.Add(address);
+            return address.Id;
         }
 
         public Address Get(long id) {

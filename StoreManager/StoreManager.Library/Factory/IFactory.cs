@@ -8,7 +8,7 @@ namespace StoreManager.Library.Factory
     {
         List<T> Items { get; set; }
 
-        void Create(IData data);
+        long Create(IData data);
         T Get(long id);
         void Update(long id, IData data);
         void Delete(long id);

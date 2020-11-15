@@ -24,9 +24,10 @@ namespace StoreManager.Library.Factory
             _idGenerator = new IdGenerator(Items.Max(s => s.Id));
         }
 
-        public void Create(IData data) {
+        public long Create(IData data) {
             var store = new Store(_idGenerator, data as StoreData);
             Items.Add(store);
+            return store.Id;
         }
 
         public void Delete(long id) {

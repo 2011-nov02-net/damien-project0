@@ -14,7 +14,7 @@ namespace StoreManager.Library.Database
 {
     public class DatabaseStorageRepository : IStorageRepository<DataBundle>
     {
-        private readonly DbContextOptions<StoreManagerContext> s_contextOptions;
+        private DbContextOptions<StoreManagerContext> s_contextOptions;
 
         public void Configure(IConfigurationOptions configurationOptions) {
             if (configurationOptions is not DatabaseConfigurationOptions)
@@ -24,6 +24,8 @@ namespace StoreManager.Library.Database
             var optionsBuilder = new DbContextOptionsBuilder<StoreManagerContext>();
             optionsBuilder.UseSqlServer(configOptions.ConnectionString);
             // TODO: Set up the logging structure here
+
+            s_contextOptions = optionsBuilder.Options;
         }
 
         public async Task<DataBundle> Read() {

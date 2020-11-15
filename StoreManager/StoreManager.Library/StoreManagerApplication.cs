@@ -21,13 +21,17 @@ namespace StoreManager.Library
             s_storeManager ??= new StoreManagerApplication(storage, configurationOptions, saveFrequency);
         }
 
+        public static bool Any<T>() {
+            return s_storeManager.AnyEntity<T>();
+        }
+
         public static long MaxId<T>() {
             return s_storeManager.MaxEntityId<T>() + 1;
         }
 
-        public static void Create<T>(IData data)
+        public static long Create<T>(IData data)
             where T : SEntity {
-            s_storeManager.CreateEntity<T>(data);
+            return s_storeManager.CreateEntity<T>(data);
         }
 
         public static IData Get<T>(long id)
@@ -74,17 +78,23 @@ namespace StoreManager.Library
             Task.Run(() => Save());
         }
 
+        private bool AnyEntity<T>() {
+            return _factoryManager.Any(typeof(T));
+        }
+
         private long MaxEntityId<T>() {
             return _factoryManager.MaxId(typeof(T));
         }
 
-        private void CreateEntity<T>(IData data)
+        private long CreateEntity<T>(IData data)
             where T : SEntity {
-            _factoryManager.Create(typeof(T), data);
+            long itemId = _factoryManager.Create(typeof(T), data);
 
             if (_saveFrequency == SaveFrequency.Always) {
                 Task.Run(() => Save());
             }
+
+            return itemId;
         }
 
         private IData GetEntity<T>(long id)

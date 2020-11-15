@@ -10,12 +10,12 @@ namespace StoreManager.Library
 {
     internal class FactoryManager
     {
-        private readonly CustomerFactory            _customerFactory;
-        private readonly OrderFactory               _orderFactory;
-        private readonly ProductFactory             _productFactory;
-        private readonly AddressFactory             _addressFactory;
-        private readonly StoreFactory               _storeFactory;
-        private readonly OperatingLocationFactory   _operatingLocationFactory;
+        private readonly CustomerFactory _customerFactory;
+        private readonly OrderFactory _orderFactory;
+        private readonly ProductFactory _productFactory;
+        private readonly AddressFactory _addressFactory;
+        private readonly StoreFactory _storeFactory;
+        private readonly OperatingLocationFactory _operatingLocationFactory;
 
         public List<Store> Stores { get => _storeFactory.Items; }
         public List<Order> Orders { get => _orderFactory.Items; }
@@ -62,6 +62,22 @@ namespace StoreManager.Library
             }
         }
 
+        public bool Any(Type type) {
+            if (type == typeof(Customer)) {
+                return _customerFactory.Items.Count == 0;
+            } else if (type == typeof(Order)) {
+                return _orderFactory.Items.Count == 0;
+            } else if (type == typeof(Address)) {
+                return _addressFactory.Items.Count == 0;
+            } else if (type == typeof(Store)) {
+                return _storeFactory.Items.Count == 0;
+            } else if (type == typeof(Product)) {
+                return _productFactory.Items.Count == 0;
+            } else if (type == typeof(OperatingLocation)) {
+                return _operatingLocationFactory.Items.Count == 0;
+            } else throw new ArgumentException($"Invalid type passed in; got {type}");
+        }
+
         public long MaxId(Type type) {
             if (type == typeof(Customer)) {
                 return _customerFactory.Items.Max(c => c.Id);
@@ -78,19 +94,19 @@ namespace StoreManager.Library
             } else throw new ArgumentException($"Invalid type passed in; got {type}");
         }
 
-        public void Create(Type type, IData data) {
+        public long Create(Type type, IData data) {
             if (type == typeof(Customer)) {
-                _customerFactory.Create(data);
+                return _customerFactory.Create(data);
             } else if (type == typeof(Order)) {
-                _orderFactory.Create(data);
+                return _orderFactory.Create(data);
             } else if (type == typeof(Address)) {
-                _addressFactory.Create(data);
+                return _addressFactory.Create(data);
             } else if (type == typeof(Store)) {
-                _storeFactory.Create(data);
+                return _storeFactory.Create(data);
             } else if (type == typeof(Product)) {
-                _productFactory.Create(data);
+                return _productFactory.Create(data);
             } else if (type == typeof(OperatingLocation)) {
-                _operatingLocationFactory.Create(data);
+                return _operatingLocationFactory.Create(data);
             } else throw new ArgumentException($"Invalid type passed in; got {type}");
         }
 

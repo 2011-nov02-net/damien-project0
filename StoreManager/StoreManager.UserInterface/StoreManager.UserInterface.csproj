@@ -9,9 +9,4 @@
     <ProjectReference Include="..\StoreManager.Library\StoreManager.Library.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="StorageRepository\Json\" />
-    <Folder Include="StorageRepository\Xml\" />
-  </ItemGroup>
-
 </Project>

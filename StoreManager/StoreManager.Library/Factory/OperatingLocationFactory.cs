@@ -22,9 +22,10 @@ namespace StoreManager.Library.Factory
 
         public List<OperatingLocation> Items { get; set; }
 
-        public void Create(IData data) {
+        public long Create(IData data) {
             var operatingLocation = new OperatingLocation(_idGenerator, data as OperatingLocationData);
             Items.Add(operatingLocation);
+            return operatingLocation.Id;
         }
 
         public void Delete(long id) {
