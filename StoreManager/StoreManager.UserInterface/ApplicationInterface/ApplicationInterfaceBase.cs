@@ -33,33 +33,87 @@ namespace StoreManager.UserInterface.ApplicationInterface
             };
         }
 
-        public long PromptForId<T>()
+        protected long PromptForId<T>()
             where T : SEntity {
-            return CUI.PromptRange($"Please enter the ID for the {_typeNames[typeof(T)]}", 0, StoreManagerApplication.MaxId<T>());
+            bool idExists = false;
+            long id;
+
+            do {
+                id = CUI.PromptRange($"Please enter the ID for the {_typeNames[typeof(T)]}", 0, StoreManagerApplication.MaxId<T>());
+
+                if (StoreManagerApplication.IdExists<T>(id))
+                    idExists = true;
+
+            } while (!idExists);
+
+            return id;
         }
 
-        public IData GetData<T>()
+        protected IData GetData<T>()
             where T : SEntity {
-            long id = PromptForId<T>();
-            return StoreManagerApplication.Get<T>(id);
+            // Get the data associated with the id
+            bool success = false;
+            IData result;
+
+            do {
+                // Get the id
+                long id = PromptForId<T>();
+                result = StoreManagerApplication.Get<T>(id);
+
+                if (result is not null) {
+                    success = true;
+                }
+
+            } while (!success);
+
+            return result;
         }
 
-        public IData PromptForCreateOrExist<T>(Func<IData> func) 
+        protected IData PromptForCreateOrExist<T>(Func<IData> func)
             where T : SEntity {
-            IData result = null;
-            bool noItemsCreated = StoreManagerApplication.Any<T>();
+            IData result;
             bool createItem = true;
 
-            if (!noItemsCreated)
+            if (!StoreManagerApplication.Any<T>())
                 createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
 
-            if(noItemsCreated || createItem) {
+            if (createItem) {
                 // create the item
                 result = func();
             } else {
                 // just get the id
                 result = GetData<T>();
             }
+
+            return result;
+        }
+
+        protected void PromptForCreateOrExist<T>(Action action)
+            where T : SEntity {
+            bool createItem = true;
+
+            if (!StoreManagerApplication.Any<T>())
+                createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
+
+            if (createItem) {
+                // create the item
+                action();
+            }
+        }
+
+        protected Dictionary<long, int> GetProductsWithCounts() {
+            Dictionary<long, int> result = new Dictionary<long, int>();
+            bool done = false;
+
+            do {
+                // Add products and the inventory they have
+                // Prompt for the product
+                long productId = PromptForId<Product>();
+                // Get the count
+                int count = CUI.PromptRange("Enter the count of said product", 0, int.MaxValue);
+                result[productId] = count;
+
+            } while (!done);
 
             return result;
         }
@@ -76,22 +130,29 @@ namespace StoreManager.UserInterface.ApplicationInterface
              */
             string firstName = CUI.PromptForInput("Enter the first name", false);
             string lastName = CUI.PromptForInput("Enter the last name", false);
-            string email = CUI.PromptForInput("Enter the email", false);
-            string phoneNumber = CUI.PromptForInput("Enter the phone number", false);
+            string email = CUI.PromptForEmail("Enter the email");
+            string phoneNumber = CUI.PromptForPhoneNumber("Enter the phone number");
+            long addressId = -1;
+            long? defaultStoreLocationId = null;
+            
             if (_allowTangentialPrompts) {
-
-                long addressId = PromptForId<Address>();
+                PromptForCreateOrExist<Address>(() =>
+                {
+                    var temp = CreateAddressData();
+                    addressId = StoreManagerApplication.Create<Address>(temp);
+                });
             } else {
-                long addressId = PromptForId<Address>();
+                addressId = PromptForId<Address>();
             }
-            // how to prompt for a date?
-            // TODO: ConsoleUI.PromptForDate()
-            // TODO: ConsoleUI.PromptForEmail()
-            // TODO: ConsoleUI.PromptForPhoneNumber()
-            long? defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
+
+            DateTime birthDate = CUI.PromptForDateTime("Enter a birth date", CUI.TimeFrame.Past, true);
+            defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
                 ? PromptForId<OperatingLocation>() : null;
 
-            return null;
+            if (addressId == -1)
+                throw new Exception("addressId was -1, which should probably not have happened...");
+
+            return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<long>());
         }
 
         public StoreData CreateStoreData() {
@@ -105,13 +166,52 @@ namespace StoreManager.UserInterface.ApplicationInterface
             List<long> customerIds = new List<long>();
             Dictionary<long, int> inventory = new Dictionary<long, int>();
 
-            if(_allowTangentialPrompts) {
+            StoreData result = null;
+
+            /*
+                OperatingLocationData result = null;
+                long addressId;
+
+                if (_allowTangentialPrompts) {
+                    var tempData = PromptForCreateOrExist<OperatingLocation>(() =>
+                    {
+                        // This is run for a new creating a new item
+                        IData temp = CreateAddressData();
+                        addressId = StoreManagerApplication.Create<Address>(temp);
+                        return new OperatingLocationData(addressId);
+                    });
+                    result = tempData as OperatingLocationData;
+                } else {
+                    // Get the id
+                    result = GetData<OperatingLocation>() as OperatingLocationData;
+                }
+             */
+
+            if (_allowTangentialPrompts) {
 
             } else {
+                bool done = false;
+                do {
+                    // Add operating locations
+                    done = !CUI.PromptForBool("Add an operating location?", "yes", "no");
+                    if (done)
+                        break;
 
+                    // Get the operating location by id
+                    long locationId = PromptForId<OperatingLocation>();
+                    operatingLocationIds.Add(locationId);
+
+                } while (!done);
+
+                done = false;
+
+                // Get the customer Id
+                long customerId = PromptForId<Customer>();
+
+                inventory = GetProductsWithCounts();
             }
 
-            return new StoreData(storeName, operatingLocationIds, customerIds, inventory);
+            return result;
         }
 
         public OrderData CreateOrderData() {
@@ -120,7 +220,32 @@ namespace StoreManager.UserInterface.ApplicationInterface
              *  Operating Location -> CreateOperatingLocationData() | GetOperatingLocationId()
              *  Products Requested -> CreateProductData() | GetProductId()
              */
-            return null;
+
+            long customerId = -1;
+            long operatingLocationId = -1;
+            Dictionary<long, int> productsRequested = null;
+
+            if (_allowTangentialPrompts) {
+
+                // Get the customer id
+
+                // Get the operating location of the store
+                // Start with the store?
+
+                // Get the products the user wants
+            } else {
+
+                // Get the customer id
+                customerId = PromptForId<Customer>();
+                // Get the operating location of the store
+                // Start with the store?
+                operatingLocationId = PromptForId<OperatingLocation>();
+
+                // Get the products the user wants
+                productsRequested = GetProductsWithCounts();
+            }
+
+            return new OrderData(customerId, operatingLocationId, productsRequested);
         }
 
         public AddressData CreateAddressData() {
@@ -153,32 +278,11 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 var tempData = PromptForCreateOrExist<OperatingLocation>(() =>
                 {
                     // This is run for a new creating a new item
-                    IData temp = null;
-
-
-
-                    return temp;
+                    IData temp = CreateAddressData();
+                    addressId = StoreManagerApplication.Create<Address>(temp);
+                    return new OperatingLocationData(addressId);
                 });
                 result = tempData as OperatingLocationData;
-
-                // TODO: Extrapolate this into a separate method that's generic
-                bool noOperatingLocationsCreated = StoreManagerApplication.Any<OperatingLocation>();
-                bool createNew = true;
-
-                if (!noOperatingLocationsCreated)
-                    createNew = CUI.PromptForBool("Create a new or use an existing Operating Location?", "yes", "no");
-
-                if(noOperatingLocationsCreated || createNew) {
-                    // Create a new one
-                    
-
-                    var data = CreateAddressData();
-                    addressId = StoreManagerApplication.Create<Address>(data);
-                    result = new OperatingLocationData(addressId);
-                } else {
-                    // Get the id
-                    result = GetData<OperatingLocation>() as OperatingLocationData;
-                }
             } else {
                 // Get the id
                 result = GetData<OperatingLocation>() as OperatingLocationData;
@@ -195,7 +299,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
              */
             string name = CUI.PromptForInput("Enter the product name", false);
             decimal price = CUI.PromptRange("Enter the product price", 0.01M, decimal.MaxValue);
-            decimal? discount = CUI.PromptForBool("Place a discount on this product?", "yes", "no") 
+            decimal? discount = CUI.PromptForBool("Place a discount on this product?", "yes", "no")
                 ? CUI.PromptRange("Enter the discount percentage", 0, 100) : null;
             return new ProductData(name, price, discount);
         }
