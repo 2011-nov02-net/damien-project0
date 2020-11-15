@@ -191,6 +191,10 @@ CREATE TABLE [Stores].[CustomerOrder] (
 GO
 
 ALTER TABLE [Stores].[CustomerOrder]
+    ADD PRIMARY KEY (CustomerId, OrderId)
+GO
+
+ALTER TABLE [Stores].[CustomerOrder]
     ADD CONSTRAINT FK_CustomerOrder_CustomerId FOREIGN KEY (CustomerId)
         REFERENCES [Stores].[Customer] (CustomerId)
 GO
@@ -211,6 +215,10 @@ CREATE TABLE [Stores].[StoreInventory] (
 GO
 
 ALTER TABLE [Stores].[StoreInventory]
+    ADD PRIMARY KEY (StoreId, ProductId)
+GO
+
+ALTER TABLE [Stores].[StoreInventory]
     ADD CONSTRAINT FK_StoreInventory_StoreId FOREIGN KEY (StoreId)
         REFERENCES [Stores].[Store] (StoreId)
 GO
@@ -228,6 +236,10 @@ CREATE TABLE [Stores].[OrderProduct] (
     [ProductId]                     INT             NOT NULL,
     [Count]                         INT             NOT NULL
 );
+GO
+
+ALTER TABLE [Stores].[OrderProduct]
+    ADD PRIMARY KEY (OrderId, ProductId)
 GO
 
 ALTER TABLE [Stores].[OrderProduct]

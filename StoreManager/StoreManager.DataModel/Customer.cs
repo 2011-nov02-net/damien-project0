@@ -9,6 +9,7 @@ namespace StoreManager.DataModel
     {
         public Customer()
         {
+            CustomerOrders = new HashSet<CustomerOrder>();
             Orders = new HashSet<Order>();
         }
 
@@ -23,6 +24,7 @@ namespace StoreManager.DataModel
 
         public virtual Address Address { get; set; }
         public virtual OperatingLocation OperatingLocation { get; set; }
+        public virtual ICollection<CustomerOrder> CustomerOrders { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
     }
 }
