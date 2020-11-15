@@ -25,8 +25,6 @@ namespace ConsoleUI
         {
             // In the past
             Past,
-            // Now?
-            Current,
             // In the future
             Future,
             // Doesn't matter
@@ -236,8 +234,6 @@ namespace ConsoleUI
                     string userInput = ConsoleUI.PromptForInput("Enter the date", false);
                     if (!DateTime.TryParse(userInput, out result)) {
                         ++tries;
-                    } else {
-                        return result;
                     }
                 } else {
                     // Year
@@ -259,8 +255,34 @@ namespace ConsoleUI
                     // Hour
                     int hours = ConsoleUI.PromptRange("Enter the number of hours: ", 0, 23);
 
-                    return new DateTime(year, month, day, hours, minutes, seconds);
+                    result = new DateTime(year, month, day, hours, minutes, seconds);
                 }
+
+                var now = DateTime.Now;
+
+                switch (timeFrame) {
+
+                    case TimeFrame.Past:
+                        // Time should be less than now
+                        if (result <= now)
+                            return result;
+                        else {
+                            Console.WriteLine($"Time passed in is invalid; it is after the current time (now: {now}, got: {result}).");
+                            break;
+                        }
+
+                    case TimeFrame.Future:
+                        if (result >= now)
+                            return result;
+                        else {
+                            Console.WriteLine($"Time passed in is invalid; it is before the current time (now: {now}, got: {result}).");
+                            break;
+                        }
+
+                    case TimeFrame.None:
+                        return result;
+                }
+
             } while (tries != s_retryCount);
 
             throw new MaximumRetriesMetException();
@@ -276,7 +298,7 @@ namespace ConsoleUI
                 // Use Regex magic to match
                 var regexString = @"^[a-zA-Z]+[a-zA-Z0-9]+@[a-zA-Z]+[a-zA-Z0-9]+\.([a-zA-Z]+[a-zA-Z0-9]+){0,253}";
                 var match = Regex.Match(userInput, regexString);
-                if(match.Success) {
+                if (match.Success) {
                     return userInput;
                 } else {
                     ++tries;
@@ -295,7 +317,7 @@ namespace ConsoleUI
                 string userInput = PromptForInput("Enter the phone number", false);
                 var regexString = @"^(\+[0-9]{0,3})?[ -]?[0-9]{3}[ -]?[0-9]{3}[ -]?[0-9]{4}";
                 var match = Regex.Match(userInput, regexString);
-                if(match.Success) {
+                if (match.Success) {
                     return userInput;
                 } else {
                     ++tries;
