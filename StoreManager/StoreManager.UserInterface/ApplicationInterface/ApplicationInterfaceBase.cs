@@ -69,7 +69,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
-        protected IData PromptForCreateOrExist<T>(Func<IData> func)
+        protected IData PromptForCreateOrExist<T>(Func<IData> idataCreationFunction)
             where T : SEntity {
             IData result;
             bool createItem = true;
@@ -79,7 +79,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
             if (createItem) {
                 // create the item
-                result = func();
+                result = idataCreationFunction();
             } else {
                 // just get the id
                 result = GetData<T>();
@@ -88,7 +88,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
-        protected void PromptForCreateOrExist<T>(Action action)
+        protected void PromptForCreateOrExist<T>(Action creationAction)
             where T : SEntity {
             bool createItem = true;
 
@@ -97,7 +97,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
             if (createItem) {
                 // create the item
-                action();
+                creationAction();
             }
         }
 
@@ -118,7 +118,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
-        public CustomerData CreateCustomerData() {
+        protected CustomerData CreateCustomerData() {
             /* Data required:
              *  First name
              *  Last name
@@ -134,7 +134,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             string phoneNumber = CUI.PromptForPhoneNumber("Enter the phone number");
             long addressId = -1;
             long? defaultStoreLocationId = null;
-            
+
             if (_allowTangentialPrompts) {
                 PromptForCreateOrExist<Address>(() =>
                 {
@@ -155,7 +155,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<long>());
         }
 
-        public StoreData CreateStoreData() {
+        protected StoreData CreateStoreData() {
             /* Data required:
              *  Name
              *  Operating Locations -> CreateOperatingLocationData() | GetOperatingLocationId()
@@ -168,53 +168,46 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
             StoreData result = null;
 
-            /*
-                OperatingLocationData result = null;
-                long addressId;
-
-                if (_allowTangentialPrompts) {
-                    var tempData = PromptForCreateOrExist<OperatingLocation>(() =>
-                    {
-                        // This is run for a new creating a new item
-                        IData temp = CreateAddressData();
-                        addressId = StoreManagerApplication.Create<Address>(temp);
-                        return new OperatingLocationData(addressId);
-                    });
-                    result = tempData as OperatingLocationData;
-                } else {
-                    // Get the id
-                    result = GetData<OperatingLocation>() as OperatingLocationData;
-                }
-             */
-
             if (_allowTangentialPrompts) {
+
+                // Operating locations
+
+                // customers
+                
+                // products
 
             } else {
                 bool done = false;
+
                 do {
                     // Add operating locations
-                    done = !CUI.PromptForBool("Add an operating location?", "yes", "no");
-                    if (done)
-                        break;
-
                     // Get the operating location by id
                     long locationId = PromptForId<OperatingLocation>();
-                    operatingLocationIds.Add(locationId);
+                    if (locationId == -1)
+                        done = true;
+                    else operatingLocationIds.Add(locationId);
 
                 } while (!done);
 
                 done = false;
 
-                // Get the customer Id
-                long customerId = PromptForId<Customer>();
+                do {
+                    // Get the customer Id
+                    long customerId = PromptForId<Customer>();
+                    if (customerId == -1)
+                        done = true;
+                    else customerIds.Add(customerId);
 
+                } while (!done);
                 inventory = GetProductsWithCounts();
+
+                result = new StoreData(storeName, operatingLocationIds, customerIds, inventory);
             }
 
             return result;
         }
 
-        public OrderData CreateOrderData() {
+        protected OrderData CreateOrderData() {
             /* Data required:
              *  Customer -> CreateCustomerData() | GetCustomerId()
              *  Operating Location -> CreateOperatingLocationData() | GetOperatingLocationId()
@@ -228,9 +221,19 @@ namespace StoreManager.UserInterface.ApplicationInterface
             if (_allowTangentialPrompts) {
 
                 // Get the customer id
+                PromptForCreateOrExist<Customer>(() =>
+                {
+                    // Create a new Customer
+                    customerId = -1;
+                });
 
                 // Get the operating location of the store
                 // Start with the store?
+                PromptForCreateOrExist<OperatingLocation>(() =>
+                {
+                    // Create an OparatingLocation
+                    operatingLocationId = -1;
+                });
 
                 // Get the products the user wants
             } else {
@@ -248,15 +251,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return new OrderData(customerId, operatingLocationId, productsRequested);
         }
 
-        public AddressData CreateAddressData() {
-            /* Data required:
-             *  Address Line 1
-             *  Address Line 2?
-             *  City
-             *  State?
-             *  Country
-             *  Zip Code
-             */
+        protected AddressData CreateAddressData() {
             string addressLine1 = CUI.PromptForInput("Enter address line 1", false);
             string addressLine2 = CUI.PromptForInput("Enter address line 2", false);
             string city = CUI.PromptForInput("Enter the city", false);
@@ -267,10 +262,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return new AddressData(addressLine1, addressLine2, city, state, country, zipCode);
         }
 
-        public OperatingLocationData CreateOperatingLocationData() {
-            /* Data required:
-             *  Address -> CreateAddressData() | GetAddressId()
-             */
+        protected OperatingLocationData CreateOperatingLocationData() {
             OperatingLocationData result = null;
             long addressId;
 
@@ -291,12 +283,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
-        public ProductData CreateProductData() {
-            /* Data required:
-             *  Name
-             *  Price
-             *  Discount?
-             */
+        protected ProductData CreateProductData() {
             string name = CUI.PromptForInput("Enter the product name", false);
             decimal price = CUI.PromptRange("Enter the product price", 0.01M, decimal.MaxValue);
             decimal? discount = CUI.PromptForBool("Place a discount on this product?", "yes", "no")
