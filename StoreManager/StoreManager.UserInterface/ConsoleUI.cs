@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ConsoleUI
 {
@@ -17,6 +18,18 @@ namespace ConsoleUI
             Angles,
             Braces,
             Pipes,
+            None
+        }
+
+        public enum TimeFrame
+        {
+            // In the past
+            Past,
+            // Now?
+            Current,
+            // In the future
+            Future,
+            // Doesn't matter
             None
         }
 
@@ -61,6 +74,7 @@ namespace ConsoleUI
         }
 
         private static int s_retryCount = 3;
+        private static int[] s_daysInMonth = new[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
         private static string BorderOption(OptionBorderChar optionBorderChar, string option) {
             return optionBorderChar switch
@@ -102,7 +116,7 @@ namespace ConsoleUI
             prompt += BorderOption(border.OptionsBorderChar, $"{final} {border.SeparatingChar} {options[final]}");
 
             // Display the prompts here
-            if(border.BorderWidth > 0) {
+            if (border.BorderWidth > 0) {
                 string borderingString = new string(border.BorderChar, border.BorderWidth);
                 Console.WriteLine(borderingString);
                 Console.WriteLine(prompt);
@@ -197,6 +211,95 @@ namespace ConsoleUI
 
                 ++tries;
 
+            } while (tries != s_retryCount);
+
+            throw new MaximumRetriesMetException();
+        }
+
+        /// <summary>
+        /// Prompts the user for a datetime, and parses it
+        /// </summary>
+        /// <param name="prompt">The prompt to show the user</param>
+        /// <param name="timeFrame">The timeframe context that is targeted</param>
+        /// <param name="oneLine">Determines if the prompts for the different points are in one line or split up</param>
+        /// <returns>A datetime that the user passes in, if successfully parsed</returns>
+        /// <remarks>
+        /// Based upon the number of retries, the method could throw a MaximumRetriesMetException
+        /// </remarks>
+        public static DateTime PromptForDateTime(string prompt, TimeFrame timeFrame, bool oneLine) {
+            int tries = 0;
+
+            do {
+                DateTime result;
+                Console.Write($"{prompt}: ");
+                if (oneLine) {
+                    string userInput = ConsoleUI.PromptForInput("Enter the date", false);
+                    if (!DateTime.TryParse(userInput, out result)) {
+                        ++tries;
+                    } else {
+                        return result;
+                    }
+                } else {
+                    // Year
+                    int year = ConsoleUI.PromptRange("Enter the year", 0, int.MaxValue);
+                    // Month
+                    int month = ConsoleUI.PromptRange("Enter the month", 1, 12) - 1;
+                    // Day
+                    // Now for some clever trickery based upon what they last entered
+                    bool leapYear = year % 4 == 0;
+                    int numberOfDaysInMonth = s_daysInMonth[month];
+                    if (month == 1 && leapYear)
+                        ++numberOfDaysInMonth;
+                    int day = ConsoleUI.PromptRange("Enter the day: ", 1, numberOfDaysInMonth);
+
+                    // Seconds
+                    int seconds = ConsoleUI.PromptRange("Enter the number of seconds: ", 0, 59);
+                    // Minutes
+                    int minutes = ConsoleUI.PromptRange("Enter the number of minutes: ", 0, 59);
+                    // Hour
+                    int hours = ConsoleUI.PromptRange("Enter the number of hours: ", 0, 23);
+
+                    return new DateTime(year, month, day, hours, minutes, seconds);
+                }
+            } while (tries != s_retryCount);
+
+            throw new MaximumRetriesMetException();
+        }
+
+        public static string PromptForEmail(string prompt) {
+            int tries = 0;
+
+            do {
+                Console.Write($"{prompt}: ");
+                // domain name length: 253 characters
+                string userInput = PromptForInput("Enter the email", false);
+                // Use Regex magic to match
+                var regexString = @"^[a-zA-Z]+[a-zA-Z0-9]+@[a-zA-Z]+[a-zA-Z0-9]+\.([a-zA-Z]+[a-zA-Z0-9]+){0,253}";
+                var match = Regex.Match(userInput, regexString);
+                if(match.Success) {
+                    return userInput;
+                } else {
+                    ++tries;
+                }
+
+            } while (tries != s_retryCount);
+
+            throw new MaximumRetriesMetException();
+        }
+
+        public static string PromptForPhoneNumber(string prompt) {
+            int tries = 0;
+
+            do {
+                Console.Write($"{prompt}: ");
+                string userInput = PromptForInput("Enter the phone number", false);
+                var regexString = @"^(\+[0-9]{0,3})?[ -]?[0-9]{3}[ -]?[0-9]{3}[ -]?[0-9]{4}";
+                var match = Regex.Match(userInput, regexString);
+                if(match.Success) {
+                    return userInput;
+                } else {
+                    ++tries;
+                }
             } while (tries != s_retryCount);
 
             throw new MaximumRetriesMetException();
