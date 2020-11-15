@@ -21,12 +21,19 @@ namespace StoreManager.Library
             s_storeManager ??= new StoreManagerApplication(storage, configurationOptions, saveFrequency);
         }
 
-        public static bool Any<T>() {
+        public static bool Any<T>()
+            where T : SEntity {
             return s_storeManager.AnyEntity<T>();
         }
 
-        public static long MaxId<T>() {
+        public static long MaxId<T>()
+            where T : SEntity {
             return s_storeManager.MaxEntityId<T>() + 1;
+        }
+
+        public static bool IdExists<T>(long id)
+            where T : SEntity {
+            return s_storeManager.EntityIdExists<T>(id);
         }
 
         public static long Create<T>(IData data)
@@ -78,17 +85,24 @@ namespace StoreManager.Library
             Task.Run(() => Save());
         }
 
-        private bool AnyEntity<T>() {
-            return _factoryManager.Any(typeof(T));
+        private bool AnyEntity<T>()
+            where T : SEntity {
+            return _factoryManager.Any<T>();
         }
 
-        private long MaxEntityId<T>() {
-            return _factoryManager.MaxId(typeof(T));
+        private long MaxEntityId<T>()
+            where T : SEntity {
+            return _factoryManager.MaxId<T>();
+        }
+
+        private bool EntityIdExists<T>(long id)
+            where T : SEntity {
+            return _factoryManager.IdExists<T>(id);
         }
 
         private long CreateEntity<T>(IData data)
             where T : SEntity {
-            long itemId = _factoryManager.Create(typeof(T), data);
+            long itemId = _factoryManager.Create<T>(data);
 
             if (_saveFrequency == SaveFrequency.Always) {
                 Task.Run(() => Save());
@@ -99,13 +113,13 @@ namespace StoreManager.Library
 
         private IData GetEntity<T>(long id)
             where T : SEntity {
-            var item = _factoryManager.Get(typeof(T), id) as T;
+            var item = _factoryManager.Get<T>(id);
             return item.GetData();
         }
 
         private void UpdateEntity<T>(long id, IData data)
             where T : SEntity {
-            _factoryManager.Update(typeof(T), id, data);
+            _factoryManager.Update<T>(id, data);
 
             if (_saveFrequency == SaveFrequency.Always) {
                 Task.Run(() => Save());
@@ -114,7 +128,7 @@ namespace StoreManager.Library
 
         private void DeleteEntity<T>(long id)
             where T : SEntity {
-            _factoryManager.Delete(typeof(T), id);
+            _factoryManager.Delete<T>(id);
 
             if(_saveFrequency == SaveFrequency.Always) {
                 Task.Run(() => Save());
