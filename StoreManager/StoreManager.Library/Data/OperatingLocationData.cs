@@ -4,6 +4,8 @@
     {
         public long AddressId { get; set; }
 
+        public OperatingLocationData() { }
+
         public OperatingLocationData(long addressId) {
             AddressId = addressId;
         }

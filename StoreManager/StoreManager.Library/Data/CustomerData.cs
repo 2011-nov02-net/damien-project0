@@ -13,10 +13,12 @@ namespace StoreManager.Library.Data
         public string PhoneNumber { get; set; }
         public long AddressId { get; set; }
         public DateTime BirthDate { get; set; }
-        public long DefaultStoreLocationId { get; set; }
+        public long? DefaultStoreLocationId { get; set; }
         public List<long> OrderIds { get; set; }
 
-        public CustomerData(string firstName, string lastName, string email, string phoneNumber, long address, DateTime birthDate, long defaultStoreLocationId, List<long> orderIds) {
+        public CustomerData() { }
+
+        public CustomerData(string firstName, string lastName, string email, string phoneNumber, long address, DateTime birthDate, long? defaultStoreLocationId, List<long> orderIds) {
             FirstName = firstName;
             LastName = lastName;
             Email = email;

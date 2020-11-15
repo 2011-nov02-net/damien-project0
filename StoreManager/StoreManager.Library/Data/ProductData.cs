@@ -6,6 +6,8 @@
         public decimal Price { get; set; }
         public decimal? Discount { get; set; }
 
+        public ProductData() { }
+
         public ProductData(string name, decimal price, decimal? discount) {
             Name = name;
             Price = price;

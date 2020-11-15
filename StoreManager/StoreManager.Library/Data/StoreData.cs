@@ -10,6 +10,8 @@ namespace StoreManager.Library.Data
         public List<long> OrderIds { get; set; }
         public Dictionary<long, int> Inventory { get; set; }
 
+        public StoreData() { }
+
         public StoreData(string name, List<long> operatingLocations, List<long> customers, Dictionary<long, int> inventory) {
             Name = name;
             OperatingLocationIds = operatingLocations;

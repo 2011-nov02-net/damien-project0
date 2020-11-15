@@ -9,6 +9,8 @@
         public string Country { get; set; }
         public string ZipCode { get; set; }
 
+        public AddressData() { }
+
         public AddressData(string addressLine1, string addressLine2, string city, string state, string country, string zipCode) {
             AddressLine1 = addressLine1;
             AddressLine2 = addressLine2;
