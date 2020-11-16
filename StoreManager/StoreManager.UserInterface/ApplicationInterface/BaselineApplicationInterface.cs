@@ -44,8 +44,11 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         private void SearchCustomersByName() {
             // get the name they wish to search for
+            string userInput = CUI.PromptForInput("Enter the name in the format of 'first, last'", false);
             // get a list of the results
+            var customerIds = StoreManagerApplication.GetCustomerIdsByName(userInput);
             // display the results
+            customerIds.ForEach(cid => DisplayCustomer(cid, true));
         }
 
         private void DisplayOrderDetails() {

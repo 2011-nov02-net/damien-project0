@@ -63,12 +63,20 @@ namespace StoreManager.Library
             return (s_storeManager.GetEntity<T>(id) as NamedData).Name;
         }
 
-        public static List<CustomerData> GetCustomersByName(string name) {
-            return s_storeManager.GetByName<Customer>(name).ConvertAll(nd => nd as CustomerData);
+        public static List<long> GetCustomerIdsByName(string name) {
+            return s_storeManager.GetByName<Customer>(name).ConvertAll(c => c.Id);
         }
 
-        public static List<StoreData> GetStoresByName(string name) {
-            return s_storeManager.GetByName<Store>(name).ConvertAll(nd => nd as StoreData);
+        public static List<long> GetStoreIdsByName(string name) {
+            return s_storeManager.GetByName<Store>(name).ConvertAll(s => s.Id);
+        }
+
+        public static List<CustomerData> GetCustomerDataByName(string name) {
+            return s_storeManager.GetByName<Customer>(name).ConvertAll(c => c.Data);
+        }
+
+        public static List<StoreData> GetStoreDataByName(string name) {
+            return s_storeManager.GetByName<Store>(name).ConvertAll(s => s.Data);
         }
 
         public static void Update<T>(long id, IData data)
@@ -149,9 +157,9 @@ namespace StoreManager.Library
             return item.GetData();
         }
 
-        private List<NamedData> GetByName<T>(string name)
+        private List<T> GetByName<T>(string name)
             where T : NamedSEntity {
-            return _factoryManager.GetByName<T>(name).ConvertAll(item => item as NamedData);
+            return _factoryManager.GetByName<T>(name);
         }
 
         private void UpdateEntity<T>(long id, IData data)
