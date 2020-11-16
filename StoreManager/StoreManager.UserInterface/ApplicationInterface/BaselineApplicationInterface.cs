@@ -52,60 +52,50 @@ namespace StoreManager.UserInterface.ApplicationInterface
             // get the order id 
             // display its data
             long orderId = PromptForId<Order>();
-            var data = StoreManagerApplication.Get<Order>(orderId) as OrderData;
-            var customer = StoreManagerApplication.Get<Customer>(data.CustomerId) as CustomerData;
-            var operatingLocation = StoreManagerApplication.Get<OperatingLocation>(data.OperatingLocationId) as OperatingLocationData;
-            var address = StoreManagerApplication.Get<Address>(operatingLocation.AddressId) as AddressData;
-            var store = StoreManagerApplication.Get<Store>(operatingLocation.StoreId) as StoreData;
-            var productsRequested = data.ProductsRequested.Select(kv => {
-                var product = StoreManagerApplication.Get<Product>(kv.Key) as ProductData;
-                string discount = product.Discount.HasValue ? $" ({product.Discount.Value}% off, making it {product.Price * (100 - product.Discount) / 100})" : "";
-                return $"{product.Name} - ${product.Price * kv.Value} (x{kv.Value}) {discount}";
-            });
-            //string product = string.Join("\n", )
-            string message = $"Order Details for Order#{orderId} from {store.Name}:\n  Customer: {customer.LastName}, {customer.FirstName}\n  Operating Location: {address}\n  Products Requested:\n    {string.Join("\n    ", productsRequested)}";
-            Console.WriteLine(message);
+            // Display the order
+            DisplayOrder(orderId);
         }
 
         private void DisplayStoreOrderHistory() {
-            // get the store location they're looking for
+            // Get all of the stores
             var stores = StoreManagerApplication.GetAll<Store>()
                 .Select(data => data as StoreData);
+            // Get their names
             var storeNames = stores.Select(sd => sd.Name).ToArray();
+            // See which one the user wishes to see
             int selectedOption = CUI.PromptForMenuSelection(storeNames, false);
+            // Get the store they wish to see
             var selectedStore = stores.ElementAt(selectedOption);
-
-            var orders = StoreManagerApplication.GetSome<Order>(selectedStore.OrderIds);
-
             // display all of the orders 
+            selectedStore.OrderIds.ForEach(o => DisplayOrder(o));
         }
 
         private void DisplayCustomerOrderHistory() {
             // get the customer they're looking for
-
+            long customerId = PromptForId<Customer>();
             // get the orders of the customer they're looking for
-
+            var customerOrders = (StoreManagerApplication.Get<Customer>(customerId) as CustomerData).OrderIds;
             // display all of the order details
+            customerOrders.ForEach(co => DisplayOrder(co, true));
         }
 
         public override void Run() {
-
             int selectedOption;
             // Set up the console options here
             var borderSettings = new CUI.ConsoleFormattingOptions.Border();
             var consoleOptions = new CUI.ConsoleFormattingOptions(borderSettings, false);
 
-            do {
-
+            UntilItIsDone(() => {
                 selectedOption = CUI.PromptForMenuSelection(_actions.Keys.ToArray(), true, consoleOptions);
                 if (selectedOption == -1)
-                    break;
+                    return true;
 
                 var action = _actions.Values.ElementAt(selectedOption);
                 action();
                 Console.WriteLine();
 
-            } while (selectedOption != -1);
+                return selectedOption == -1;
+            });
         }
     }
 }

@@ -58,6 +58,11 @@ namespace StoreManager.Library
             return s_storeManager.GetEntity<T>(id);
         }
 
+        public static string GetName<T>(long id)
+            where T : NamedSEntity {
+            return (s_storeManager.GetEntity<T>(id) as NamedData).Name;
+        }
+
         public static List<CustomerData> GetCustomersByName(string name) {
             return s_storeManager.GetByName<Customer>(name).ConvertAll(nd => nd as CustomerData);
         }

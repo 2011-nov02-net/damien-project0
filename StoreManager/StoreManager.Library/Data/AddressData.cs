@@ -1,4 +1,6 @@
-﻿namespace StoreManager.Library.Data
+﻿using System.Text;
+
+namespace StoreManager.Library.Data
 {
     public class AddressData : IData
     {
@@ -24,5 +26,6 @@
             this(data.AddressLine1, data.AddressLine2, data.City, data.State, data.Country, data.ZipCode) {
         }
 
+        public override string ToString() => $"{AddressLine1}, {AddressLine2}, {City},{(State is not null ? $" {State}" : "")}, {Country} {ZipCode}";
     }
 }
