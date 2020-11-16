@@ -5,11 +5,10 @@ namespace StoreManager.Library.Entity
     public sealed class Address : SEntity
     {
         private AddressData _data;
-
-        public AddressData Data
+        internal AddressData Data
         {
-            get => new AddressData(_data);
-            internal set => _data = value;
+            get => _data;
+            set => _data = value;
         }
 
         internal Address(IdGenerator idGenerator, AddressData data) :
@@ -17,6 +16,6 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
-        internal override IData GetData() => Data;
+        internal override IData GetData() => new AddressData(_data);
     }
 }

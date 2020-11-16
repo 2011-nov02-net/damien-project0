@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using StoreManager.Library.Entity;
-
 namespace StoreManager.Library.Data
 {
-    public class CustomerData : IData
+    public class CustomerData : NamedData
     {
+        public override string Name 
+        { 
+            get => $"{FirstName}, {LastName}";
+            set => _ = value;
+        }
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }

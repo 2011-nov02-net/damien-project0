@@ -2,14 +2,13 @@
 
 namespace StoreManager.Library.Entity
 {
-    public sealed class Customer : SEntity
+    public sealed class Customer : NamedSEntity
     {
         private CustomerData _data;
-
-        public CustomerData Data
+        internal CustomerData Data
         {
-            get => new CustomerData(_data);
-            internal set => _data = value;
+            get => _data;
+            set => _data = value;
         }
 
         internal Customer(IdGenerator idGenerator, CustomerData data) :
@@ -17,6 +16,8 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
-        internal override IData GetData() => Data;
+        internal override IData GetData() => new CustomerData(_data);
+
+        internal override string GetName() => Data.Name;
     }
 }

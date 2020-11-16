@@ -72,9 +72,27 @@ namespace StoreManager.Library
             return _typeFactories[typeof(T)].Create(data);
         }
 
+        public List<T> GetAll<T>()
+            where T : SEntity {
+            return _typeFactories[typeof(T)].Items.ConvertAll(item => item as T);
+        }
+
+        public List<T> GetSome<T>(List<long> ids)
+            where T : SEntity {
+            return _typeFactories[typeof(T)].Items
+                .Where(item => ids.Contains(item.Id))
+                .Select(item => item as T)
+                .ToList();
+        }
+
         public T Get<T>(long id)
             where T : SEntity {
             return _typeFactories[typeof(T)].Get(id) as T;
+        }
+
+        public List<T> GetByName<T>(string name)
+            where T : NamedSEntity {
+            return _typeFactories[typeof(T)].Items.ConvertAll(item => item as T);
         }
 
         public void Update<T>(long id, IData data)

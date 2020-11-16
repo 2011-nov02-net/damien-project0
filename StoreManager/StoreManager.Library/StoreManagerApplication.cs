@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using StoreManager.Library.Data;
@@ -41,9 +43,27 @@ namespace StoreManager.Library
             return s_storeManager.CreateEntity<T>(data);
         }
 
+        public static List<IData> GetAll<T>()
+            where T : SEntity {
+            return s_storeManager.GetAllEntities<T>();
+        }
+
+        public static List<IData> GetSome<T>(List<long> ids)
+            where T : SEntity {
+            return s_storeManager.GetSomeEntities<T>(ids);
+        }
+
         public static IData Get<T>(long id)
             where T : SEntity {
             return s_storeManager.GetEntity<T>(id);
+        }
+
+        public static List<CustomerData> GetCustomersByName(string name) {
+            return s_storeManager.GetByName<Customer>(name).ConvertAll(nd => nd as CustomerData);
+        }
+
+        public static List<StoreData> GetStoresByName(string name) {
+            return s_storeManager.GetByName<Store>(name).ConvertAll(nd => nd as StoreData);
         }
 
         public static void Update<T>(long id, IData data)
@@ -57,7 +77,6 @@ namespace StoreManager.Library
         }
 
         private readonly SaveFrequency _saveFrequency;
-        // TODO: Use this when an exception is thrown or something
 
         /// <summary>
         /// Creates a StoreManager instance
@@ -109,10 +128,25 @@ namespace StoreManager.Library
             return itemId;
         }
 
+        private List<IData> GetAllEntities<T>()
+            where T : SEntity {
+            return _factoryManager.GetAll<T>().Select(t => t.GetData()).ToList();
+        }
+
+        private List<IData> GetSomeEntities<T>(List<long> ids)
+            where T : SEntity {
+            return _factoryManager.GetSome<T>(ids).Select(t => t.GetData()).ToList();
+        }
+
         private IData GetEntity<T>(long id)
             where T : SEntity {
             var item = _factoryManager.Get<T>(id);
             return item.GetData();
+        }
+
+        private List<NamedData> GetByName<T>(string name)
+            where T : NamedSEntity {
+            return _factoryManager.GetByName<T>(name).ConvertAll(item => item as NamedData);
         }
 
         private void UpdateEntity<T>(long id, IData data)
@@ -128,13 +162,14 @@ namespace StoreManager.Library
             where T : SEntity {
             _factoryManager.Delete<T>(id);
 
-            if(_saveFrequency == SaveFrequency.Always) {
+            if (_saveFrequency == SaveFrequency.Always) {
                 Task.Run(() => Save());
             }
         }
 
         private async Task Save() {
-            await _storage.Write(_factoryManager.BundleData);
+            // await _storage.Write(_factoryManager.BundleData);
+            await Task.Run(() => { /* TODO: Decide how to handle storing the data (other than internally, in the lifetime of the program) */ });
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace StoreManager.Library.Data
 {
-    public class ProductData : IData
+    public class ProductData : NamedData
     {
-        public string Name { get; set; }
+        public override string Name { get; set; }
         public decimal Price { get; set; }
         public decimal? Discount { get; set; }
 

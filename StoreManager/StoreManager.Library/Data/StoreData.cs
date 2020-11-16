@@ -2,9 +2,9 @@
 
 namespace StoreManager.Library.Data
 {
-    public class StoreData : IData
+    public class StoreData : NamedData
     {
-        public string Name { get; set; }
+        public override string Name { get; set; }
         public List<long> OperatingLocationIds { get; set; }
         public List<long> CustomerIds { get; set; }
         public List<long> OrderIds { get; set; }

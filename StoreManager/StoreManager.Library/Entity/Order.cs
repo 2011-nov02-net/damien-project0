@@ -5,11 +5,10 @@ namespace StoreManager.Library.Entity
     public sealed class Order : SEntity
     {
         private OrderData _data;
-
-        public OrderData Data
+        internal OrderData Data
         {
             get => _data;
-            internal set => _data = value;
+            set => _data = value;
         }
 
         internal Order(IdGenerator idGenerator, OrderData data) :
@@ -17,6 +16,6 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
-        internal override IData GetData() => new OrderData(Data);
+        internal override IData GetData() => new OrderData(_data);
     }
 }

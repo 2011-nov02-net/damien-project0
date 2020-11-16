@@ -5,10 +5,10 @@ namespace StoreManager.Library.Entity
     public sealed class OperatingLocation : SEntity
     {
         private OperatingLocationData _data;
-        public OperatingLocationData Data
+        internal OperatingLocationData Data
         {
             get => _data;
-            internal set => _data = value;
+            set => _data = value;
         }
 
         public OperatingLocation(IdGenerator idGenerator, OperatingLocationData data) :
@@ -16,6 +16,6 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
-        internal override IData GetData() => new OperatingLocationData(Data);
+        internal override IData GetData() => new OperatingLocationData(_data);
     }
 }

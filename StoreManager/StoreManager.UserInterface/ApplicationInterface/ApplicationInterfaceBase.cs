@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using StoreManager.Library;
 using StoreManager.Library.Data;
@@ -84,6 +82,14 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
+        protected static void UntilItIsDone(Func<bool> task) {
+            bool done;
+
+            do {
+                done = task();
+            } while (!done);
+        }
+
         protected Dictionary<long, int> PromptForProductsWithCounts() {
             Dictionary<long, int> result = new Dictionary<long, int>();
 
@@ -107,6 +113,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
+        #region Creation Methods
+
         protected CustomerData CreateCustomerData() {
             string firstName = CUI.PromptForInput("Enter the first name", false);
             string lastName = CUI.PromptForInput("Enter the last name", false);
@@ -126,14 +134,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 ? PromptForId<OperatingLocation>() : null;
 
             return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<long>());
-        }
-
-        protected static void UntilItIsDone(Func<bool> task) {
-            bool done;
-
-            do {
-                done = task();
-            } while (!done);
         }
 
         protected StoreData CreateStoreData() {
@@ -263,5 +263,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 ? CUI.PromptRange("Enter the discount percentage", 0, 100) : null;
             return new ProductData(name, price, discount);
         }
+
+        #endregion
     }
 }
