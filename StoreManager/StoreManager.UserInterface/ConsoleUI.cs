@@ -72,7 +72,7 @@ namespace ConsoleUI
         }
 
         private static int s_retryCount = 3;
-        private static int[] s_daysInMonth = new[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+        private static readonly int[] s_daysInMonth = new[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
         private static string BorderOption(OptionBorderChar optionBorderChar, string option) {
             return optionBorderChar switch

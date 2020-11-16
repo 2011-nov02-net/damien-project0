@@ -35,16 +35,12 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         protected long PromptForId<T>()
             where T : SEntity {
-            bool idExists = false;
-            long id;
+            long id = -1;
 
-            do {
+            UntilItIsDone(() => {
                 id = CUI.PromptRange($"Please enter the ID for the {_typeNames[typeof(T)]}", 0, StoreManagerApplication.MaxId<T>());
-
-                if (StoreManagerApplication.IdExists<T>(id))
-                    idExists = true;
-
-            } while (!idExists);
+                return StoreManagerApplication.IdExists<T>(id);
+            });
 
             return id;
         }
@@ -52,201 +48,177 @@ namespace StoreManager.UserInterface.ApplicationInterface
         protected IData GetData<T>()
             where T : SEntity {
             // Get the data associated with the id
-            bool success = false;
-            IData result;
+            IData result = null;
 
-            do {
+            UntilItIsDone(() => {
                 // Get the id
                 long id = PromptForId<T>();
                 result = StoreManagerApplication.Get<T>(id);
 
-                if (result is not null) {
-                    success = true;
+                return result is not null;
+            });
+
+            return result;
+        }
+
+        protected long PromptForCreateOrExist<T>(Func<long> creationFunction, Func<long> existingFunction)
+            where T : SEntity {
+            long result;
+            bool createItem = true;
+
+            if (_allowTangentialPrompts) {
+                if (!StoreManagerApplication.Any<T>())
+                    createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
+
+                if (createItem) {
+                    // create the item
+                    result = creationFunction();
+                } else {
+                    // just get the id
+                    result = existingFunction();
                 }
-
-            } while (!success);
-
-            return result;
-        }
-
-        protected IData PromptForCreateOrExist<T>(Func<IData> idataCreationFunction)
-            where T : SEntity {
-            IData result;
-            bool createItem = true;
-
-            if (!StoreManagerApplication.Any<T>())
-                createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
-
-            if (createItem) {
-                // create the item
-                result = idataCreationFunction();
             } else {
-                // just get the id
-                result = GetData<T>();
+                result = existingFunction();
             }
 
             return result;
         }
 
-        protected void PromptForCreateOrExist<T>(Action creationAction)
-            where T : SEntity {
-            bool createItem = true;
-
-            if (!StoreManagerApplication.Any<T>())
-                createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
-
-            if (createItem) {
-                // create the item
-                creationAction();
-            }
-        }
-
-        protected Dictionary<long, int> GetProductsWithCounts() {
+        protected Dictionary<long, int> PromptForProductsWithCounts() {
             Dictionary<long, int> result = new Dictionary<long, int>();
-            bool done = false;
 
-            do {
+            UntilItIsDone(() => {
                 // Add products and the inventory they have
-                // Prompt for the product
-                long productId = PromptForId<Product>();
+                long productId = PromptForCreateOrExist<Product>(
+                    () => {
+                        var data = CreateProductData();
+                        return StoreManagerApplication.Create<Product>(data);
+                    },
+                    () => PromptForId<Product>()
+                );
+
                 // Get the count
                 int count = CUI.PromptRange("Enter the count of said product", 0, int.MaxValue);
                 result[productId] = count;
 
-            } while (!done);
+                return !CUI.PromptForBool("Add another product?", "yes", "no");
+            });
 
             return result;
         }
 
         protected CustomerData CreateCustomerData() {
-            /* Data required:
-             *  First name
-             *  Last name
-             *  Email
-             *  Phone number
-             *  Address -> CreateAddressData() | GetAddressId()
-             *  Birth Date
-             *  default store location?
-             */
             string firstName = CUI.PromptForInput("Enter the first name", false);
             string lastName = CUI.PromptForInput("Enter the last name", false);
             string email = CUI.PromptForEmail("Enter the email");
             string phoneNumber = CUI.PromptForPhoneNumber("Enter the phone number");
-            long addressId = -1;
-            long? defaultStoreLocationId = null;
 
-            if (_allowTangentialPrompts) {
-                PromptForCreateOrExist<Address>(() =>
-                {
-                    var temp = CreateAddressData();
-                    addressId = StoreManagerApplication.Create<Address>(temp);
-                });
-            } else {
-                addressId = PromptForId<Address>();
-            }
+            long addressId = PromptForCreateOrExist<Address>(
+                            () => {
+                                var temp = CreateAddressData();
+                                return StoreManagerApplication.Create<Address>(temp);
+                            },
+                            () => PromptForId<Address>()
+                        );
 
             DateTime birthDate = CUI.PromptForDateTime("Enter a birth date", CUI.TimeFrame.Past, true);
-            defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
+            long? defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
                 ? PromptForId<OperatingLocation>() : null;
-
-            if (addressId == -1)
-                throw new Exception("addressId was -1, which should probably not have happened...");
 
             return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<long>());
         }
 
+        protected static void UntilItIsDone(Func<bool> task) {
+            bool done;
+
+            do {
+                done = task();
+            } while (!done);
+        }
+
         protected StoreData CreateStoreData() {
-            /* Data required:
-             *  Name
-             *  Operating Locations -> CreateOperatingLocationData() | GetOperatingLocationId()
-             *  Inventory -> CreateProductData() | GetProductId()
-             */
             string storeName = CUI.PromptForInput("Enter the store name", false);
             List<long> operatingLocationIds = new List<long>();
             List<long> customerIds = new List<long>();
-            Dictionary<long, int> inventory = new Dictionary<long, int>();
+            Dictionary<long, int> inventory;
 
-            StoreData result = null;
+            long locationId;
+            long customerId;
 
-            if (_allowTangentialPrompts) {
+            UntilItIsDone(() => {
+                // Add operating locations
+                locationId = PromptForCreateOrExist<OperatingLocation>(
+                    () => {
+                        // Create a new operating location
+                        var data = CreateOperatingLocationData();
+                        return StoreManagerApplication.Create<OperatingLocation>(data);
+                    },
+                    // Prompt for an operating location
+                    () => PromptForId<OperatingLocation>()
+                );
 
-                // Operating locations
+                operatingLocationIds.Add(locationId);
 
-                // customers
-                
-                // products
+                return !CUI.PromptForBool("Add another operating location?", "yes", "no");
+            });
 
-            } else {
-                bool done = false;
+            UntilItIsDone(() => {
+                customerId = PromptForCreateOrExist<Customer>(
+                    () => {
+                        var data = CreateCustomerData();
+                        return StoreManagerApplication.Create<Customer>(data);
+                    },
+                    () => PromptForId<Customer>()
+                );
 
-                do {
-                    // Add operating locations
-                    // Get the operating location by id
-                    long locationId = PromptForId<OperatingLocation>();
-                    if (locationId == -1)
-                        done = true;
-                    else operatingLocationIds.Add(locationId);
+                customerIds.Add(customerId);
 
-                } while (!done);
+                return !CUI.PromptForBool("Add another customer?", "yes", "no");
+            });
 
-                done = false;
+            inventory = PromptForProductsWithCounts();
 
-                do {
-                    // Get the customer Id
-                    long customerId = PromptForId<Customer>();
-                    if (customerId == -1)
-                        done = true;
-                    else customerIds.Add(customerId);
-
-                } while (!done);
-                inventory = GetProductsWithCounts();
-
-                result = new StoreData(storeName, operatingLocationIds, customerIds, inventory);
-            }
-
-            return result;
+            return new StoreData(storeName, operatingLocationIds, customerIds, inventory);
         }
 
         protected OrderData CreateOrderData() {
-            /* Data required:
-             *  Customer -> CreateCustomerData() | GetCustomerId()
-             *  Operating Location -> CreateOperatingLocationData() | GetOperatingLocationId()
-             *  Products Requested -> CreateProductData() | GetProductId()
-             */
-
             long customerId = -1;
             long operatingLocationId = -1;
             Dictionary<long, int> productsRequested = null;
 
-            if (_allowTangentialPrompts) {
-
+            // Get the customer id
+            customerId = PromptForCreateOrExist<Customer>(
+                () => {
+                    // Create a new customer
+                    var data = CreateCustomerData();
+                    return StoreManagerApplication.Create<Customer>(data);
+                },
                 // Get the customer id
-                PromptForCreateOrExist<Customer>(() =>
-                {
-                    // Create a new Customer
-                    customerId = -1;
-                });
+                () => PromptForId<Customer>()
+            );
 
-                // Get the operating location of the store
-                // Start with the store?
-                PromptForCreateOrExist<OperatingLocation>(() =>
-                {
-                    // Create an OparatingLocation
-                    operatingLocationId = -1;
-                });
+            // Get the store that owns the location
+            long storeId = PromptForCreateOrExist<Store>(
+                () => {
+                    var data = CreateStoreData();
+                    return StoreManagerApplication.Create<Store>(data);
+                },
+                () => PromptForId<Store>()
+            );
 
-                // Get the products the user wants
-            } else {
+            var store = StoreManagerApplication.Get<Store>(storeId) as StoreData;
+            // Prompt for a store, then look through the locations it has
+            var options = store.OperatingLocationIds.Select(id => {
+                var data = StoreManagerApplication.Get<OperatingLocation>(id) as OperatingLocationData;
+                var address = StoreManagerApplication.Get<Address>(data.AddressId) as AddressData;
+                return $"{store.Name} - {address}";
+            }).ToArray();
+            // Show the available locations that can be chosen from
+            int selectedOption = CUI.PromptForMenuSelection(options, false);
+            operatingLocationId = store.OperatingLocationIds[selectedOption];
 
-                // Get the customer id
-                customerId = PromptForId<Customer>();
-                // Get the operating location of the store
-                // Start with the store?
-                operatingLocationId = PromptForId<OperatingLocation>();
-
-                // Get the products the user wants
-                productsRequested = GetProductsWithCounts();
-            }
+            // Get the products the user wants
+            productsRequested = PromptForProductsWithCounts();
 
             return new OrderData(customerId, operatingLocationId, productsRequested);
         }
@@ -263,24 +235,25 @@ namespace StoreManager.UserInterface.ApplicationInterface
         }
 
         protected OperatingLocationData CreateOperatingLocationData() {
-            OperatingLocationData result = null;
-            long addressId;
+            // Get the store that owns this location
+            long storeId = PromptForCreateOrExist<Store>(
+                () => {
+                    var data = CreateStoreData();
+                    return StoreManagerApplication.Create<Store>(data);
+                },
+                () => PromptForId<Store>()
+            );
 
-            if (_allowTangentialPrompts) {
-                var tempData = PromptForCreateOrExist<OperatingLocation>(() =>
-                {
-                    // This is run for a new creating a new item
-                    IData temp = CreateAddressData();
-                    addressId = StoreManagerApplication.Create<Address>(temp);
-                    return new OperatingLocationData(addressId);
-                });
-                result = tempData as OperatingLocationData;
-            } else {
-                // Get the id
-                result = GetData<OperatingLocation>() as OperatingLocationData;
-            }
+            // Get the address of this location
+            long addressId = PromptForCreateOrExist<Address>(
+                () => {
+                    var data = CreateAddressData();
+                    return StoreManagerApplication.Create<Address>(data);
+                },
+                () => PromptForId<Address>()
+            );
 
-            return result;
+            return new OperatingLocationData(storeId, addressId);
         }
 
         protected ProductData CreateProductData() {

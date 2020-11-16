@@ -62,8 +62,6 @@ namespace StoreManager.Library
         /// <summary>
         /// Creates a StoreManager instance
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <param name="storage">The storage medium in which the application stores its data</param>
         private StoreManagerApplication(IStorageRepository<DataBundle> storage, IConfigurationOptions configurationOptions, SaveFrequency saveFrequency) {
             _storage = storage ?? new DatabaseStorageRepository();
