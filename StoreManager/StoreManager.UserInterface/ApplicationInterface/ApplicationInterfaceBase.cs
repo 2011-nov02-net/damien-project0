@@ -127,12 +127,12 @@ namespace StoreManager.UserInterface.ApplicationInterface
             string phoneNumber = CUI.PromptForPhoneNumber("Enter the phone number");
 
             int addressId = PromptForCreateOrExist<Address>(
-                            () => {
-                                var temp = CreateAddressData();
-                                return StoreManagerApplication.Create<Address>(temp);
-                            },
-                            () => PromptForId<Address>()
-                        );
+                () => {
+                    var temp = CreateAddressData();
+                    return StoreManagerApplication.Create<Address>(temp);
+                },
+                () => PromptForId<Address>()
+            );
 
             DateTime birthDate = CUI.PromptForDateTime("Enter a birth date", CUI.TimeFrame.Past, true);
             int? defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
@@ -280,9 +280,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
             //   DefaultStoreLocationId -> OperatingLocation&store (if exists)
             if (data.DefaultStoreLocationId.HasValue)
                 DisplayOperatingLocation(data.DefaultStoreLocationId.Value);
-            // ? OrderIds -> Get distinct stores the user has purchased from?
-            // TODO: Decide if orders are shown in with customer data
-            // Probably not, because it isn't directly *about* the customer
         }
 
         public void DisplayStore(int id, bool newLine = false, int tabIndents = 0) {

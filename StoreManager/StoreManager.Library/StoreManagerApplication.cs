@@ -123,12 +123,10 @@ namespace StoreManager.Library
         /// <param name="storage">The storage medium in which the application stores its data</param>
         private StoreManagerApplication(IStorageRepository storage, IConfigurationOptions configurationOptions) {
             _storage = storage ?? new DatabaseStorageRepository();
-            // TODO: Decide how the connection string is passed in/set
-            _storage.Configure(configurationOptions ?? new DatabaseConfigurationOptions(""));
+            _storage.Configure(configurationOptions);
 
             try {
                 var dataBundle = _storage?.ReadAsync()?.Result;
-                // TODO: Check if this is allowed, or if it will give a NullReferenceException
                 _factoryManager = new FactoryManager(dataBundle);
             } catch (Exception) {
                 // TODO: Log the error to disk
@@ -236,7 +234,7 @@ namespace StoreManager.Library
 
         private async Task Save() {
             // await _storage.Write(_factoryManager.BundleData);
-            await Task.Run(() => { /* TODO: Decide how to handle storing the data (other than internally, in the lifetime of the program) */ });
+            await Task.Run(() => {  });
         }
 
         #endregion

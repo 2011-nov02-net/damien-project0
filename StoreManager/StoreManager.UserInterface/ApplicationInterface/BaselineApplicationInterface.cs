@@ -18,7 +18,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
         private readonly Dictionary<string, Action> _actions;
 
         public BaselineApplicationInterface(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) :
-            base(storage, configurationOptions){
+            base(storage, configurationOptions) {
+
             _actions = new Dictionary<string, Action>
             {
                 { "Place an Order to a store location", PlaceOrderToStoreLocation },
@@ -86,11 +87,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
         public override void Run() {
             int selectedOption;
             // Set up the console options here
-            var borderSettings = new CUI.ConsoleFormattingOptions.Border();
-            var consoleOptions = new CUI.ConsoleFormattingOptions(borderSettings, false);
-
             UntilItIsDone(() => {
-                selectedOption = CUI.PromptForMenuSelection(_actions.Keys.ToArray(), true, consoleOptions);
+                selectedOption = CUI.PromptForMenuSelection(_actions.Keys.ToArray(), true);
                 if (selectedOption == -1)
                     return true;
 

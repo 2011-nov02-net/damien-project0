@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Text.Json;
 
 using StoreManager.Library;
 using StoreManager.Library.Data;
+using StoreManager.Library.Database;
 using StoreManager.UserInterface.ApplicationInterface;
 using StoreManager.UserInterface.StorageRepository;
 
@@ -14,9 +17,13 @@ namespace StoreManager.UserInterface
         static void Main(string[] _) {
             ApplicationInterfaceBase applicationInterface;
 
+            string filepath = @"C:/Users/Khypr/Desktop/store_manager_configuration.json";
+            string json = File.ReadAllText(filepath);
+            string connString = JsonSerializer.Deserialize<string>(json);
             // var options = new[] { "db", "xml", "json" };
             // int selectedOption = CUI.PromptForMenuSelection(options, true);
             IStorageRepository storageRepository = null;
+            IConfigurationOptions configurationOptions = new DatabaseConfigurationOptions(connString);
 
             // if(selectedOption == -1) {
             //     Console.WriteLine("Exiting...");
@@ -36,12 +43,12 @@ namespace StoreManager.UserInterface
             //     }
             // } // else if database was chosen, leave storageRepository as null
 
-            bool verbose = CUI.PromptForBool("Do you wish to run the application verbosely?", "yes", "no");
+            bool verbose = false; // CUI.PromptForBool("Do you wish to run the application verbosely?", "yes", "no");
 
             if(verbose) {
-                applicationInterface = new VerboseApplicationInterface(storageRepository);
+                applicationInterface = new VerboseApplicationInterface(storageRepository, configurationOptions);
             } else {
-                applicationInterface = new BaselineApplicationInterface(storageRepository);
+                applicationInterface = new BaselineApplicationInterface(storageRepository, configurationOptions);
             }
 
             applicationInterface.Run();

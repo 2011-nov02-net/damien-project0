@@ -104,14 +104,21 @@ namespace ConsoleUI
             ConsoleFormattingOptions consoleOptions = consoleFormattingOptions ?? new ConsoleFormattingOptions();
             ConsoleFormattingOptions.Border border = consoleOptions.BorderSettings;
 
-            string withQuitOption = withQuit ? $"-1 = Quit,{(consoleOptions.SingleLine ? " " : "\n")}" : "";
-            string prompt = $"{withQuitOption}";
+            string quitString = $"Quit";
+            List<string> optionsList = new List<string>(options);
+            
+            if (withQuit)
+                optionsList.Insert(0, quitString);
+
+            int maxWidth = optionsList.Max(str => str.Length) + 4;
+            string prompt = "";
             string newLine = consoleOptions.SingleLine ? "" : "\n";
-            for (int i = 0; i < options.Length - 1; i++) {
-                prompt += BorderOption(border.OptionsBorderChar, $"{i} {border.SeparatingChar} {options[i]}{newLine}");
+            for (int i = 0; i < optionsList.Count - 1; i++) {
+                int currentLength = optionsList[i].Length;
+                prompt += BorderOption(border.OptionsBorderChar, $"{i - 1} {border.SeparatingChar} {optionsList[i]}".PadRight(maxWidth, ' ')) + newLine;
             }
-            int final = options.Length - 1;
-            prompt += BorderOption(border.OptionsBorderChar, $"{final} {border.SeparatingChar} {options[final]}");
+            int final = optionsList.Count - 1 + (withQuit ? -1 : 0);
+            prompt += BorderOption(border.OptionsBorderChar, $"{final} {border.SeparatingChar} {optionsList[final]}".PadRight(maxWidth, ' '));
 
             // Display the prompts here
             if (border.BorderWidth > 0) {
@@ -292,11 +299,10 @@ namespace ConsoleUI
             int tries = 0;
 
             do {
-                Console.Write($"{prompt}: ");
                 // domain name length: 253 characters
                 string userInput = PromptForInput("Enter the email", false);
                 // Use Regex magic to match
-                var regexString = @"^[a-zA-Z]+[a-zA-Z0-9]+@[a-zA-Z]+[a-zA-Z0-9]+\.([a-zA-Z]+[a-zA-Z0-9]+){0,253}";
+                var regexString = @"^[a-zA-Z]+[a-zA-Z0-9]*\.[a-zA-Z0-9]+\@[a-zA-Z]+[a-zA-Z0-9]+\.([a-zA-Z]+[a-zA-Z0-9]+){0,253}";
                 var match = Regex.Match(userInput, regexString);
                 if (match.Success) {
                     return userInput;
