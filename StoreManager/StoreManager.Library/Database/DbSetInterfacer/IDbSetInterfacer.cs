@@ -11,6 +11,8 @@ namespace StoreManager.Library.Database.DbSetInterfacer
     internal interface IDbSetInterfacer<T>
         where T : SEntity
     {
+        Task<bool> Any();
+
         // Create
         Task CreateSomeAsync(List<T> items);
         Task CreateOneAsync(T item);

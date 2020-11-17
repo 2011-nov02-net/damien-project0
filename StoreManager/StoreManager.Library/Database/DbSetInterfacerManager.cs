@@ -27,13 +27,18 @@ namespace StoreManager.Library.Database
                 { typeof(Order), new CustomerDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
             };
         }
-        
-        internal async Task CreateSomeAsync<T>(List<SEntity> items)
+
+        internal async Task<bool> AnyAsync<T>()
+            where T : SEntity {
+            return await _interfacers[typeof(T)].Any();
+        }
+
+        internal async Task CreateManyAsync<T>(List<SEntity> items)
             where T : SEntity {
             await _interfacers[typeof(T)].CreateSomeAsync(items);
         }
 
-        internal async Task CreateAsync<T>(SEntity entity)
+        internal async Task CreateOneAsync<T>(SEntity entity)
             where T : SEntity {
             await _interfacers[typeof(T)].CreateOneAsync(entity);
         }
@@ -58,7 +63,7 @@ namespace StoreManager.Library.Database
             await _interfacers[typeof(T)].UpdateAllAsync(entities);
         }
 
-        internal async Task UpdateSomeAsync<T>(List<SEntity> entities)
+        internal async Task UpdateManyAsync<T>(List<SEntity> entities)
             where T : SEntity {
             await _interfacers[typeof(T)].UpdateSomeAsync(entities);
         }

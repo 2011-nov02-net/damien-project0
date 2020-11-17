@@ -28,7 +28,7 @@ namespace StoreManager.Library
 
         internal static List<T> GetSome<T>(List<int> ids)
             where T : SEntity {
-            return s_storeManager.GetSomeEntities<T>(ids);
+            return s_storeManager.GetManyEntities<T>(ids);
         }
 
         internal static T Get<T>(int id)
@@ -67,7 +67,7 @@ namespace StoreManager.Library
 
         public static List<IData> GetSomeData<T>(List<int> ids)
             where T : SEntity {
-            return s_storeManager.GetSomeEntityData<T>(ids);
+            return s_storeManager.GetManyEntityData<T>(ids);
         }
 
         public static IData GetData<T>(int id)
@@ -142,7 +142,9 @@ namespace StoreManager.Library
         private void UpdateEntities<T>()
             where T : SEntity {
             List<T> items = _storage.GetAllAsync<T>().Result;
-            items.ForEach(item => _factoryManager.Update<T>(item.Id, item.GetData()));
+            if (items.Any()) {
+                items.ForEach(item => _factoryManager.Update<T>(item.Id, item.GetData()));
+            }                
         }
 
         private bool AnyEntity<T>()
@@ -174,38 +176,58 @@ namespace StoreManager.Library
         private List<IData> GetAllEntityData<T>()
             where T : SEntity {
             var entities = GetAllEntities<T>();
+
+            if (!entities.Any())
+                return new List<IData>();
+
             return entities.ConvertAll(e => e.GetData());
         }
 
-        private List<IData> GetSomeEntityData<T>(List<int> ids)
+        private List<IData> GetManyEntityData<T>(List<int> ids)
             where T : SEntity {
-            var entities = GetSomeEntities<T>(ids);
+            var entities = GetManyEntities<T>(ids);
+
+            if (!entities.Any())
+                return new List<IData>();
+
             return entities.ConvertAll(e => e.GetData());
         }
 
         private IData GetEntityData<T>(int id)
             where T : SEntity {
             var item = GetEntity<T>(id);
-            return item.GetData();
+            return item?.GetData();
         }
 
         private List<T> GetAllEntities<T>()
             where T : SEntity {
             var entities = _storage.GetAllAsync<T>().Result;
+
+            if (!entities.Any())
+                return entities;
+
             entities.ForEach(e => _factoryManager.Update<T>(e.Id, e.GetData()));
             return _factoryManager.GetAll<T>();
         }
 
-        private List<T> GetSomeEntities<T>(List<int> ids)
+        private List<T> GetManyEntities<T>(List<int> ids)
             where T : SEntity {
-            var entities = _storage.GetSomeAsync<T>(ids).Result;
+            var entities = _storage.GetManyAsync<T>(ids).Result;
+
+            if (!entities.Any())
+                return entities;
+
             entities.ForEach(e => _factoryManager.Update<T>(e.Id, e.GetData()));
             return _factoryManager.GetSome<T>(ids);
         }
 
         private T GetEntity<T>(int id)
             where T : SEntity {
-            var entity = _storage.GetOneAsync<T>(id).Result;
+            var entity = _storage.GetOneAsync<T>(id)?.Result;
+            
+            if (entity is null)
+                return entity;
+
             _factoryManager.Update<T>(id, entity.GetData());
             return _factoryManager.Get<T>(id);
         }
@@ -213,6 +235,10 @@ namespace StoreManager.Library
         private List<T> GetByName<T>(string name)
             where T : NamedSEntity {
             var entities = _storage.GetAllAsync<T>().Result;
+
+            if (!entities.Any())
+                return entities;
+
             entities.ForEach(e => _factoryManager.Update<T>(e.Id, e.GetData()));
             return _factoryManager.GetByName<T>(name);
         }
@@ -233,8 +259,7 @@ namespace StoreManager.Library
         }
 
         private async Task Save() {
-            // await _storage.Write(_factoryManager.BundleData);
-            await Task.Run(() => {  });
+            await _storage.WriteAsync(_factoryManager.BundleData);
         }
 
         #endregion

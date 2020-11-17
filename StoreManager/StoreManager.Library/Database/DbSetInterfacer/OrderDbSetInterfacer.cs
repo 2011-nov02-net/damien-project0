@@ -66,6 +66,11 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             _contextOptions = contextOptions;
         }
 
+        public async Task<bool> Any() {
+            using var context = new StoreManagerContext(_contextOptions);
+            return await context.Orders.AnyAsync();
+        }
+
         public async Task CreateSomeAsync(List<Order> items) {
             await Task.Run(() => items.ForEach(o => CreateOneAsync(o).Wait()));
         }

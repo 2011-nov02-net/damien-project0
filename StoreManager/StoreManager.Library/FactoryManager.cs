@@ -62,11 +62,19 @@ namespace StoreManager.Library
 
         public int MaxId<T>()
             where T : SEntity {
+            
+            if (!Any<T>())
+                return -1;
+
             return _typeFactories[typeof(T)].Items.Max(i => i.Id);
         }
 
         public bool IdExists<T>(int id)
             where T : SEntity {
+
+            if (!Any<T>())
+                return false;
+
             return _typeFactories[typeof(T)].Items.FirstOrDefault(i => i.Id == id) is not null;
         }
 

@@ -66,6 +66,11 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             _contextOptions = contextOptions;
         }
 
+        public async Task<bool> Any() {
+            using var context = new StoreManagerContext(_contextOptions);
+            return await context.Stores.AnyAsync();
+        }
+
         public async Task CreateSomeAsync(List<Store> items) {
             await Task.Run(() => items.ForEach(s => CreateOneAsync(s).Wait()));
         }
@@ -85,6 +90,10 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         public async Task<List<Store>> GetAllAsync() {
             using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                // If there are none
+                return await Task.Run(() => new List<Store>());
+
             // Make sure to include the other items
             var stores = context.Stores
                 .Include(s => s.OperatingLocations)
@@ -99,6 +108,10 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         public async Task<Store> GetOneAsync(int id) {
             using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                // If there are none
+                return null;
+
             // Make sure to include the other items
             _ = context.Stores
                 .Include(s => s.OperatingLocations)
@@ -110,6 +123,10 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         public async Task UpdateAllAsync(List<Store> items) {
             using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                // If there are none
+                return;
+
             // Make sure to include the other items
             var stores = context.Stores
                 .Include(s => s.OperatingLocations)
@@ -124,6 +141,10 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         public async Task UpdateOneAsync(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                // If there are none
+                return;
+
             // Make sure to include the other items
             _ = context.Stores
                 .Include(s => s.OperatingLocations)
@@ -137,6 +158,10 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         public async Task DeleteAllAsync() {
             using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                // If there are none
+                return;
+
             var items = context.Stores;
             await Task.Run(() => items.ForEachAsync(id => DeleteOneAsync(ToStore(id)).Wait()));
         }
@@ -147,6 +172,10 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         public async Task DeleteOneAsync(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                // If there are none
+                return;
+
             // Make sure to include the other items
             _ = context.Stores
                 .Include(s => s.OperatingLocations)

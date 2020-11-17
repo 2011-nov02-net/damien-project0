@@ -12,7 +12,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
 {
     public abstract class ApplicationInterfaceBase
     {
-        protected readonly bool _allowTangentialPrompts;
         protected readonly Dictionary<Type, string> _typeNames;
 
         public abstract void Run();
@@ -20,7 +19,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
         public ApplicationInterfaceBase(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) {
             StoreManagerApplication.Initialize(storage, configurationOptions);
             // Prompt to see if the user wishes to have rabbit-hole prompts
-            _allowTangentialPrompts = CUI.PromptForBool("Allow the prompts to detour from the original prompt?", "yes", "no");
             _typeNames = new Dictionary<Type, string>
             {
                 { typeof(Customer), "customer" },
@@ -65,20 +63,17 @@ namespace StoreManager.UserInterface.ApplicationInterface
         protected int PromptForCreateOrExist<T>(Func<int> creationFunction, Func<int> existingFunction)
             where T : SEntity {
             int result;
+            bool itemExists = StoreManagerApplication.Any<T>();
             bool createItem = true;
 
-            if (_allowTangentialPrompts) {
-                if (!StoreManagerApplication.Any<T>())
-                    createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
+            if (itemExists)
+                createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
 
-                if (createItem) {
-                    // create the item
-                    result = creationFunction();
-                } else {
-                    // just get the id
-                    result = existingFunction();
-                }
+            if (createItem) {
+                // create the item
+                result = creationFunction();
             } else {
+                // just get the id
                 result = existingFunction();
             }
 

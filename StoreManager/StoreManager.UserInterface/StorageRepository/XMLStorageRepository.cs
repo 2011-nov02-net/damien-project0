@@ -39,7 +39,7 @@ namespace StoreManager.UserInterface.StorageRepository
             throw new NotImplementedException();
         }
 
-        public Task CreateSomeAsync<T>(List<SEntity> entities) where T : SEntity {
+        public Task CreateManyAsync<T>(List<SEntity> entities) where T : SEntity {
             throw new NotImplementedException();
         }
 
@@ -51,7 +51,7 @@ namespace StoreManager.UserInterface.StorageRepository
             throw new NotImplementedException();
         }
 
-        public Task<List<T>> GetSomeAsync<T>(List<int> ids) where T : SEntity {
+        public Task<List<T>> GetManyAsync<T>(List<int> ids) where T : SEntity {
             throw new NotImplementedException();
         }
 
@@ -63,7 +63,7 @@ namespace StoreManager.UserInterface.StorageRepository
             throw new NotImplementedException();
         }
 
-        public Task UpdateSomeAsync<T>(List<SEntity> items) where T : SEntity {
+        public Task UpdateManyAsync<T>(List<SEntity> items) where T : SEntity {
             throw new NotImplementedException();
         }
 
@@ -75,7 +75,7 @@ namespace StoreManager.UserInterface.StorageRepository
             throw new NotImplementedException();
         }
 
-        public Task DeleteSomeAsync<T>(List<SEntity> entities) where T : SEntity {
+        public Task DeleteManyAsync<T>(List<SEntity> entities) where T : SEntity {
             throw new NotImplementedException();
         }
 
