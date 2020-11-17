@@ -5,27 +5,111 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DbOrder = StoreManager.DataModel.Order;
+using DbOrderProduct = StoreManager.DataModel.OrderProduct;
+using StoreManagerContext = StoreManager.DataModel.StoreManagerContext;
 
 using StoreManager.Library.Entity;
+using StoreManager.Library.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace StoreManager.Library.Database.DbSetTranslator
 {
     internal class OrderDbSetInterfacer : IDbSetInterfacer<Order>
     {
-        public async Task Create(Order item) {
-            throw new NotImplementedException();
+        internal static DbOrder ToDbOrder(Order order) {
+            var data = order.Data;
+            // Get the customer
+            var customer = CustomerDbSetInterfacer.ToDbCustomer(
+                StoreManagerApplication.Get<Customer>(data.CustomerId)
+            );
+            // Get the Operating Location
+            var operatingLocations = OperatingLocationDbSetInterfacer.ToDbOperatingLocation(
+                    StoreManagerApplication.Get<OperatingLocation>(data.OperatingLocationId)
+            );
+            // Get the Products Requested
+            var productsRequested = data.ProductsRequested.Select(
+                pr => ToDbOrderProduct(pr)
+            ).ToList();
+            return new DbOrder
+            {
+                OrderId = order.Id,
+                Customer = customer,
+                OperatingLocation = null,
+                OrderProducts = productsRequested
+            };
         }
 
-        public async Task Delete(Order item) {
-            throw new NotImplementedException();
+        internal static Order ToOrder(DbOrder dbOrder) {
+            var data = new OrderData(dbOrder.CustomerId, dbOrder.OperatingLocationId,
+                dbOrder.OrderProducts.ToDictionary(
+                    op => op.ProductId,
+                    op => op.Count
+                )
+            );
+            return new Order(dbOrder.OrderId, data);
+        }
+
+        internal static DbOrderProduct ToDbOrderProduct(KeyValuePair<int, int> pair) {
+            var product = ProductDbSetInterfacer.ToDbProduct(
+                StoreManagerApplication.Get<Product>(pair.Key)
+            );
+            return new DbOrderProduct
+            {
+                Product = product,
+                Count = pair.Value
+            };
+        }
+
+        private readonly DbContextOptions<StoreManagerContext> _contextOptions;
+
+        public OrderDbSetInterfacer(DbContextOptions<StoreManagerContext> contextOptions) {
+            _contextOptions = contextOptions;
+        }
+
+        public async Task Create(Order order) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Orders
+                .Include(o => o.OrderProducts);
+            // Convert the data for the DbContext to use
+            var item = ToDbOrder(order);
+            context.Orders.Add(item);
+            // Save the changes
+            await Task.Run(() => context.SaveChanges());
         }
 
         public async Task<Order> Get(int id) {
-            throw new NotImplementedException();
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Orders
+                .Include(o => o.OrderProducts);
+            // Convert the data for the Library to use
+            var item = context.Orders.Find(id);
+            return await Task.Run(() => ToOrder(item));
         }
 
-        public async Task Update(Order item) {
-            throw new NotImplementedException();
+        public async Task Update(Order order) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Orders
+                .Include(o => o.OrderProducts);
+            // Convert the data for the DbContext to use
+            var item = ToDbOrder(order);
+            context.Orders.Update(item);
+            // Save the changes
+            await Task.Run(() => context.SaveChanges());
+        }
+
+        public async Task Delete(Order order) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Orders
+                .Include(o => o.OrderProducts);
+            // Convert the data for the DbContext to use
+            var item = ToDbOrder(order);
+            context.Orders.Remove(item);
+            // Save the changes
+            await Task.Run(() => context.SaveChanges());
         }
     }
 }

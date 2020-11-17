@@ -11,7 +11,7 @@ namespace StoreManager.Library.Database.DbSetTranslator
 {
     internal class CustomerDbSetInterfacer : IDbSetInterfacer<Customer>
     {
-        private static DbCustomer ToDbCustomer(Customer customer) {
+        internal static DbCustomer ToDbCustomer(Customer customer) {
             var data = customer.Data;
             return new DbCustomer
             {
@@ -26,7 +26,7 @@ namespace StoreManager.Library.Database.DbSetTranslator
             };
         }
 
-        private static Customer ToCustomer(DbCustomer dbCustomer) {
+        internal static Customer ToCustomer(DbCustomer dbCustomer) {
             var data = new CustomerData(dbCustomer.FirstName, dbCustomer.LastName, dbCustomer.Email, dbCustomer.PhoneNumber, dbCustomer.AddressId, dbCustomer.BirthDate, dbCustomer.OperatingLocationId);
             return new Customer(dbCustomer.CustomerId, data);
         }

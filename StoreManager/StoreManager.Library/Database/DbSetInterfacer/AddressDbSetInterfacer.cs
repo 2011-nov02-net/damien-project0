@@ -11,7 +11,7 @@ namespace StoreManager.Library.Database.DbSetTranslator
 {
     internal class AddressDbSetInterfacer : IDbSetInterfacer<Address>
     {
-        private static DbAddress ToDbAddress(Address address) {
+        internal static DbAddress ToDbAddress(Address address) {
             var data = address.Data;
             return new DbAddress
             {
@@ -25,7 +25,7 @@ namespace StoreManager.Library.Database.DbSetTranslator
             };
         }
 
-        private static Address ToAddress(DbAddress dbAddress) {
+        internal static Address ToAddress(DbAddress dbAddress) {
             var data = new AddressData(dbAddress.AddressLine1, dbAddress.AddressLine2,
                 dbAddress.City, dbAddress.State, dbAddress.Country, dbAddress.ZipCode);
             return new Address(dbAddress.AddressId, data);

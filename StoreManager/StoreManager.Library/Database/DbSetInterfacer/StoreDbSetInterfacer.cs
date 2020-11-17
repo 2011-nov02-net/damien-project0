@@ -68,6 +68,10 @@ namespace StoreManager.Library.Database.DbSetTranslator
 
         public async Task Create(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Stores
+                .Include(s => s.OperatingLocations)
+                .Include(s => s.StoreInventories);
             // Convert the data for the DbContext to use
             var item = ToDbStore(store);
             context.Stores.Add(item);
@@ -77,6 +81,10 @@ namespace StoreManager.Library.Database.DbSetTranslator
 
         public async Task<Store> Get(int id) {
             using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Stores
+                .Include(s => s.OperatingLocations)
+                .Include(s => s.StoreInventories);
             // Convert the data for the Library to use
             var item = context.Stores.Find(id);
             return await Task.Run(() => ToStore(item));
@@ -84,6 +92,10 @@ namespace StoreManager.Library.Database.DbSetTranslator
 
         public async Task Update(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Stores
+                .Include(s => s.OperatingLocations)
+                .Include(s => s.StoreInventories);
             // Convert the data for the DbContext to use
             var item = ToDbStore(store);
             context.Stores.Update(item);
@@ -93,6 +105,10 @@ namespace StoreManager.Library.Database.DbSetTranslator
 
         public async Task Delete(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            _ = context.Stores
+                .Include(s => s.OperatingLocations)
+                .Include(s => s.StoreInventories);
             // Convert the data for the DbContext to use
             var item = ToDbStore(store);
             context.Stores.Remove(item);
