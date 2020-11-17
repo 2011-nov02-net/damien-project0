@@ -62,7 +62,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         private void DisplayStoreOrderHistory() {
             // Get all of the stores
-            var stores = StoreManagerApplication.GetAll<Store>()
+            var stores = StoreManagerApplication.GetAllData<Store>()
                 .Select(data => data as StoreData);
             // Get their names
             var storeNames = stores.Select(sd => sd.Name).ToArray();
@@ -78,7 +78,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             // get the customer they're looking for
             int customerId = PromptForId<Customer>();
             // get the orders of the customer they're looking for
-            var customerOrders = (StoreManagerApplication.Get<Customer>(customerId) as CustomerData).OrderIds;
+            var customerOrders = (StoreManagerApplication.GetData<Customer>(customerId) as CustomerData).OrderIds;
             // display all of the order details
             customerOrders.ForEach(co => DisplayOrder(co, true));
         }

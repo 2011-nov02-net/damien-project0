@@ -9,13 +9,14 @@ namespace StoreManager.DataModel
     {
         public Store()
         {
+            OperatingLocations = new HashSet<OperatingLocation>();
             StoreInventories = new HashSet<StoreInventory>();
         }
 
         public int StoreId { get; set; }
         public string Name { get; set; }
 
-        public virtual StoreOperatingLocation StoreOperatingLocation { get; set; }
+        public virtual ICollection<OperatingLocation> OperatingLocations { get; set; }
         public virtual ICollection<StoreInventory> StoreInventories { get; set; }
     }
 }

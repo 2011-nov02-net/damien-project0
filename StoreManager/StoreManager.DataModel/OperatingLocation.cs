@@ -11,15 +11,15 @@ namespace StoreManager.DataModel
         {
             Customers = new HashSet<Customer>();
             Orders = new HashSet<Order>();
-            StoreOperatingLocations = new HashSet<StoreOperatingLocation>();
         }
 
         public int OperatingLocationId { get; set; }
+        public int StoreId { get; set; }
         public int AddressId { get; set; }
 
         public virtual Address Address { get; set; }
+        public virtual Store Store { get; set; }
         public virtual ICollection<Customer> Customers { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
-        public virtual ICollection<StoreOperatingLocation> StoreOperatingLocations { get; set; }
     }
 }

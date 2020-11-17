@@ -26,7 +26,6 @@ namespace StoreManager.DataModel
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<Store> Stores { get; set; }
         public virtual DbSet<StoreInventory> StoreInventories { get; set; }
-        public virtual DbSet<StoreOperatingLocation> StoreOperatingLocations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,7 +93,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<CustomerOrder>(entity =>
             {
                 entity.HasKey(e => new { e.CustomerId, e.OrderId })
-                    .HasName("PK__Customer__48976164B0404BA4");
+                    .HasName("PK__Customer__48976164AC7F0C3E");
 
                 entity.ToTable("CustomerOrder", "Stores");
 
@@ -115,7 +114,7 @@ namespace StoreManager.DataModel
             {
                 entity.ToTable("OperatingLocation", "Stores");
 
-                entity.HasIndex(e => e.AddressId, "UQ__Operatin__091C2AFA120A3512")
+                entity.HasIndex(e => e.AddressId, "UQ__Operatin__091C2AFA29A70F1F")
                     .IsUnique();
 
                 entity.Property(e => e.OperatingLocationId).ValueGeneratedNever();
@@ -125,6 +124,12 @@ namespace StoreManager.DataModel
                     .HasForeignKey<OperatingLocation>(d => d.AddressId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_OperatingLocation_AddressId");
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.OperatingLocations)
+                    .HasForeignKey(d => d.StoreId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_OperatingLocation_StoreId");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -149,7 +154,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<OrderProduct>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK__OrderPro__08D097A3DD3732B5");
+                    .HasName("PK__OrderPro__08D097A3FC4E497A");
 
                 entity.ToTable("OrderProduct", "Stores");
 
@@ -195,7 +200,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<StoreInventory>(entity =>
             {
                 entity.HasKey(e => new { e.StoreId, e.ProductId })
-                    .HasName("PK__StoreInv__F0C23D6D44ED7A3C");
+                    .HasName("PK__StoreInv__F0C23D6D4677EAC4");
 
                 entity.ToTable("StoreInventory", "Stores");
 
@@ -210,28 +215,6 @@ namespace StoreManager.DataModel
                     .HasForeignKey(d => d.StoreId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_StoreInventory_StoreId");
-            });
-
-            modelBuilder.Entity<StoreOperatingLocation>(entity =>
-            {
-                entity.HasKey(e => e.StoreId)
-                    .HasName("PK__StoreOpe__3B82F1016218B920");
-
-                entity.ToTable("StoreOperatingLocation", "Stores");
-
-                entity.Property(e => e.StoreId).ValueGeneratedNever();
-
-                entity.HasOne(d => d.OperatingLocation)
-                    .WithMany(p => p.StoreOperatingLocations)
-                    .HasForeignKey(d => d.OperatingLocationId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_StoreOperatingLocation_OperatingLocationId");
-
-                entity.HasOne(d => d.Store)
-                    .WithOne(p => p.StoreOperatingLocation)
-                    .HasForeignKey<StoreOperatingLocation>(d => d.StoreId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_StoreOperatingLocation_StoreId");
             });
 
             OnModelCreatingPartial(modelBuilder);

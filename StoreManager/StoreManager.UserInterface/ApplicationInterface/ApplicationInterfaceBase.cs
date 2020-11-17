@@ -54,7 +54,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             UntilItIsDone(() => {
                 // Get the id
                 int id = PromptForId<T>();
-                result = StoreManagerApplication.Get<T>(id);
+                result = StoreManagerApplication.GetData<T>(id);
 
                 return result is not null;
             });
@@ -211,11 +211,11 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 () => PromptForId<Store>()
             );
 
-            var store = StoreManagerApplication.Get<Store>(storeId) as StoreData;
+            var store = StoreManagerApplication.GetData<Store>(storeId) as StoreData;
             // Prompt for a store, then look through the locations it has
             var options = store.OperatingLocationIds.Select(id => {
-                var data = StoreManagerApplication.Get<OperatingLocation>(id) as OperatingLocationData;
-                var address = StoreManagerApplication.Get<Address>(data.AddressId) as AddressData;
+                var data = StoreManagerApplication.GetData<OperatingLocation>(id) as OperatingLocationData;
+                var address = StoreManagerApplication.GetData<Address>(data.AddressId) as AddressData;
                 return $"{store.Name} - {address}";
             }).ToArray();
             // Show the available locations that can be chosen from
@@ -275,8 +275,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         public void DisplayCustomer(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
-            var data = StoreManagerApplication.Get<Customer>(id) as CustomerData;
-            var address = (StoreManagerApplication.Get<Address>(data.AddressId) as AddressData).ToString();
+            var data = StoreManagerApplication.GetData<Customer>(id) as CustomerData;
+            var address = (StoreManagerApplication.GetData<Address>(data.AddressId) as AddressData).ToString();
             var prefix = $"{(newLine ? "\n" : "")}{indentation}";
             var items = new List<string>
             {
@@ -303,7 +303,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
         public void DisplayStore(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
             string prefix = $"{(newLine ? "\n" : "")}{indentation}";
-            var data = StoreManagerApplication.Get<Store>(id) as StoreData;
+            var data = StoreManagerApplication.GetData<Store>(id) as StoreData;
             // Name
             string storeName = data.Name;
             // Operating Locations
@@ -315,10 +315,10 @@ namespace StoreManager.UserInterface.ApplicationInterface
         }
 
         public void DisplayOrder(int orderId, bool newLine = false, int tabIndents = 0) {
-            var data = StoreManagerApplication.Get<Order>(orderId) as OrderData;
+            var data = StoreManagerApplication.GetData<Order>(orderId) as OrderData;
             string customerName = StoreManagerApplication.GetName<Customer>(data.CustomerId);
             // Get the addressId and storeId from the operating location
-            int storeId = (StoreManagerApplication.Get<OperatingLocation>(data.OperatingLocationId) as OperatingLocationData).StoreId;
+            int storeId = (StoreManagerApplication.GetData<OperatingLocation>(data.OperatingLocationId) as OperatingLocationData).StoreId;
             // get the store that owns the operating location
             string storeName = StoreManagerApplication.GetName<Store>(storeId);
 
@@ -335,7 +335,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         public void DisplayAddress(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
-            string address = (StoreManagerApplication.Get<Address>(id) as AddressData).ToString();
+            string address = (StoreManagerApplication.GetData<Address>(id) as AddressData).ToString();
             Console.Write($"{(newLine ? "\n" : "")}{indentation}{address}");
         }
 
@@ -343,7 +343,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             string indentation = new string(' ', tabIndents * 2);
             // Get the store and address id from the operating location's data
             (int storeId, int addressId) = new Func<Tuple<int, int>>(() => {
-                var tempData = StoreManagerApplication.Get<OperatingLocation>(id) as OperatingLocationData;
+                var tempData = StoreManagerApplication.GetData<OperatingLocation>(id) as OperatingLocationData;
                 return new Tuple<int, int>(tempData.StoreId, tempData.AddressId);
             }).Invoke();
             // Get the name of the store
@@ -354,7 +354,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
         }
 
         public void DisplayProduct(int id, int count = 1, bool newLine = false, int tabIndents = 0) {
-            var data = StoreManagerApplication.Get<Product>(id) as ProductData;
+            var data = StoreManagerApplication.GetData<Product>(id) as ProductData;
             string indentation = new string(' ', tabIndents * 2);
             string discount = data.Discount.HasValue ? $" ({data.Discount.Value}% off, making it {data.Price * (100 - data.Discount) / 100})" : "";
             Console.Write($"{(newLine ? "\n" : "")}{indentation}{data.Name} - ${data.Price * count} (x{count}) {discount}");

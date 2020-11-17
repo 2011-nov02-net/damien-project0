@@ -21,6 +21,21 @@ namespace StoreManager.Library
 
         #region Singleton Methods
 
+        internal static List<T> GetAll<T>()
+            where T : SEntity {
+            return s_storeManager.GetAllEntities<T>();
+        }
+
+        internal static List<T> GetSome<T>(List<int> ids)
+            where  T : SEntity {
+            return s_storeManager.GetSomeEntities<T>(ids);
+        }
+
+        internal static T Get<T>(int id)
+            where T : SEntity {
+            return s_storeManager.GetEntity<T>(id);
+        }
+
         public static void Initialize(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) {
             s_storeManager ??= new StoreManagerApplication(storage, configurationOptions, saveFrequency);
         }
@@ -45,24 +60,24 @@ namespace StoreManager.Library
             return s_storeManager.CreateEntity<T>(data);
         }
 
-        public static List<IData> GetAll<T>()
+        public static List<IData> GetAllData<T>()
             where T : SEntity {
-            return s_storeManager.GetAllEntities<T>();
+            return s_storeManager.GetAllEntityData<T>();
         }
 
-        public static List<IData> GetSome<T>(List<int> ids)
+        public static List<IData> GetSomeData<T>(List<int> ids)
             where T : SEntity {
-            return s_storeManager.GetSomeEntities<T>(ids);
+            return s_storeManager.GetSomeEntityData<T>(ids);
         }
 
-        public static IData Get<T>(int id)
+        public static IData GetData<T>(int id)
             where T : SEntity {
-            return s_storeManager.GetEntity<T>(id);
+            return s_storeManager.GetEntityData<T>(id);
         }
 
         public static string GetName<T>(int id)
             where T : NamedSEntity {
-            return (s_storeManager.GetEntity<T>(id) as NamedData).Name;
+            return (s_storeManager.GetEntityData<T>(id) as NamedData).Name;
         }
 
         public static List<int> GetCustomerIdsByName(string name) {
@@ -157,20 +172,35 @@ namespace StoreManager.Library
             return itemId;
         }
 
-        private List<IData> GetAllEntities<T>()
+        private List<IData> GetAllEntityData<T>()
             where T : SEntity {
             return _factoryManager.GetAll<T>().Select(t => t.GetData()).ToList();
         }
 
-        private List<IData> GetSomeEntities<T>(List<int> ids)
+        private List<IData> GetSomeEntityData<T>(List<int> ids)
             where T : SEntity {
             return _factoryManager.GetSome<T>(ids).Select(t => t.GetData()).ToList();
         }
 
-        private IData GetEntity<T>(int id)
+        private IData GetEntityData<T>(int id)
             where T : SEntity {
             var item = _factoryManager.Get<T>(id);
             return item.GetData();
+        }
+
+        private List<T> GetAllEntities<T>()
+            where T : SEntity {
+            return _factoryManager.GetAll<T>();
+        }
+
+        private List<T> GetSomeEntities<T>(List<int> ids) 
+            where T : SEntity {
+            return _factoryManager.GetSome<T>(ids);
+        }
+
+        private T GetEntity<T>(int id)
+            where T : SEntity {
+            return _factoryManager.Get<T>(id);
         }
 
         private List<T> GetByName<T>(string name)

@@ -82,16 +82,16 @@ GO
 DROP TABLE [Stores].[OrderProduct]
 GO
 
-DROP TABLE [Stores].[Address]
+DROP TABLE [Stores].[Order]
+GO
+
+DROP TABLE [Stores].[Customer]
 GO
 
 DROP TABLE [Stores].[OperatingLocation]
 GO
 
-DROP TABLE [Stores].[Order]
-GO
-
-DROP TABLE [Stores].[Customer]
+DROP TABLE [Stores].[Address]
 GO
 
 DROP TABLE [Stores].[Product]
@@ -126,8 +126,14 @@ GO
 -- DROP TABLE [Stores].[OperatingLocation]
 CREATE TABLE [Stores].[OperatingLocation] (
     [OperatingLocationId]           INT             NOT NULL PRIMARY KEY,
+    [StoreId]                       INT             NOT NULL,
     [AddressId]                     INT             NOT NULL UNIQUE
 );
+GO
+
+ALTER TABLE [Stores].[OperatingLocation]
+    ADD CONSTRAINT FK_OperatingLocation_StoreId FOREIGN KEY (StoreId)
+        REFERENCES [Stores].[Store] (StoreId)
 GO
 
 ALTER TABLE [Stores].[OperatingLocation]
@@ -189,25 +195,6 @@ GO
 
 ALTER TABLE [Stores].[Order]
     ADD CONSTRAINT FK_Order_OperatingLocationId FOREIGN KEY (OperatingLocationId)
-        REFERENCES [Stores].[OperatingLocation] (OperatingLocationId)
-GO
-
--------------------------------------------------------------------------------------------------------------------------------------------
-
--- DROP TABLE [Stores].[StoreOperatingLocation]
-CREATE TABLE [Stores].[StoreOperatingLocation] (
-    [StoreId]                       INT             NOT NULL PRIMARY KEY,
-    [OperatingLocationId]           INT             NOT NULL,
-);
-GO
-
-ALTER TABLE [Stores].[StoreOperatingLocation]
-    ADD CONSTRAINT FK_StoreOperatingLocation_StoreId FOREIGN KEY (StoreId)
-        REFERENCES [Stores].[Store] (StoreId)
-GO
-
-ALTER TABLE [Stores].[StoreOperatingLocation]
-    ADD CONSTRAINT FK_StoreOperatingLocation_OperatingLocationId FOREIGN KEY (OperatingLocationId)
         REFERENCES [Stores].[OperatingLocation] (OperatingLocationId)
 GO
 
