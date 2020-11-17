@@ -18,8 +18,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
     {
         private readonly Dictionary<string, Action> _actions;
 
-        public VerboseApplicationInterface(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) {
-            StoreManagerApplication.Initialize(storage, configurationOptions, saveFrequency);
+        public VerboseApplicationInterface(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) {
+            StoreManagerApplication.Initialize(storage, configurationOptions);
             _actions = new Dictionary<string, Action>
             {
             };

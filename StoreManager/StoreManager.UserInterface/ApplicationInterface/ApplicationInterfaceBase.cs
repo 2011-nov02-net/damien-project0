@@ -17,8 +17,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         public abstract void Run();
 
-        public ApplicationInterfaceBase(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) {
-            StoreManagerApplication.Initialize(storage, configurationOptions, saveFrequency);
+        public ApplicationInterfaceBase(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) {
+            StoreManagerApplication.Initialize(storage, configurationOptions);
             // Prompt to see if the user wishes to have rabbit-hole prompts
             _allowTangentialPrompts = CUI.PromptForBool("Allow the prompts to detour from the original prompt?", "yes", "no");
             _typeNames = new Dictionary<Type, string>

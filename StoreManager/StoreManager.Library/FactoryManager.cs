@@ -64,7 +64,7 @@ namespace StoreManager.Library
             where T : SEntity {
             return _typeFactories[typeof(T)].Items.Max(i => i.Id);
         }
-        
+
         public bool IdExists<T>(int id)
             where T : SEntity {
             return _typeFactories[typeof(T)].Items.FirstOrDefault(i => i.Id == id) is not null;
@@ -101,6 +101,11 @@ namespace StoreManager.Library
         public void Update<T>(int id, IData data)
             where T : SEntity {
             _typeFactories[typeof(T)].Update(id, data);
+        }
+
+        public void DeleteAll<T>()
+            where T : SEntity {
+            _typeFactories[typeof(T)].Items.Clear();
         }
 
         public void Delete<T>(int id)

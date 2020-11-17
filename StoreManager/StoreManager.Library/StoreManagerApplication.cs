@@ -27,7 +27,7 @@ namespace StoreManager.Library
         }
 
         internal static List<T> GetSome<T>(List<int> ids)
-            where  T : SEntity {
+            where T : SEntity {
             return s_storeManager.GetSomeEntities<T>(ids);
         }
 
@@ -36,8 +36,8 @@ namespace StoreManager.Library
             return s_storeManager.GetEntity<T>(id);
         }
 
-        public static void Initialize(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) {
-            s_storeManager ??= new StoreManagerApplication(storage, configurationOptions, saveFrequency);
+        public static void Initialize(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) {
+            s_storeManager ??= new StoreManagerApplication(storage, configurationOptions);
         }
 
         public static bool Any<T>()
@@ -96,6 +96,13 @@ namespace StoreManager.Library
             return s_storeManager.GetByName<Store>(name).ConvertAll(s => s.Data);
         }
 
+        public static List<int> GetOrderIdsByCustomerId(int id) {
+            var storeData = s_storeManager.GetAllEntityData<Store>().ConvertAll(ed => ed as StoreData);
+            List<int> orderIds = new List<int>();
+            storeData.ForEach(sd => orderIds.AddRange(sd.OrderIds));
+            return orderIds;
+        }
+
         public static void Update<T>(int id, IData data)
             where T : SEntity {
             s_storeManager.UpdateEntity<T>(id, data);
@@ -108,19 +115,16 @@ namespace StoreManager.Library
 
         #endregion
 
-        private readonly SaveFrequency _saveFrequency;
-
         #region Instance Methods
 
         /// <summary>
         /// Creates a StoreManager instance
         /// </summary>
         /// <param name="storage">The storage medium in which the application stores its data</param>
-        private StoreManagerApplication(IStorageRepository storage, IConfigurationOptions configurationOptions, SaveFrequency saveFrequency) {
+        private StoreManagerApplication(IStorageRepository storage, IConfigurationOptions configurationOptions) {
             _storage = storage ?? new DatabaseStorageRepository();
             // TODO: Decide how the connection string is passed in/set
             _storage.Configure(configurationOptions ?? new DatabaseConfigurationOptions(""));
-            _saveFrequency = saveFrequency;
 
             try {
                 var dataBundle = _storage?.ReadAsync()?.Result;
@@ -164,66 +168,70 @@ namespace StoreManager.Library
         private int CreateEntity<T>(IData data)
             where T : SEntity {
             int itemId = _factoryManager.Create<T>(data);
-
-            if (_saveFrequency == SaveFrequency.Always) {
-                Task.Run(() => Save());
-            }
-
+            var item = _factoryManager.Get<T>(itemId);
+            _storage.CreateOneAsync<T>(item);
             return itemId;
         }
 
         private List<IData> GetAllEntityData<T>()
             where T : SEntity {
-            return _factoryManager.GetAll<T>().Select(t => t.GetData()).ToList();
+            var entities = GetAllEntities<T>();
+            return entities.ConvertAll(e => e.GetData());
         }
 
         private List<IData> GetSomeEntityData<T>(List<int> ids)
             where T : SEntity {
-            return _factoryManager.GetSome<T>(ids).Select(t => t.GetData()).ToList();
+            var entities = GetSomeEntities<T>(ids);
+            return entities.ConvertAll(e => e.GetData());
         }
 
         private IData GetEntityData<T>(int id)
             where T : SEntity {
-            var item = _factoryManager.Get<T>(id);
+            var item = GetEntity<T>(id);
             return item.GetData();
         }
 
         private List<T> GetAllEntities<T>()
             where T : SEntity {
+            var entities = _storage.GetAllAsync<T>().Result;
+            entities.ForEach(e => _factoryManager.Update<T>(e.Id, e.GetData()));
             return _factoryManager.GetAll<T>();
         }
 
-        private List<T> GetSomeEntities<T>(List<int> ids) 
+        private List<T> GetSomeEntities<T>(List<int> ids)
             where T : SEntity {
+            var entities = _storage.GetSomeAsync<T>(ids).Result;
+            entities.ForEach(e => _factoryManager.Update<T>(e.Id, e.GetData()));
             return _factoryManager.GetSome<T>(ids);
         }
 
         private T GetEntity<T>(int id)
             where T : SEntity {
+            var entity = _storage.GetOneAsync<T>(id).Result;
+            _factoryManager.Update<T>(id, entity.GetData());
             return _factoryManager.Get<T>(id);
         }
 
         private List<T> GetByName<T>(string name)
             where T : NamedSEntity {
+            var entities = _storage.GetAllAsync<T>().Result;
+            entities.ForEach(e => _factoryManager.Update<T>(e.Id, e.GetData()));
             return _factoryManager.GetByName<T>(name);
         }
 
         private void UpdateEntity<T>(int id, IData data)
             where T : SEntity {
+            var item = _factoryManager.Get<T>(id);
             _factoryManager.Update<T>(id, data);
-
-            if (_saveFrequency == SaveFrequency.Always) {
-                Task.Run(() => Save());
-            }
+            _storage.UpdateOneAsync<T>(item);
         }
 
         private void DeleteEntity<T>(int id)
             where T : SEntity {
-            _factoryManager.Delete<T>(id);
+            var item = _factoryManager.Get<T>(id);
 
-            if (_saveFrequency == SaveFrequency.Always) {
-                Task.Run(() => Save());
-            }
+            _storage.DeleteOneAsync<T>(item);
+            _factoryManager.Delete<T>(id);
         }
 
         private async Task Save() {
