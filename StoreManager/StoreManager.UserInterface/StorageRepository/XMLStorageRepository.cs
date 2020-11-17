@@ -31,35 +31,59 @@ namespace StoreManager.UserInterface.StorageRepository
             // TODO: Set up how the configuration options will work here
         }
 
-        public async Task<DataBundle> Read() {
-            return await Task.Run(() => new DataBundle());
-        }
-
-        public async Task Write(DataBundle dataBundle) {
-            await Task.Run(() => { });
-        }
-
-        public Task<List<T>> ReadAll<T>() where T : SEntity {
+        public Task<DataBundle> Read() {
             throw new NotImplementedException();
         }
 
-        public Task<List<T>> ReadSome<T>(int[] ids) where T : SEntity {
+        public Task Write(DataBundle dataBundle) {
             throw new NotImplementedException();
         }
 
-        public Task<T> ReadOne<T>(int id) where T : SEntity {
+        public Task<List<int>> CreateAll<T>(List<IData> data) where T : SEntity {
             throw new NotImplementedException();
         }
 
-        public Task WriteAll<T>(List<T> dataItems) where T : SEntity {
+        public Task<List<int>> CreateSome<T>(List<IData> data) where T : SEntity {
             throw new NotImplementedException();
         }
 
-        public Task WriteSome<T>(int[] ids, List<T> dataItems) where T : SEntity {
+        public Task<int> Create<T>(IData data) where T : SEntity {
             throw new NotImplementedException();
         }
 
-        public Task WriteOne<T>(int id, T item) where T : SEntity {
+        public Task<List<T>> GetAll<T>() where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<T>> GetSome<T>(List<int> ids) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> GetOne<T>(int id) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAll<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateSome<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateOne<T>(T item) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAll<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteSome<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteOne<T>(T item) where T : SEntity {
             throw new NotImplementedException();
         }
     }

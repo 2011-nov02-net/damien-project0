@@ -10,20 +10,27 @@ namespace StoreManager.Library
     {
         void Configure(IConfigurationOptions configurationOptions);
 
-        // Read Operations (All)
         Task<DataBundle> Read();
+        Task Write(DataBundle dataBundle);
 
-        // Read Operations (Generic)
-        Task<List<T>> ReadAll<T>() where T : SEntity;
-        Task<List<T>> ReadSome<T>(int[] ids) where T : SEntity;
-        Task<T> ReadOne<T>(int id) where T : SEntity;
+        // Create
+        Task<List<int>> CreateAll<T>(List<IData> data) where T : SEntity;
+        Task<List<int>> CreateSome<T>(List<IData> data) where T : SEntity;
+        Task<int> Create<T>(IData data) where T : SEntity;
 
-        // Write Operations (All)
-        Task Write(DataBundle data);
-
-        // Write Operations (Generic)
-        Task WriteAll<T>(List<T> dataItems) where T : SEntity;
-        Task WriteSome<T>(int[] ids, List<T> dataItems) where T : SEntity;
-        Task WriteOne<T>(int id, T item) where T : SEntity;
+        // Read
+        Task<List<T>> GetAll<T>() where T : SEntity;
+        Task<List<T>> GetSome<T>(List<int> ids) where T : SEntity;
+        Task<T> GetOne<T>(int id) where T : SEntity;
+        
+        // Update
+        Task UpdateAll<T>(List<T> items) where T : SEntity;
+        Task UpdateSome<T>(List<T> items) where T : SEntity;
+        Task UpdateOne<T>(T item) where T : SEntity;
+        
+        // Delete
+        Task DeleteAll<T>(List<T> items) where T : SEntity;
+        Task DeleteSome<T>(List<T> items) where T : SEntity;
+        Task DeleteOne<T>(T item) where T : SEntity;
     }
 }

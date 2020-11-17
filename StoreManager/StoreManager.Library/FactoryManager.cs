@@ -41,6 +41,7 @@ namespace StoreManager.Library
 
         public DataBundle BundleData
         {
+            // TODO: This might have to be changed at a later date
             get
             {
                 var storesData = _typeFactories[typeof(Store)].Items.Select(item => item.GetData() as StoreData).ToList();

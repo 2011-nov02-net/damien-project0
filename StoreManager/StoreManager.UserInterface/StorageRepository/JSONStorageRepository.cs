@@ -30,37 +30,65 @@ namespace StoreManager.UserInterface.StorageRepository
             // TODO: Set up how the configuration options will work here
         }
 
-        public async Task<DataBundle> Read() {
-            string json = File.ReadAllText(_filepath);
-            var stores = JsonSerializer.Deserialize<DataBundle>(json);
-            return await Task.Run(() => stores);
-        }
+        // public async Task<DataBundle> Read() {
+        //     string json = File.ReadAllText(_filepath);
+        //     var stores = JsonSerializer.Deserialize<DataBundle>(json);
+        //     return await Task.Run(() => stores);
+        // }
 
-        public async Task Write(DataBundle dataBundle) {
-            await Task.Run(() => { });
-        }
-
-        public Task<List<T>> ReadAll<T>() where T : SEntity {
+        public Task<DataBundle> Read() {
             throw new System.NotImplementedException();
         }
 
-        public Task<List<T>> ReadSome<T>(int[] ids) where T : SEntity {
+        public Task Write(DataBundle dataBundle) {
             throw new System.NotImplementedException();
         }
 
-        public Task<T> ReadOne<T>(int id) where T : SEntity {
+        public Task<List<int>> CreateAll<T>(List<IData> data) where T : SEntity {
             throw new System.NotImplementedException();
         }
 
-        public Task WriteAll<T>(List<T> dataItems) where T : SEntity {
+        public Task<List<int>> CreateSome<T>(List<IData> data) where T : SEntity {
             throw new System.NotImplementedException();
         }
 
-        public Task WriteSome<T>(int[] ids, List<T> dataItems) where T : SEntity {
+        public Task<int> Create<T>(IData data) where T : SEntity {
             throw new System.NotImplementedException();
         }
 
-        public Task WriteOne<T>(int id, T item) where T : SEntity {
+        public Task<List<T>> GetAll<T>() where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<List<T>> GetSome<T>(List<int> ids) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<T> GetOne<T>(int id) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task UpdateAll<T>(List<T> items) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task UpdateSome<T>(List<T> items) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task UpdateOne<T>(T item) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task DeleteAll<T>(List<T> items) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task DeleteSome<T>(List<T> items) where T : SEntity {
+            throw new System.NotImplementedException();
+        }
+
+        public Task DeleteOne<T>(T item) where T : SEntity {
             throw new System.NotImplementedException();
         }
     }

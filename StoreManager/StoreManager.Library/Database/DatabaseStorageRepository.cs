@@ -14,8 +14,7 @@ namespace StoreManager.Library.Database
 {
     public class DatabaseStorageRepository : IStorageRepository
     {
-        private DbContextOptions<StoreManagerContext> s_contextOptions;
-
+        private DbSetInterfacerManager _interfacerManager;
         public void Configure(IConfigurationOptions configurationOptions) {
             if (configurationOptions is not DatabaseConfigurationOptions)
                 throw new ArgumentException($"Invalid IConfigurationsOptions argument; got '{configurationOptions.GetType()}' instead.");
@@ -25,42 +24,63 @@ namespace StoreManager.Library.Database
             optionsBuilder.UseSqlServer(configOptions.ConnectionString);
             // TODO: Set up the logging structure here
 
-            s_contextOptions = optionsBuilder.Options;
+            var contextOptions = optionsBuilder.Options;
+            _interfacerManager = new DbSetInterfacerManager(contextOptions);
         }
 
-        public async Task<DataBundle> Read() {
-            using var context = new StoreManagerContext(s_contextOptions);
-            // Interact with the DataModel Library here
-            return await Task.Run(() => new DataBundle());
-        }
-
-        public Task<List<T>> ReadAll<T>() where T : SEntity {
+        public Task<DataBundle> Read() {
             throw new NotImplementedException();
         }
 
-        public Task<T> ReadOne<T>(int id) where T : SEntity {
+        public Task Write(DataBundle dataBundle) {
             throw new NotImplementedException();
         }
 
-        public Task<List<T>> ReadSome<T>(int[] ids) where T : SEntity {
+        public Task<List<int>> CreateAll<T>(List<IData> data) where T : SEntity {
             throw new NotImplementedException();
         }
 
-        public async Task Write(DataBundle dataBundle) {
-            using var context = new StoreManagerContext(s_contextOptions);
-            // Interact with the DataModel Library here
-            await Task.Run(() => { });
-        }
-
-        public Task WriteAll<T>(List<T> dataItems) where T : SEntity {
+        public Task<List<int>> CreateSome<T>(List<IData> data) where T : SEntity {
             throw new NotImplementedException();
         }
 
-        public Task WriteOne<T>(int id, T item) where T : SEntity {
+        public Task<int> Create<T>(IData data) where T : SEntity {
             throw new NotImplementedException();
         }
 
-        public Task WriteSome<T>(int[] ids, List<T> dataItems) where T : SEntity {
+        public Task<List<T>> GetAll<T>() where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<T>> GetSome<T>(List<int> ids) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> GetOne<T>(int id) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAll<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateSome<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateOne<T>(T item) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAll<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteSome<T>(List<T> items) where T : SEntity {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteOne<T>(T item) where T : SEntity {
             throw new NotImplementedException();
         }
     }

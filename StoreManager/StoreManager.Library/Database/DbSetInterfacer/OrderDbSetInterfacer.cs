@@ -12,7 +12,7 @@ using StoreManager.Library.Entity;
 using StoreManager.Library.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace StoreManager.Library.Database.DbSetTranslator
+namespace StoreManager.Library.Database.DbSetInterfacer
 {
     internal class OrderDbSetInterfacer : IDbSetInterfacer<Order>
     {
@@ -66,7 +66,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             _contextOptions = contextOptions;
         }
 
-        public async Task Create(Order order) {
+        public async Task CreateSomeAsync(List<Order> items) {
+            await Task.Run(() => items.ForEach(o => CreateOneAsync(o).Wait()));
+        }
+
+        public async Task CreateOneAsync(Order order) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Orders
@@ -78,7 +82,21 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task<Order> Get(int id) {
+        public async Task<List<Order>> GetAllAsync() {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            var orders = context.Orders
+                .Include(o => o.OperatingLocationId)
+                .Include(o => o.CustomerId);
+            // Convert the data for the Library to use
+            return await Task.Run(() => orders.Select(o => ToOrder(o)).ToList());
+        }
+
+        public async Task<List<Order>> GetSomeAsync(List<int> ids) {
+            return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
+        }
+
+        public async Task<Order> GetOneAsync(int id) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Orders
@@ -88,7 +106,21 @@ namespace StoreManager.Library.Database.DbSetTranslator
             return await Task.Run(() => ToOrder(item));
         }
 
-        public async Task Update(Order order) {
+        public async Task UpdateAllAsync(List<Order> items) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            var orders = context.Orders
+                .Include(o => o.OperatingLocationId)
+                .Include(o => o.CustomerId);
+            // Convert the data for the Library to use
+            await Task.Run(() => orders.Select(o => UpdateOneAsync(ToOrder(o))));
+        }
+
+        public async Task UpdateSomeAsync(List<Order> items) {
+            await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
+        }
+
+        public async Task UpdateOneAsync(Order order) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Orders
@@ -100,7 +132,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task Delete(Order order) {
+        public async Task DeleteSomeAsync(List<Order> items) {
+            await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
+        }
+
+        public async Task DeleteOneAsync(Order order) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Orders

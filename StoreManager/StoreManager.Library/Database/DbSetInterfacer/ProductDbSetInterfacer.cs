@@ -6,8 +6,10 @@ using StoreManagerContext = StoreManager.DataModel.StoreManagerContext;
 using StoreManager.Library.Entity;
 using StoreManager.Library.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace StoreManager.Library.Database.DbSetTranslator
+namespace StoreManager.Library.Database.DbSetInterfacer
 {
     internal class ProductDbSetInterfacer : IDbSetInterfacer<Product>
     {
@@ -33,7 +35,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             _contextOptions = contextOptions;
         }
 
-        public async Task Create(Product product) {
+        public async Task CreateSomeAsync(List<Product> items) {
+            await Task.Run(() => items.ForEach(p => CreateOneAsync(p).Wait()));
+        }
+
+        public async Task CreateOneAsync(Product product) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the DbContext to use
             var item = ToDbProduct(product);
@@ -42,14 +48,37 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task<Product> Get(int id) {
+        public async Task<List<Product>> GetAllAsync() {
+            using var context = new StoreManagerContext(_contextOptions);
+            var products = context.Products;
+            // Make sure to include the other items
+            // Convert the data for the Library to use
+            return await Task.Run(() => products.Select(p => ToProduct(p)).ToList());
+        }
+
+        public async Task<List<Product>> GetSomeAsync(List<int> ids) {
+            return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
+        }
+
+        public async Task<Product> GetOneAsync(int id) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the Library to use
             var item = context.Products.Find(id);
             return await Task.Run(() => ToProduct(item));
         }
 
-        public async Task Update(Product product) {
+        public async Task UpdateAllAsync(List<Product> items) {
+            using var context = new StoreManagerContext(_contextOptions);
+            var products = context.Products;
+            // Convert the data for the Library to use
+            await Task.Run(() => products.Select(p => UpdateOneAsync(ToProduct(p))));
+        }
+
+        public async Task UpdateSomeAsync(List<Product> items) {
+            await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
+        }
+
+        public async Task UpdateOneAsync(Product product) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the DbContext to use
             var item = ToDbProduct(product);
@@ -58,7 +87,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task Delete(Product product) {
+        public async Task DeleteSomeAsync(List<Product> items) {
+            await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
+        }
+
+        public async Task DeleteOneAsync(Product product) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the DbContext to use
             var item = ToDbProduct(product);

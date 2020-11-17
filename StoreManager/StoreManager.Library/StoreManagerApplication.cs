@@ -139,7 +139,7 @@ namespace StoreManager.Library
 
         private void UpdateEntities<T>()
             where T : SEntity {
-            List<T> items = _storage.ReadAll<T>().Result;
+            List<T> items = _storage.GetAll<T>().Result;
             items.ForEach(item => _factoryManager.Update<T>(item.Id, item.GetData()));
         }
 

@@ -12,7 +12,7 @@ using StoreManager.Library.Entity;
 using StoreManager.Library.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace StoreManager.Library.Database.DbSetTranslator
+namespace StoreManager.Library.Database.DbSetInterfacer
 {
     internal class StoreDbSetInterfacer : IDbSetInterfacer<Store>
     {
@@ -66,7 +66,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             _contextOptions = contextOptions;
         }
 
-        public async Task Create(Store store) {
+        public async Task CreateSomeAsync(List<Store> items) {
+            await Task.Run(() => items.ForEach(s => CreateOneAsync(s).Wait()));
+        }
+
+        public async Task CreateOneAsync(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Stores
@@ -79,7 +83,21 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task<Store> Get(int id) {
+        public async Task<List<Store>> GetAllAsync() {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            var stores = context.Stores
+                .Include(s => s.OperatingLocations)
+                .Include(s => s.StoreInventories);
+            // Convert the data for the Library to use
+            return await Task.Run(() => stores.Select(s => ToStore(s)).ToList());
+        }
+
+        public async Task<List<Store>> GetSomeAsync(List<int> ids) {
+            return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
+        }
+
+        public async Task<Store> GetOneAsync(int id) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Stores
@@ -90,7 +108,21 @@ namespace StoreManager.Library.Database.DbSetTranslator
             return await Task.Run(() => ToStore(item));
         }
 
-        public async Task Update(Store store) {
+        public async Task UpdateAllAsync(List<Store> items) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            var stores = context.Stores
+                .Include(s => s.OperatingLocations)
+                .Include(s => s.StoreInventories);
+            // Convert the data for the Library to use
+            await Task.Run(() => stores.Select(s => UpdateOneAsync(ToStore(s))));
+        }
+
+        public async Task UpdateSomeAsync(List<Store> items) {
+            await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
+        }
+
+        public async Task UpdateOneAsync(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Stores
@@ -103,7 +135,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task Delete(Store store) {
+        public async Task DeleteSomeAsync(List<Store> items) {
+            await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
+        }
+
+        public async Task DeleteOneAsync(Store store) {
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             _ = context.Stores

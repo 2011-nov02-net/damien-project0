@@ -6,8 +6,10 @@ using StoreManagerContext = StoreManager.DataModel.StoreManagerContext;
 using StoreManager.Library.Entity;
 using StoreManager.Library.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace StoreManager.Library.Database.DbSetTranslator
+namespace StoreManager.Library.Database.DbSetInterfacer
 {
     internal class CustomerDbSetInterfacer : IDbSetInterfacer<Customer>
     {
@@ -37,7 +39,11 @@ namespace StoreManager.Library.Database.DbSetTranslator
             _contextOptions = contextOptions;
         }
 
-        public async Task Create(Customer customer) {
+        public async Task CreateSomeAsync(List<Customer> items) {
+            await Task.Run(() => items.ForEach(c => CreateOneAsync(c).Wait()));
+        }
+
+        public async Task CreateOneAsync(Customer customer) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the DbContext to use
             var item = ToDbCustomer(customer);
@@ -46,27 +52,59 @@ namespace StoreManager.Library.Database.DbSetTranslator
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task Delete(Customer customer) {
+        public async Task<List<Customer>> GetAllAsync() {
             using var context = new StoreManagerContext(_contextOptions);
-            // Convert the data for the DbContext to use
-            var item = ToDbCustomer(customer);
-            context.Customers.Remove(item);
-            // Save the changes
-            await Task.Run(() => context.SaveChanges());
+            // Make sure to include the other items
+            var customers = context.Customers
+                .Include(c => c.AddressId)
+                .Include(c => c.OperatingLocationId);
+            // Convert the data for the Library to use
+            return await Task.Run(() => customers.Select(c => ToCustomer(c)).ToList());
         }
 
-        public async Task<Customer> Get(int id) {
+        public async Task<List<Customer>> GetSomeAsync(List<int> ids) {
+            return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
+        }
+
+        public async Task<Customer> GetOneAsync(int id) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the Library to use
             var item = context.Customers.Find(id);
             return await Task.Run(() => ToCustomer(item));
         }
 
-        public async Task Update(Customer customer) {
+        public async Task UpdateAllAsync(List<Customer> items) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Make sure to include the other items
+            var customers = context.Customers
+                .Include(c => c.AddressId)
+                .Include(c => c.OperatingLocationId);
+            // Convert the data for the Library to use
+            await Task.Run(() => customers.Select(c => UpdateOneAsync(ToCustomer(c))));
+        }
+
+        public async Task UpdateSomeAsync(List<Customer> items) {
+            await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
+        }
+
+        public async Task UpdateOneAsync(Customer customer) {
             using var context = new StoreManagerContext(_contextOptions);
             // Convert the data for the DbContext to use
             var item = ToDbCustomer(customer);
             context.Customers.Update(item);
+            // Save the changes
+            await Task.Run(() => context.SaveChanges());
+        }
+
+        public async Task DeleteSomeAsync(List<Customer> items) {
+            await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
+        }
+
+        public async Task DeleteOneAsync(Customer customer) {
+            using var context = new StoreManagerContext(_contextOptions);
+            // Convert the data for the DbContext to use
+            var item = ToDbCustomer(customer);
+            context.Customers.Remove(item);
             // Save the changes
             await Task.Run(() => context.SaveChanges());
         }
