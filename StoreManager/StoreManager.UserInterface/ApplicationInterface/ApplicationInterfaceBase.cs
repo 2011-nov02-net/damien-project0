@@ -17,7 +17,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         public abstract void Run();
 
-        public ApplicationInterfaceBase() {
+        public ApplicationInterfaceBase(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) {
+            StoreManagerApplication.Initialize(storage, configurationOptions, saveFrequency);
             // Prompt to see if the user wishes to have rabbit-hole prompts
             _allowTangentialPrompts = CUI.PromptForBool("Allow the prompts to detour from the original prompt?", "yes", "no");
             _typeNames = new Dictionary<Type, string>
@@ -31,9 +32,11 @@ namespace StoreManager.UserInterface.ApplicationInterface
             };
         }
 
-        protected long PromptForId<T>()
+        #region Utility Methods
+
+        protected int PromptForId<T>()
             where T : SEntity {
-            long id = -1;
+            int id = -1;
 
             UntilItIsDone(() => {
                 id = CUI.PromptRange($"Please enter the ID for the {_typeNames[typeof(T)]}", 0, StoreManagerApplication.MaxId<T>());
@@ -50,7 +53,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
             UntilItIsDone(() => {
                 // Get the id
-                long id = PromptForId<T>();
+                int id = PromptForId<T>();
                 result = StoreManagerApplication.Get<T>(id);
 
                 return result is not null;
@@ -59,9 +62,9 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
-        protected long PromptForCreateOrExist<T>(Func<long> creationFunction, Func<long> existingFunction)
+        protected int PromptForCreateOrExist<T>(Func<int> creationFunction, Func<int> existingFunction)
             where T : SEntity {
-            long result;
+            int result;
             bool createItem = true;
 
             if (_allowTangentialPrompts) {
@@ -90,12 +93,12 @@ namespace StoreManager.UserInterface.ApplicationInterface
             } while (!done);
         }
 
-        protected Dictionary<long, int> PromptForProductsWithCounts() {
-            Dictionary<long, int> result = new Dictionary<long, int>();
+        protected Dictionary<int, int> PromptForProductsWithCounts() {
+            Dictionary<int, int> result = new Dictionary<int, int>();
 
             UntilItIsDone(() => {
                 // Add products and the inventory they have
-                long productId = PromptForCreateOrExist<Product>(
+                int productId = PromptForCreateOrExist<Product>(
                     () => {
                         var data = CreateProductData();
                         return StoreManagerApplication.Create<Product>(data);
@@ -113,6 +116,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
             return result;
         }
 
+        #endregion
+
         #region Creation Methods
 
         protected CustomerData CreateCustomerData() {
@@ -121,7 +126,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             string email = CUI.PromptForEmail("Enter the email");
             string phoneNumber = CUI.PromptForPhoneNumber("Enter the phone number");
 
-            long addressId = PromptForCreateOrExist<Address>(
+            int addressId = PromptForCreateOrExist<Address>(
                             () => {
                                 var temp = CreateAddressData();
                                 return StoreManagerApplication.Create<Address>(temp);
@@ -130,20 +135,20 @@ namespace StoreManager.UserInterface.ApplicationInterface
                         );
 
             DateTime birthDate = CUI.PromptForDateTime("Enter a birth date", CUI.TimeFrame.Past, true);
-            long? defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
+            int? defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
                 ? PromptForId<OperatingLocation>() : null;
 
-            return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<long>());
+            return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<int>());
         }
 
         protected StoreData CreateStoreData() {
             string storeName = CUI.PromptForInput("Enter the store name", false);
-            List<long> operatingLocationIds = new List<long>();
-            List<long> customerIds = new List<long>();
-            Dictionary<long, int> inventory;
+            List<int> operatingLocationIds = new List<int>();
+            List<int> customerIds = new List<int>();
+            Dictionary<int, int> inventory;
 
-            long locationId;
-            long customerId;
+            int locationId;
+            int customerId;
 
             UntilItIsDone(() => {
                 // Add operating locations
@@ -182,9 +187,9 @@ namespace StoreManager.UserInterface.ApplicationInterface
         }
 
         protected OrderData CreateOrderData() {
-            long customerId = -1;
-            long operatingLocationId = -1;
-            Dictionary<long, int> productsRequested = null;
+            int customerId = -1;
+            int operatingLocationId = -1;
+            Dictionary<int, int> productsRequested = null;
 
             // Get the customer id
             customerId = PromptForCreateOrExist<Customer>(
@@ -198,7 +203,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             );
 
             // Get the store that owns the location
-            long storeId = PromptForCreateOrExist<Store>(
+            int storeId = PromptForCreateOrExist<Store>(
                 () => {
                     var data = CreateStoreData();
                     return StoreManagerApplication.Create<Store>(data);
@@ -236,7 +241,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         protected OperatingLocationData CreateOperatingLocationData() {
             // Get the store that owns this location
-            long storeId = PromptForCreateOrExist<Store>(
+            int storeId = PromptForCreateOrExist<Store>(
                 () => {
                     var data = CreateStoreData();
                     return StoreManagerApplication.Create<Store>(data);
@@ -245,7 +250,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             );
 
             // Get the address of this location
-            long addressId = PromptForCreateOrExist<Address>(
+            int addressId = PromptForCreateOrExist<Address>(
                 () => {
                     var data = CreateAddressData();
                     return StoreManagerApplication.Create<Address>(data);
@@ -268,7 +273,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         #region Displaying Methods
 
-        public void DisplayCustomer(long id, bool newLine = false, int tabIndents = 0) {
+        public void DisplayCustomer(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
             var data = StoreManagerApplication.Get<Customer>(id) as CustomerData;
             var address = (StoreManagerApplication.Get<Address>(data.AddressId) as AddressData).ToString();
@@ -295,7 +300,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             // Probably not, because it isn't directly *about* the customer
         }
 
-        public void DisplayStore(long id, bool newLine = false, int tabIndents = 0) {
+        public void DisplayStore(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
             string prefix = $"{(newLine ? "\n" : "")}{indentation}";
             var data = StoreManagerApplication.Get<Store>(id) as StoreData;
@@ -309,11 +314,11 @@ namespace StoreManager.UserInterface.ApplicationInterface
             data.OperatingLocationIds.ForEach(olid => DisplayOperatingLocation(olid, true, tabIndents + 1));
         }
 
-        public void DisplayOrder(long orderId, bool newLine = false, int tabIndents = 0) {
+        public void DisplayOrder(int orderId, bool newLine = false, int tabIndents = 0) {
             var data = StoreManagerApplication.Get<Order>(orderId) as OrderData;
             string customerName = StoreManagerApplication.GetName<Customer>(data.CustomerId);
             // Get the addressId and storeId from the operating location
-            long storeId = (StoreManagerApplication.Get<OperatingLocation>(data.OperatingLocationId) as OperatingLocationData).StoreId;
+            int storeId = (StoreManagerApplication.Get<OperatingLocation>(data.OperatingLocationId) as OperatingLocationData).StoreId;
             // get the store that owns the operating location
             string storeName = StoreManagerApplication.GetName<Store>(storeId);
 
@@ -328,18 +333,18 @@ namespace StoreManager.UserInterface.ApplicationInterface
             }
         }
 
-        public void DisplayAddress(long id, bool newLine = false, int tabIndents = 0) {
+        public void DisplayAddress(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
             string address = (StoreManagerApplication.Get<Address>(id) as AddressData).ToString();
             Console.Write($"{(newLine ? "\n" : "")}{indentation}{address}");
         }
 
-        public void DisplayOperatingLocation(long id, bool newLine = false, int tabIndents = 0) {
+        public void DisplayOperatingLocation(int id, bool newLine = false, int tabIndents = 0) {
             string indentation = new string(' ', tabIndents * 2);
             // Get the store and address id from the operating location's data
-            (long storeId, long addressId) = new Func<Tuple<long, long>>(() => {
+            (int storeId, int addressId) = new Func<Tuple<int, int>>(() => {
                 var tempData = StoreManagerApplication.Get<OperatingLocation>(id) as OperatingLocationData;
-                return new Tuple<long, long>(tempData.StoreId, tempData.AddressId);
+                return new Tuple<int, int>(tempData.StoreId, tempData.AddressId);
             }).Invoke();
             // Get the name of the store
             string storeName = StoreManagerApplication.GetName<Store>(storeId);
@@ -348,7 +353,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             DisplayAddress(addressId);
         }
 
-        public void DisplayProduct(long id, int count = 1, bool newLine = false, int tabIndents = 0) {
+        public void DisplayProduct(int id, int count = 1, bool newLine = false, int tabIndents = 0) {
             var data = StoreManagerApplication.Get<Product>(id) as ProductData;
             string indentation = new string(' ', tabIndents * 2);
             string discount = data.Discount.HasValue ? $" ({data.Discount.Value}% off, making it {data.Price * (100 - data.Discount) / 100})" : "";

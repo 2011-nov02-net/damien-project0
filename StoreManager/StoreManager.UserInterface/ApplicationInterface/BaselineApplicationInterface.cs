@@ -17,7 +17,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
     {
         private readonly Dictionary<string, Action> _actions;
 
-        public BaselineApplicationInterface() {
+        public BaselineApplicationInterface(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) :
+            base(storage, configurationOptions, saveFrequency){
             _actions = new Dictionary<string, Action>
             {
                 { "Place an Order to a store location", PlaceOrderToStoreLocation },
@@ -54,7 +55,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
         private void DisplayOrderDetails() {
             // get the order id 
             // display its data
-            long orderId = PromptForId<Order>();
+            int orderId = PromptForId<Order>();
             // Display the order
             DisplayOrder(orderId);
         }
@@ -75,7 +76,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         private void DisplayCustomerOrderHistory() {
             // get the customer they're looking for
-            long customerId = PromptForId<Customer>();
+            int customerId = PromptForId<Customer>();
             // get the orders of the customer they're looking for
             var customerOrders = (StoreManagerApplication.Get<Customer>(customerId) as CustomerData).OrderIds;
             // display all of the order details

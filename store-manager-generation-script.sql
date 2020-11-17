@@ -70,9 +70,39 @@ GO
 
 ******************************************************/
 
+DROP TABLE [Stores].[StoreOperatingLocation]
+GO
+
+DROP TABLE [Stores].[CustomerOrder]
+GO
+
+DROP TABLE [Stores].[StoreInventory]
+GO
+
+DROP TABLE [Stores].[OrderProduct]
+GO
+
+DROP TABLE [Stores].[Address]
+GO
+
+DROP TABLE [Stores].[OperatingLocation]
+GO
+
+DROP TABLE [Stores].[Order]
+GO
+
+DROP TABLE [Stores].[Customer]
+GO
+
+DROP TABLE [Stores].[Product]
+GO
+
+DROP TABLE [Stores].[Store]
+GO
+
 -- DROP TABLE [Stores].[Store]
 CREATE TABLE [Stores].[Store] (
-    [StoreId]                       INT             NOT NULL PRIMARY KEY IDENTITY,
+    [StoreId]                       INT             NOT NULL PRIMARY KEY,
     [Name]                          NVARCHAR(64)    NOT NULL     
 );
 GO
@@ -81,7 +111,7 @@ GO
 
 -- DROP TABLE [Stores].[Address]
 CREATE TABLE [Stores].[Address] (
-    [AddressId]                     INT             NOT NULL PRIMARY KEY IDENTITY,
+    [AddressId]                     INT             NOT NULL PRIMARY KEY,
     [AddressLine1]                  NVARCHAR(128)   NOT NULL,
     [AddressLine2]                  NVARCHAR(128)   NOT NULL,
     [City]                          NVARCHAR(128)   NOT NULL,
@@ -95,7 +125,7 @@ GO
 
 -- DROP TABLE [Stores].[OperatingLocation]
 CREATE TABLE [Stores].[OperatingLocation] (
-    [OperatingLocationId]           INT             NOT NULL PRIMARY KEY IDENTITY,
+    [OperatingLocationId]           INT             NOT NULL PRIMARY KEY,
     [AddressId]                     INT             NOT NULL UNIQUE
 );
 GO
@@ -109,7 +139,7 @@ GO
 
 -- DROP TABLE [Stores].[Customer]
 CREATE TABLE [Stores].[Customer] (
-    [CustomerId]                    INT             NOT NULL PRIMARY KEY IDENTITY,
+    [CustomerId]                    INT             NOT NULL PRIMARY KEY,
     [FirstName]                     NVARCHAR(128)   NOT NULL,
     [LastName]                      NVARCHAR(128)   NOT NULL,
     [BirthDate]                     DATETIME        NOT NULL,
@@ -135,7 +165,7 @@ GO
 
 -- DROP TABLE [Stores].[Product]
 CREATE TABLE [Stores].[Product] (
-    [ProductId]                     INT             NOT NULL PRIMARY KEY IDENTITY,
+    [ProductId]                     INT             NOT NULL PRIMARY KEY,
     [Name]                          NVARCHAR(64)    NOT NULL,
     [Price]                         MONEY           NOT NULL,
     [Discount]                      MONEY           NULL
@@ -146,7 +176,7 @@ GO
 
 -- DROP TABLE [Stores].[Order]
 CREATE TABLE [Stores].[Order] (
-    [OrderId]                       INT             NOT NULL PRIMARY KEY IDENTITY,
+    [OrderId]                       INT             NOT NULL PRIMARY KEY,
     [CustomerId]                    INT             NOT NULL,
     [OperatingLocationId]           INT             NOT NULL
 );
@@ -166,7 +196,7 @@ GO
 
 -- DROP TABLE [Stores].[StoreOperatingLocation]
 CREATE TABLE [Stores].[StoreOperatingLocation] (
-    [StoreId]                       INT             NOT NULL PRIMARY KEY IDENTITY,
+    [StoreId]                       INT             NOT NULL PRIMARY KEY,
     [OperatingLocationId]           INT             NOT NULL,
 );
 GO

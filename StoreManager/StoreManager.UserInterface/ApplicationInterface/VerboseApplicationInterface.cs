@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using StoreManager.Library;
+using StoreManager.Library.Data;
+
 using CUI = ConsoleUI.ConsoleUI;
 
 namespace StoreManager.UserInterface.ApplicationInterface
@@ -15,7 +18,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
     {
         private readonly Dictionary<string, Action> _actions;
 
-        public VerboseApplicationInterface() {
+        public VerboseApplicationInterface(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null, SaveFrequency saveFrequency = SaveFrequency.Always) {
+            StoreManagerApplication.Initialize(storage, configurationOptions, saveFrequency);
             _actions = new Dictionary<string, Action>
             {
             };
