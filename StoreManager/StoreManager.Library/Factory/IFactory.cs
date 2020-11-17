@@ -5,7 +5,7 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Factory
 {
-    interface IFactory<T>
+    internal interface IFactory<T>
         where T : SEntity
     {
         List<T> Items { get; set; }

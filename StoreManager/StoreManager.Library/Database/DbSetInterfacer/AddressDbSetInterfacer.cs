@@ -92,6 +92,12 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             await Task.Run(() => context.SaveChanges());
         }
 
+        public async Task DeleteAllAsync() {
+            using var context = new StoreManagerContext(_contextOptions);
+            var items = context.Addresses;
+            await Task.Run(() => items.ForEachAsync(id => DeleteOneAsync(ToAddress(id)).Wait()));
+        }
+
         public async Task DeleteSomeAsync(List<Address> items) {
             await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
         }

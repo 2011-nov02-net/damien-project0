@@ -27,23 +27,58 @@ namespace StoreManager.Library.Database
                 { typeof(Order), new CustomerDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
             };
         }
-
-        internal async Task Create<T>(T item)
+        
+        internal async Task CreateSomeAsync<T>(List<SEntity> items)
             where T : SEntity {
-            await _interfacers[typeof(T)].CreateOneAsync(item);
+            await _interfacers[typeof(T)].CreateSomeAsync(items);
         }
 
-        internal async Task<T> Get<T>(int id)
+        internal async Task CreateAsync<T>(SEntity entity)
             where T : SEntity {
-            return await _interfacers[typeof(T)].GetOneAsync(id) as T;
+            await _interfacers[typeof(T)].CreateOneAsync(entity);
         }
 
-        internal async Task Update<T>(T item)
+        internal async Task<List<SEntity>> GetAllAsync<T>()
+            where T : SEntity {
+            return await Task.Run(() => _interfacers[typeof(T)].GetAllAsync());
+        }
+
+        internal async Task<List<SEntity>> GetSomeAsync<T>(List<int> ids)
+            where T : SEntity {
+            return await Task.Run(() => _interfacers[typeof(T)].GetSomeAsync(ids));
+        }
+
+        internal async Task<SEntity> GetOneAsync<T>(int id)
+            where T : SEntity {
+            return await _interfacers[typeof(T)].GetOneAsync(id);
+        }
+
+        internal async Task UpdateAllAsync<T>(List<SEntity> entities)
+            where T : SEntity {
+            await _interfacers[typeof(T)].UpdateAllAsync(entities);
+        }
+
+        internal async Task UpdateSomeAsync<T>(List<SEntity> entities)
+            where T : SEntity {
+            await _interfacers[typeof(T)].UpdateSomeAsync(entities);
+        }
+
+        internal async Task UpdateOneAsync<T>(SEntity item)
             where T : SEntity {
             await _interfacers[typeof(T)].UpdateOneAsync(item);
         }
 
-        internal async Task Delete<T>(T item)
+        internal async Task DeleteAllAsync<T>()
+            where T : SEntity {
+            await _interfacers[typeof(T)].DeleteAllAsync();
+        }
+
+        internal async Task DeleteSomeAsync<T>(List<SEntity> entities)
+            where T : SEntity {
+            await _interfacers[typeof(T)].DeleteSomeAsync(entities);
+        }
+
+        internal async Task DeleteOneAsync<T>(SEntity item)
             where T : SEntity {
             await _interfacers[typeof(T)].DeleteOneAsync(item);
         }

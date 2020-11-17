@@ -123,7 +123,7 @@ namespace StoreManager.Library
             _saveFrequency = saveFrequency;
 
             try {
-                var dataBundle = _storage?.Read()?.Result;
+                var dataBundle = _storage?.ReadAsync()?.Result;
                 // TODO: Check if this is allowed, or if it will give a NullReferenceException
                 _factoryManager = new FactoryManager(dataBundle);
             } catch (Exception) {
@@ -139,7 +139,7 @@ namespace StoreManager.Library
 
         private void UpdateEntities<T>()
             where T : SEntity {
-            List<T> items = _storage.GetAll<T>().Result;
+            List<T> items = _storage.GetAllAsync<T>().Result;
             items.ForEach(item => _factoryManager.Update<T>(item.Id, item.GetData()));
         }
 

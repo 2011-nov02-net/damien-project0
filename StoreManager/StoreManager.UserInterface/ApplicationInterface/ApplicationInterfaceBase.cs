@@ -138,7 +138,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             int? defaultStoreLocationId = CUI.PromptForBool("Set a default store location?", "yes", "no")
                 ? PromptForId<OperatingLocation>() : null;
 
-            return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId, new List<int>());
+            return new CustomerData(firstName, lastName, email, phoneNumber, addressId, birthDate, defaultStoreLocationId);
         }
 
         protected StoreData CreateStoreData() {
@@ -148,7 +148,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
             Dictionary<int, int> inventory;
 
             int locationId;
-            int customerId;
 
             UntilItIsDone(() => {
                 // Add operating locations
@@ -167,23 +166,9 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 return !CUI.PromptForBool("Add another operating location?", "yes", "no");
             });
 
-            UntilItIsDone(() => {
-                customerId = PromptForCreateOrExist<Customer>(
-                    () => {
-                        var data = CreateCustomerData();
-                        return StoreManagerApplication.Create<Customer>(data);
-                    },
-                    () => PromptForId<Customer>()
-                );
-
-                customerIds.Add(customerId);
-
-                return !CUI.PromptForBool("Add another customer?", "yes", "no");
-            });
-
             inventory = PromptForProductsWithCounts();
 
-            return new StoreData(storeName, operatingLocationIds, customerIds, inventory);
+            return new StoreData(storeName, operatingLocationIds, inventory);
         }
 
         protected OrderData CreateOrderData() {

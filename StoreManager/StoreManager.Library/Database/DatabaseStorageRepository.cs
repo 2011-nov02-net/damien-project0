@@ -28,60 +28,56 @@ namespace StoreManager.Library.Database
             _interfacerManager = new DbSetInterfacerManager(contextOptions);
         }
 
-        public Task<DataBundle> Read() {
-            throw new NotImplementedException();
+        public async Task<DataBundle> ReadAsync() {
+            return await Task.Run(() => new DataBundle());
         }
 
-        public Task Write(DataBundle dataBundle) {
-            throw new NotImplementedException();
+        public async Task WriteAsync(DataBundle dataBundle) {
+            await Task.Run(() => { });
         }
 
-        public Task<List<int>> CreateAll<T>(List<IData> data) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task CreateSomeAsync<T>(List<SEntity> entities) where T : SEntity {
+            await _interfacerManager.CreateSomeAsync<T>(entities);
         }
 
-        public Task<List<int>> CreateSome<T>(List<IData> data) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task CreateOneAsync<T>(SEntity entity) where T : SEntity {
+            await _interfacerManager.CreateAsync<T>(entity);
         }
 
-        public Task<int> Create<T>(IData data) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task<List<T>> GetAllAsync<T>() where T : SEntity {
+            return await Task.Run(() => _interfacerManager.GetAllAsync<T>().Result.ConvertAll(t => t as T));
         }
 
-        public Task<List<T>> GetAll<T>() where T : SEntity {
-            throw new NotImplementedException();
+        public async Task<List<T>> GetSomeAsync<T>(List<int> ids) where T : SEntity {
+            return await Task.Run(() => _interfacerManager.GetSomeAsync<T>(ids).Result.ConvertAll(t => t as T));
         }
 
-        public Task<List<T>> GetSome<T>(List<int> ids) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task<T> GetOneAsync<T>(int id) where T : SEntity {
+            return await _interfacerManager.GetOneAsync<T>(id) as T;
         }
 
-        public Task<T> GetOne<T>(int id) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task UpdateAllAsync<T>(List<SEntity> items) where T : SEntity {
+            await _interfacerManager.UpdateAllAsync<T>(items);
         }
 
-        public Task UpdateAll<T>(List<T> items) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task UpdateSomeAsync<T>(List<SEntity> items) where T : SEntity {
+            await _interfacerManager.UpdateSomeAsync<T>(items);
         }
 
-        public Task UpdateSome<T>(List<T> items) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task UpdateOneAsync<T>(SEntity entity) where T : SEntity {
+            await _interfacerManager.UpdateOneAsync<T>(entity);
         }
 
-        public Task UpdateOne<T>(T item) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task DeleteAllAsync<T>() where T : SEntity {
+            await _interfacerManager.DeleteAllAsync<T>();
         }
 
-        public Task DeleteAll<T>(List<T> items) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task DeleteSomeAsync<T>(List<SEntity> entities) where T : SEntity {
+            await _interfacerManager.DeleteSomeAsync<T>(entities);
         }
 
-        public Task DeleteSome<T>(List<T> items) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteOne<T>(T item) where T : SEntity {
-            throw new NotImplementedException();
+        public async Task DeleteOneAsync<T>(SEntity entity) where T : SEntity {
+            await _interfacerManager.DeleteOneAsync<T>(entity);
         }
     }
 }

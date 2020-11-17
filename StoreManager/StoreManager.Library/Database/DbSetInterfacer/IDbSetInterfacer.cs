@@ -26,6 +26,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
         Task UpdateOneAsync(T item);
 
         // Delete
+        Task DeleteAllAsync();
         Task DeleteSomeAsync(List<T> items);
         Task DeleteOneAsync(T item);
     }
