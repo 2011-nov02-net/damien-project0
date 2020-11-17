@@ -6,13 +6,13 @@ namespace StoreManager.Library.Data
 {
     public class OrderData : IData
     {
-        public long CustomerId { get; set; }
-        public long OperatingLocationId { get; set; }
-        public Dictionary<long, int> ProductsRequested { get; set; }
+        public int CustomerId { get; set; }
+        public int OperatingLocationId { get; set; }
+        public Dictionary<int, int> ProductsRequested { get; set; }
 
         public OrderData() { }
 
-        public OrderData(long customer, long operatingLocationId, Dictionary<long, int> productsRequested) {
+        public OrderData(int customer, int operatingLocationId, Dictionary<int, int> productsRequested) {
             CustomerId = customer;
             OperatingLocationId = operatingLocationId;
             ProductsRequested = productsRequested;

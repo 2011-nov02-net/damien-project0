@@ -4,9 +4,13 @@ namespace StoreManager.Library.Entity
 {
     public abstract class SEntity
     {
-        internal long Id { get; private set; }
+        internal int Id { get; set; }
 
         internal abstract IData GetData();
+
+        internal SEntity(int id) {
+            Id = id;
+        }
 
         internal SEntity(IdGenerator idGenerator) {
             Id = idGenerator.NextId();

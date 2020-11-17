@@ -24,13 +24,13 @@ namespace StoreManager.Library.Factory
             _idGenerator = new IdGenerator(Items.Max(s => s.Id));
         }
 
-        public long Create(IData data) {
+        public int Create(IData data) {
             var store = new Store(_idGenerator, data as StoreData);
             Items.Add(store);
             return store.Id;
         }
 
-        public void Delete(long id) {
+        public void Delete(int id) {
             var store = Get(id);
 
             if (store is null)
@@ -39,11 +39,11 @@ namespace StoreManager.Library.Factory
             Items.Remove(store);
         }
 
-        public Store Get(long id) {
+        public Store Get(int id) {
             return Items.FirstOrDefault(s => s.Id == id);
         }
 
-        public void Update(long id, IData data) {
+        public void Update(int id, IData data) {
             var store = Get(id);
 
             if (store is null)

@@ -10,9 +10,9 @@ namespace StoreManager.Library.Factory
     {
         List<T> Items { get; set; }
 
-        long Create(IData data);
-        T Get(long id);
-        void Update(long id, IData data);
-        void Delete(long id);
+        int Create(IData data);
+        T Get(int id);
+        void Update(int id, IData data);
+        void Delete(int id);
     }
 }

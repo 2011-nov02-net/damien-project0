@@ -22,13 +22,13 @@ namespace StoreManager.Library.Factory
 
         public List<OperatingLocation> Items { get; set; }
 
-        public long Create(IData data) {
+        public int Create(IData data) {
             var operatingLocation = new OperatingLocation(_idGenerator, data as OperatingLocationData);
             Items.Add(operatingLocation);
             return operatingLocation.Id;
         }
 
-        public void Delete(long id) {
+        public void Delete(int id) {
             var operatingLocation = Get(id);
 
             if (operatingLocation is null)
@@ -37,11 +37,11 @@ namespace StoreManager.Library.Factory
             Items.Remove(operatingLocation);
         }
 
-        public OperatingLocation Get(long id) {
+        public OperatingLocation Get(int id) {
             return Items.FirstOrDefault(ol => ol.Id == id);
         }
 
-        public void Update(long id, IData data) {
+        public void Update(int id, IData data) {
             var operatingLocation = Get(id);
 
             if (operatingLocation is null)

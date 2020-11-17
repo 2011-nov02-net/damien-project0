@@ -13,6 +13,10 @@ namespace StoreManager.Library.Entity
 
         }
 
+        internal NamedSEntity(int id) :
+            base(id) {
+        }
+
         internal abstract string GetName();
     }
 }

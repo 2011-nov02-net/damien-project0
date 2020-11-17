@@ -26,6 +26,8 @@ namespace StoreManager.Library
 
         public FactoryManager(DataBundle dataBundle) :
             this() {
+            if (dataBundle is null)
+                return;
             // with the data bundle passed in, now the data can be assorted into each of the objects
             // Id lifespan is only of the lifetime of the application; they are reassigned on loading. 
             // The ids are only used in the location, and not by any of the storage items
@@ -57,17 +59,17 @@ namespace StoreManager.Library
             return _typeFactories[typeof(T)].Items.Count > 0;
         }
 
-        public long MaxId<T>()
+        public int MaxId<T>()
             where T : SEntity {
             return _typeFactories[typeof(T)].Items.Max(i => i.Id);
         }
         
-        public bool IdExists<T>(long id)
+        public bool IdExists<T>(int id)
             where T : SEntity {
             return _typeFactories[typeof(T)].Items.FirstOrDefault(i => i.Id == id) is not null;
         }
 
-        public long Create<T>(IData data)
+        public int Create<T>(IData data)
             where T : SEntity {
             return _typeFactories[typeof(T)].Create(data);
         }
@@ -77,7 +79,7 @@ namespace StoreManager.Library
             return _typeFactories[typeof(T)].Items.ConvertAll(item => item as T);
         }
 
-        public List<T> GetSome<T>(List<long> ids)
+        public List<T> GetSome<T>(List<int> ids)
             where T : SEntity {
             return _typeFactories[typeof(T)].Items
                 .Where(item => ids.Contains(item.Id))
@@ -85,7 +87,7 @@ namespace StoreManager.Library
                 .ToList();
         }
 
-        public T Get<T>(long id)
+        public T Get<T>(int id)
             where T : SEntity {
             return _typeFactories[typeof(T)].Get(id) as T;
         }
@@ -95,12 +97,12 @@ namespace StoreManager.Library
             return _typeFactories[typeof(T)].Items.ConvertAll(item => item as T);
         }
 
-        public void Update<T>(long id, IData data)
+        public void Update<T>(int id, IData data)
             where T : SEntity {
             _typeFactories[typeof(T)].Update(id, data);
         }
 
-        public void Delete<T>(long id)
+        public void Delete<T>(int id)
             where T : SEntity {
             _typeFactories[typeof(T)].Delete(id);
         }

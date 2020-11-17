@@ -34,6 +34,8 @@ namespace StoreManager.DataModel
             {
                 entity.ToTable("Address", "Stores");
 
+                entity.Property(e => e.AddressId).ValueGeneratedNever();
+
                 entity.Property(e => e.AddressLine1)
                     .IsRequired()
                     .HasMaxLength(128);
@@ -60,6 +62,8 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable("Customer", "Stores");
+
+                entity.Property(e => e.CustomerId).ValueGeneratedNever();
 
                 entity.Property(e => e.BirthDate).HasColumnType("datetime");
 
@@ -90,7 +94,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<CustomerOrder>(entity =>
             {
                 entity.HasKey(e => new { e.CustomerId, e.OrderId })
-                    .HasName("PK__Customer__4897616485E32D5C");
+                    .HasName("PK__Customer__48976164B0404BA4");
 
                 entity.ToTable("CustomerOrder", "Stores");
 
@@ -111,8 +115,10 @@ namespace StoreManager.DataModel
             {
                 entity.ToTable("OperatingLocation", "Stores");
 
-                entity.HasIndex(e => e.AddressId, "UQ__Operatin__091C2AFA29F0CF00")
+                entity.HasIndex(e => e.AddressId, "UQ__Operatin__091C2AFA120A3512")
                     .IsUnique();
+
+                entity.Property(e => e.OperatingLocationId).ValueGeneratedNever();
 
                 entity.HasOne(d => d.Address)
                     .WithOne(p => p.OperatingLocation)
@@ -124,6 +130,8 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.ToTable("Order", "Stores");
+
+                entity.Property(e => e.OrderId).ValueGeneratedNever();
 
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Orders)
@@ -141,7 +149,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<OrderProduct>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK__OrderPro__08D097A340572D29");
+                    .HasName("PK__OrderPro__08D097A3DD3732B5");
 
                 entity.ToTable("OrderProduct", "Stores");
 
@@ -162,6 +170,8 @@ namespace StoreManager.DataModel
             {
                 entity.ToTable("Product", "Stores");
 
+                entity.Property(e => e.ProductId).ValueGeneratedNever();
+
                 entity.Property(e => e.Discount).HasColumnType("money");
 
                 entity.Property(e => e.Name)
@@ -175,6 +185,8 @@ namespace StoreManager.DataModel
             {
                 entity.ToTable("Store", "Stores");
 
+                entity.Property(e => e.StoreId).ValueGeneratedNever();
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(64);
@@ -183,7 +195,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<StoreInventory>(entity =>
             {
                 entity.HasKey(e => new { e.StoreId, e.ProductId })
-                    .HasName("PK__StoreInv__F0C23D6D25E83EDC");
+                    .HasName("PK__StoreInv__F0C23D6D44ED7A3C");
 
                 entity.ToTable("StoreInventory", "Stores");
 
@@ -203,11 +215,11 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<StoreOperatingLocation>(entity =>
             {
                 entity.HasKey(e => e.StoreId)
-                    .HasName("PK__StoreOpe__3B82F1011F89625C");
+                    .HasName("PK__StoreOpe__3B82F1016218B920");
 
                 entity.ToTable("StoreOperatingLocation", "Stores");
 
-                entity.Property(e => e.StoreId).ValueGeneratedOnAdd();
+                entity.Property(e => e.StoreId).ValueGeneratedNever();
 
                 entity.HasOne(d => d.OperatingLocation)
                     .WithMany(p => p.StoreOperatingLocations)

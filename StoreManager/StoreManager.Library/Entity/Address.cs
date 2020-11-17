@@ -16,6 +16,11 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
+        internal Address(int id, AddressData data) :
+            base(id) {
+            _data = data;
+        }
+
         internal override IData GetData() => new AddressData(_data);
     }
 }

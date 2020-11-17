@@ -16,6 +16,11 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
+        internal OperatingLocation(int id, OperatingLocationData data) :
+            base(id) {
+            _data = data;
+        }
+
         internal override IData GetData() => new OperatingLocationData(_data);
     }
 }

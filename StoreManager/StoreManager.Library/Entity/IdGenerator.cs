@@ -2,14 +2,14 @@
 {
     public class IdGenerator
     {
-        private long _id = 0;
+        private int _id = 0;
         
-        public IdGenerator(long startingId) => _id = startingId;
+        public IdGenerator(int startingId) => _id = startingId;
 
         /// <summary>
         /// Generates an id
         /// </summary>
         /// <returns>A new id</returns>
-        public long NextId() => _id++;
+        public int NextId() => _id++;
     }
 }

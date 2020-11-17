@@ -23,17 +23,17 @@ namespace StoreManager.Library.Factory
         private List<Order> _orders;
         public List<Order> Items { get => _orders; set => _orders = value; }
 
-        public long Create(IData data) {
+        public int Create(IData data) {
             var order = new Order(_idGenerator, data as OrderData);
             Items.Add(order);
             return order.Id;
         }
 
-        public Order Get(long id) {
+        public Order Get(int id) {
             return Items.FirstOrDefault(o => o.Id == id);
         }
 
-        public void Update(long id, IData data) {
+        public void Update(int id, IData data) {
             var order = Get(id);
 
             if (order is null)
@@ -42,7 +42,7 @@ namespace StoreManager.Library.Factory
             order.Data = data as OrderData;
         }
 
-        public void Delete(long id) {
+        public void Delete(int id) {
             var order = Get(id);
 
             if (order is null)

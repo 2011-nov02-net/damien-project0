@@ -2,12 +2,12 @@
 {
     public class OperatingLocationData : IData
     {
-        public long StoreId { get; set; }
-        public long AddressId { get; set; }
+        public int StoreId { get; set; }
+        public int AddressId { get; set; }
 
         public OperatingLocationData() { }
 
-        public OperatingLocationData(long storeId, long addressId) {
+        public OperatingLocationData(int storeId, int addressId) {
             StoreId = storeId;
             AddressId = addressId;
         }

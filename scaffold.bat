@@ -1,0 +1,2 @@
+dotnet ef dbcontext scaffold "Server=tcp:2011-bevins-training.database.windows.net,1433;Initial Catalog=StoreManager;Persist Security Info=False;User ID=khypr;Password=Tyko343ijak;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" Microsoft.EntityFrameworkCore.SqlServer --startup-project ./StoreManager/StoreManager.DataModel/ --force --no-onconfiguring
+pause

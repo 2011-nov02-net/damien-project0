@@ -23,17 +23,17 @@ namespace StoreManager.Library.Factory
 
         public List<Address> Items { get; set; }
 
-        public long Create(IData data) {
+        public int Create(IData data) {
             var address = new Address(_idGenerator, data as AddressData);
             Items.Add(address);
             return address.Id;
         }
 
-        public Address Get(long id) {
+        public Address Get(int id) {
             return Items.FirstOrDefault(a => a.Id == id);
         }
 
-        public void Update(long id, IData data) {
+        public void Update(int id, IData data) {
             var address = Get(id);
             
             if (address is null)
@@ -42,7 +42,7 @@ namespace StoreManager.Library.Factory
             address.Data = data as AddressData;
         }
 
-        public void Delete(long id) {
+        public void Delete(int id) {
             var address = Get(id);
             
             if (address is null)

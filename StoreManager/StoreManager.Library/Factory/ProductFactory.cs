@@ -22,17 +22,17 @@ namespace StoreManager.Library.Factory
         
         public List<Product> Items { get; set; }
 
-        public long Create(IData data) {
+        public int Create(IData data) {
             var product = new Product(_idGenerator, data as ProductData);
             Items.Add(product);
             return product.Id;
         }
 
-        public Product Get(long id) {
+        public Product Get(int id) {
             return Items.FirstOrDefault(p => p.Id == id);
         }
 
-        public void Update(long id, IData data) {
+        public void Update(int id, IData data) {
             var product = Get(id);
 
             if (product is null)
@@ -41,7 +41,7 @@ namespace StoreManager.Library.Factory
             product.Data = data as ProductData;
         }
 
-        public void Delete(long id) {
+        public void Delete(int id) {
             var product = Get(id);
 
             if (product is null)

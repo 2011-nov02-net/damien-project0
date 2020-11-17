@@ -16,6 +16,11 @@ namespace StoreManager.Library.Entity
             _data = data;
         }
 
+        internal Customer(int id, CustomerData data) :
+            base(id) {
+            _data = data;
+        }
+
         internal override IData GetData() => new CustomerData(_data);
 
         internal override string GetName() => Data.Name;
