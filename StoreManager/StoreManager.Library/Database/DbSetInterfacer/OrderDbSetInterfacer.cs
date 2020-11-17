@@ -71,7 +71,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await context.Orders.AnyAsync();
         }
 
-        public async Task CreateSomeAsync(List<Order> items) {
+        public async Task CreateManyAsync(List<Order> items) {
             await Task.Run(() => items.ForEach(o => CreateOneAsync(o).Wait()));
         }
 
@@ -97,7 +97,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => orders.Select(o => ToOrder(o)).ToList());
         }
 
-        public async Task<List<Order>> GetSomeAsync(List<int> ids) {
+        public async Task<List<Order>> GetManyAsync(List<int> ids) {
             return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
         }
 
@@ -111,17 +111,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => ToOrder(item));
         }
 
-        public async Task UpdateAllAsync(List<Order> items) {
-            using var context = new StoreManagerContext(_contextOptions);
-            // Make sure to include the other items
-            var orders = context.Orders
-                .Include(o => o.OperatingLocationId)
-                .Include(o => o.CustomerId);
-            // Convert the data for the Library to use
-            await Task.Run(() => orders.Select(o => UpdateOneAsync(ToOrder(o))));
-        }
-
-        public async Task UpdateSomeAsync(List<Order> items) {
+        public async Task UpdateManyAsync(List<Order> items) {
             await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
         }
 
@@ -137,13 +127,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task DeleteAllAsync() {
-            using var context = new StoreManagerContext(_contextOptions);
-            var items = context.Orders;
-            await Task.Run(() => items.ForEachAsync(id => DeleteOneAsync(ToOrder(id)).Wait()));
-        }
-
-        public async Task DeleteSomeAsync(List<Order> items) {
+        public async Task DeleteManyAsync(List<Order> items) {
             await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
         }
 

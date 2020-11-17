@@ -98,12 +98,16 @@ namespace StoreManager.Library
 
         public T Get<T>(int id)
             where T : SEntity {
-            return _typeFactories[typeof(T)].Get(id) as T;
+            var entity = _typeFactories[typeof(T)].Get(id);
+            return entity as T ?? null;
         }
 
         public List<T> GetByName<T>(string name)
             where T : NamedSEntity {
-            return _typeFactories[typeof(T)].Items.ConvertAll(item => item as T);
+            return _typeFactories[typeof(T)].Items
+                .ConvertAll(item => item as T)
+                .Where(i => i.GetName().Contains(name))
+                .ToList();
         }
 
         public void Update<T>(int id, IData data)

@@ -44,7 +44,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await context.Addresses.AnyAsync();
         }
 
-        public async Task CreateSomeAsync(List<Address> items) {
+        public async Task CreateManyAsync(List<Address> items) {
             await Task.Run(() => items.ForEach(a => CreateOneAsync(a).Wait()));
         }
 
@@ -65,7 +65,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => addresses.Select(a => ToAddress(a)).ToList());
         }
 
-        public async Task<List<Address>> GetSomeAsync(List<int> ids) {
+        public async Task<List<Address>> GetManyAsync(List<int> ids) {
             return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
         }
 
@@ -76,15 +76,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => ToAddress(item));
         }
 
-        public async Task UpdateAllAsync(List<Address> items) {
-            using var context = new StoreManagerContext(_contextOptions);
-            // Make sure to include the other items
-            var addresses = context.Addresses;
-            // Convert the data for the Library to use
-            await Task.Run(() => addresses.Select(a => UpdateOneAsync(ToAddress(a))));
-        }
-
-        public async Task UpdateSomeAsync(List<Address> items) {
+        public async Task UpdateManyAsync(List<Address> items) {
             await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
         }
 
@@ -97,13 +89,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task DeleteAllAsync() {
-            using var context = new StoreManagerContext(_contextOptions);
-            var items = context.Addresses;
-            await Task.Run(() => items.ForEachAsync(id => DeleteOneAsync(ToAddress(id)).Wait()));
-        }
-
-        public async Task DeleteSomeAsync(List<Address> items) {
+        public async Task DeleteManyAsync(List<Address> items) {
             await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
         }
 

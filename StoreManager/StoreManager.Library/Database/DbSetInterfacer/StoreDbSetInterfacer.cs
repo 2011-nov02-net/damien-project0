@@ -71,7 +71,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await context.Stores.AnyAsync();
         }
 
-        public async Task CreateSomeAsync(List<Store> items) {
+        public async Task CreateManyAsync(List<Store> items) {
             await Task.Run(() => items.ForEach(s => CreateOneAsync(s).Wait()));
         }
 
@@ -102,7 +102,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => stores.Select(s => ToStore(s)).ToList());
         }
 
-        public async Task<List<Store>> GetSomeAsync(List<int> ids) {
+        public async Task<List<Store>> GetManyAsync(List<int> ids) {
             return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
         }
 
@@ -121,21 +121,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => ToStore(item));
         }
 
-        public async Task UpdateAllAsync(List<Store> items) {
-            using var context = new StoreManagerContext(_contextOptions);
-            if (!context.Stores.Any())
-                // If there are none
-                return;
-
-            // Make sure to include the other items
-            var stores = context.Stores
-                .Include(s => s.OperatingLocations)
-                .Include(s => s.StoreInventories);
-            // Convert the data for the Library to use
-            await Task.Run(() => stores.Select(s => UpdateOneAsync(ToStore(s))));
-        }
-
-        public async Task UpdateSomeAsync(List<Store> items) {
+        public async Task UpdateManyAsync(List<Store> items) {
             await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
         }
 
@@ -156,17 +142,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task DeleteAllAsync() {
-            using var context = new StoreManagerContext(_contextOptions);
-            if (!context.Stores.Any())
-                // If there are none
-                return;
-
-            var items = context.Stores;
-            await Task.Run(() => items.ForEachAsync(id => DeleteOneAsync(ToStore(id)).Wait()));
-        }
-
-        public async Task DeleteSomeAsync(List<Store> items) {
+        public async Task DeleteManyAsync(List<Store> items) {
             await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
         }
 

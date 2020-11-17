@@ -35,7 +35,7 @@ namespace StoreManager.Library.Database
 
         internal async Task CreateManyAsync<T>(List<SEntity> items)
             where T : SEntity {
-            await _interfacers[typeof(T)].CreateSomeAsync(items);
+            await _interfacers[typeof(T)].CreateManyAsync(items);
         }
 
         internal async Task CreateOneAsync<T>(SEntity entity)
@@ -50,7 +50,7 @@ namespace StoreManager.Library.Database
 
         internal async Task<List<SEntity>> GetSomeAsync<T>(List<int> ids)
             where T : SEntity {
-            return await Task.Run(() => _interfacers[typeof(T)].GetSomeAsync(ids));
+            return await Task.Run(() => _interfacers[typeof(T)].GetManyAsync(ids));
         }
 
         internal async Task<SEntity> GetOneAsync<T>(int id)
@@ -58,14 +58,9 @@ namespace StoreManager.Library.Database
             return await _interfacers[typeof(T)].GetOneAsync(id);
         }
 
-        internal async Task UpdateAllAsync<T>(List<SEntity> entities)
-            where T : SEntity {
-            await _interfacers[typeof(T)].UpdateAllAsync(entities);
-        }
-
         internal async Task UpdateManyAsync<T>(List<SEntity> entities)
             where T : SEntity {
-            await _interfacers[typeof(T)].UpdateSomeAsync(entities);
+            await _interfacers[typeof(T)].UpdateManyAsync(entities);
         }
 
         internal async Task UpdateOneAsync<T>(SEntity item)
@@ -73,14 +68,9 @@ namespace StoreManager.Library.Database
             await _interfacers[typeof(T)].UpdateOneAsync(item);
         }
 
-        internal async Task DeleteAllAsync<T>()
-            where T : SEntity {
-            await _interfacers[typeof(T)].DeleteAllAsync();
-        }
-
         internal async Task DeleteSomeAsync<T>(List<SEntity> entities)
             where T : SEntity {
-            await _interfacers[typeof(T)].DeleteSomeAsync(entities);
+            await _interfacers[typeof(T)].DeleteManyAsync(entities);
         }
 
         internal async Task DeleteOneAsync<T>(SEntity item)

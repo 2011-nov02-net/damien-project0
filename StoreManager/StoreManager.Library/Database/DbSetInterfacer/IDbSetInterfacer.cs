@@ -14,22 +14,20 @@ namespace StoreManager.Library.Database.DbSetInterfacer
         Task<bool> Any();
 
         // Create
-        Task CreateSomeAsync(List<T> items);
+        Task CreateManyAsync(List<T> items);
         Task CreateOneAsync(T item);
 
         // Read
         Task<List<T>> GetAllAsync();
-        Task<List<T>> GetSomeAsync(List<int> ids);
+        Task<List<T>> GetManyAsync(List<int> ids);
         Task<T> GetOneAsync(int id);
 
         // Update
-        Task UpdateAllAsync(List<T> items);
-        Task UpdateSomeAsync(List<T> items);
+        Task UpdateManyAsync(List<T> items);
         Task UpdateOneAsync(T item);
 
         // Delete
-        Task DeleteAllAsync();
-        Task DeleteSomeAsync(List<T> items);
+        Task DeleteManyAsync(List<T> items);
         Task DeleteOneAsync(T item);
     }
 }

@@ -38,7 +38,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await context.OperatingLocations.AnyAsync();
         }
 
-        public async Task CreateSomeAsync(List<OperatingLocation> items) {
+        public async Task CreateManyAsync(List<OperatingLocation> items) {
             await Task.Run(() => items.ForEach(ol => CreateOneAsync(ol).Wait()));
         }
 
@@ -61,7 +61,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => operatingLocations.Select(ol => ToOperatingLocation(ol)).ToList());
         }
 
-        public async Task<List<OperatingLocation>> GetSomeAsync(List<int> ids) {
+        public async Task<List<OperatingLocation>> GetManyAsync(List<int> ids) {
             return await Task.Run(() => ids.ConvertAll(id => GetOneAsync(id).Result));
         }
 
@@ -72,17 +72,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await Task.Run(() => ToOperatingLocation(item));
         }
 
-        public async Task UpdateAllAsync(List<OperatingLocation> items) {
-            using var context = new StoreManagerContext(_contextOptions);
-            // Make sure to include the other items
-            var operatingLocations = context.OperatingLocations
-                .Include(ol => ol.StoreId)
-                .Include(ol => ol.AddressId);
-            // Convert the data for the Library to use
-            await Task.Run(() => operatingLocations.Select(ol => UpdateOneAsync(ToOperatingLocation(ol))));
-        }
-
-        public async Task UpdateSomeAsync(List<OperatingLocation> items) {
+        public async Task UpdateManyAsync(List<OperatingLocation> items) {
             await Task.Run(() => items.ForEach(id => UpdateOneAsync(id).Wait()));
         }
 
@@ -95,13 +85,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             await Task.Run(() => context.SaveChanges());
         }
 
-        public async Task DeleteAllAsync() {
-            using var context = new StoreManagerContext(_contextOptions);
-            var items = context.OperatingLocations;
-            await Task.Run(() => items.ForEachAsync(id => DeleteOneAsync(ToOperatingLocation(id)).Wait()));
-        }
-
-        public async Task DeleteSomeAsync(List<OperatingLocation> items) {
+        public async Task DeleteManyAsync(List<OperatingLocation> items) {
             await Task.Run(() => items.ForEach(id => DeleteOneAsync(id).Wait()));
         }
 

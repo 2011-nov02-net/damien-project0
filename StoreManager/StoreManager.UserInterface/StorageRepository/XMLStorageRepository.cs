@@ -59,19 +59,11 @@ namespace StoreManager.UserInterface.StorageRepository
             throw new NotImplementedException();
         }
 
-        public Task UpdateAllAsync<T>(List<SEntity> items) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
         public Task UpdateManyAsync<T>(List<SEntity> items) where T : SEntity {
             throw new NotImplementedException();
         }
 
         public Task UpdateOneAsync<T>(SEntity entity) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAllAsync<T>() where T : SEntity {
             throw new NotImplementedException();
         }
 
