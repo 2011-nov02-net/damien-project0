@@ -26,6 +26,6 @@ namespace StoreManager.Library.Data
             this(data.AddressLine1, data.AddressLine2, data.City, data.State, data.Country, data.ZipCode) {
         }
 
-        public override string ToString() => $"{AddressLine1}, {AddressLine2}, {City},{(State is not null ? $" {State}" : "")}, {Country} {ZipCode}";
+        public override string ToString() => $"{AddressLine1},{(!string.IsNullOrWhiteSpace(AddressLine2) ? $" {AddressLine2}, " : "")}{City},{(!string.IsNullOrWhiteSpace(State) ? $" {State}, " : "")}{Country} {ZipCode}";
     }
 }

@@ -17,9 +17,10 @@ namespace StoreManager.Library
         private static StoreManagerApplication s_storeManager;
 
         private readonly IStorageRepository _storage;
+        private readonly ISerializer _serializer;
         private readonly FactoryManager _factoryManager;
 
-        #region Singleton Methods
+        #region Utility Methods
 
         internal static List<T> GetAll<T>()
             where T : SEntity {
@@ -36,9 +37,13 @@ namespace StoreManager.Library
             return s_storeManager.GetEntity<T>(id);
         }
 
-        public static void Initialize(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) {
-            s_storeManager ??= new StoreManagerApplication(storage, configurationOptions);
+        #endregion
+
+        public static void Initialize(IStorageRepository storage = null, ISerializer serializer = null, IConfigurationOptions configurationOptions = null) {
+            s_storeManager ??= new StoreManagerApplication(storage, serializer, configurationOptions);
         }
+
+        #region Singleton Methods
 
         public static bool Any<T>()
             where T : SEntity {
@@ -99,6 +104,10 @@ namespace StoreManager.Library
         public static List<int> GetOrderIdsByCustomerId(int id) {
             var storeData = s_storeManager.GetAllEntityData<Store>().ConvertAll(ed => ed as StoreData);
             List<int> orderIds = new List<int>();
+
+            if (!orderIds.Any())
+                return orderIds;
+
             storeData.ForEach(sd => orderIds.AddRange(sd.OrderIds));
             return orderIds;
         }
@@ -121,15 +130,18 @@ namespace StoreManager.Library
         /// Creates a StoreManager instance
         /// </summary>
         /// <param name="storage">The storage medium in which the application stores its data</param>
-        private StoreManagerApplication(IStorageRepository storage, IConfigurationOptions configurationOptions) {
+        private StoreManagerApplication(IStorageRepository storage, ISerializer serializer, IConfigurationOptions configurationOptions) {
             _storage = storage ?? new DatabaseStorageRepository();
+            _serializer = serializer ?? (_storage is DatabaseStorageRepository
+                ? _storage as DatabaseStorageRepository
+                : null
+            );
             _storage.Configure(configurationOptions);
 
             try {
-                var dataBundle = _storage?.ReadAsync()?.Result;
+                var dataBundle = _serializer?.ReadAsync()?.Result;
                 _factoryManager = new FactoryManager(dataBundle);
             } catch (Exception) {
-                // TODO: Log the error to disk
             } finally {
                 _factoryManager ??= new FactoryManager();
             }
@@ -267,7 +279,7 @@ namespace StoreManager.Library
         }
 
         private async Task Save() {
-            await _storage.WriteAsync(_factoryManager.BundleData);
+            await _serializer?.WriteAsync(_factoryManager.DataBundle);
         }
 
         #endregion

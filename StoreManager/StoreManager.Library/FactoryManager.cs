@@ -28,6 +28,7 @@ namespace StoreManager.Library
             this() {
             if (dataBundle is null)
                 return;
+            else _dataBundle = dataBundle;
             // with the data bundle passed in, now the data can be assorted into each of the objects
             // Id lifespan is only of the lifetime of the application; they are reassigned on loading. 
             // The ids are only used in the location, and not by any of the storage items
@@ -39,20 +40,21 @@ namespace StoreManager.Library
             dataBundle.AddressData.ForEach(ad => Create<Address>(ad));
         }
 
-        public DataBundle BundleData
+        ~FactoryManager() {
+            var storesData = Factories<Store>().Items.Select(item => item.GetData() as StoreData).ToList();
+            var ordersData = Factories<Order>().Items.Select(item => item.GetData() as OrderData).ToList();
+            var customersData = Factories<Customer>().Items.Select(item => item.GetData() as CustomerData).ToList();
+            var addressesData = Factories<Address>().Items.Select(item => item.GetData() as AddressData).ToList();
+            var operatingLocationsData = Factories<OperatingLocation>().Items.Select(item => item.GetData() as OperatingLocationData).ToList();
+            var productsData = Factories<Product>().Items.Select(item => item.GetData() as ProductData).ToList();
+            var dataBundle = new DataBundle(storesData, ordersData, customersData, addressesData, operatingLocationsData, productsData);
+        }
+
+        private DataBundle _dataBundle;
+        public DataBundle DataBundle
         {
-            // TODO: This might have to be changed at a later date
-            get
-            {
-                var storesData = Factories<Store>().Items.Select(item => item.GetData() as StoreData).ToList();
-                var ordersData = Factories<Order>().Items.Select(item => item.GetData() as OrderData).ToList();
-                var customersData = Factories<Customer>().Items.Select(item => item.GetData() as CustomerData).ToList();
-                var addressesData = Factories<Address>().Items.Select(item => item.GetData() as AddressData).ToList();
-                var operatingLocationsData = Factories<OperatingLocation>().Items.Select(item => item.GetData() as OperatingLocationData).ToList();
-                var productsData = Factories<Product>().Items.Select(item => item.GetData() as ProductData).ToList();
-                var dataBundle = new DataBundle(storesData, ordersData, customersData, addressesData, operatingLocationsData, productsData);
-                return dataBundle;
-            }
+            get => _dataBundle;
+            set => _dataBundle = value;
         }
 
         internal ISEntityFactory<T> Factories<T>()
@@ -111,8 +113,6 @@ namespace StoreManager.Library
             where T : NamedSEntity {
             var items = Factories<T>().Items;
             var tItems = items.ConvertAll(item => item as T);
-
-            Console.WriteLine($"Type: {typeof(T)}, items_count: {items.Count()}");
 
             return tItems.Where(i => {
                 var name = i.GetName();

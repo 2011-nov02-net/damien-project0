@@ -10,9 +10,6 @@ namespace StoreManager.Library
     {
         void Configure(IConfigurationOptions configurationOptions);
 
-        Task<DataBundle> ReadAsync();
-        Task WriteAsync(DataBundle dataBundle);
-
         // Create
         Task CreateManyAsync<T>(List<T> entities) where T : SEntity;
         Task CreateOneAsync<T>(T entity) where T : SEntity;

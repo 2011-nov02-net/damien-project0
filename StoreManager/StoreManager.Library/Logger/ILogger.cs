@@ -1,4 +1,6 @@
-﻿namespace StoreManager.Library.Logger
+﻿using System.Threading.Tasks;
+
+namespace StoreManager.Library.Logger
 {
     public interface ILogger
     {

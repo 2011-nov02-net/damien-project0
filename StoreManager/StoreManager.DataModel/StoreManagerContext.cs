@@ -39,9 +39,7 @@ namespace StoreManager.DataModel
                     .IsRequired()
                     .HasMaxLength(128);
 
-                entity.Property(e => e.AddressLine2)
-                    .IsRequired()
-                    .HasMaxLength(128);
+                entity.Property(e => e.AddressLine2).HasMaxLength(128);
 
                 entity.Property(e => e.City)
                     .IsRequired()
@@ -93,7 +91,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<CustomerOrder>(entity =>
             {
                 entity.HasKey(e => new { e.CustomerId, e.OrderId })
-                    .HasName("PK__Customer__48976164AC7F0C3E");
+                    .HasName("PK__Customer__489761646B2818FE");
 
                 entity.ToTable("CustomerOrder", "Stores");
 
@@ -114,7 +112,7 @@ namespace StoreManager.DataModel
             {
                 entity.ToTable("OperatingLocation", "Stores");
 
-                entity.HasIndex(e => e.AddressId, "UQ__Operatin__091C2AFA29A70F1F")
+                entity.HasIndex(e => e.AddressId, "UQ__Operatin__091C2AFA74EE03B1")
                     .IsUnique();
 
                 entity.Property(e => e.OperatingLocationId).ValueGeneratedNever();
@@ -154,7 +152,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<OrderProduct>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK__OrderPro__08D097A3FC4E497A");
+                    .HasName("PK__OrderPro__08D097A3A6851507");
 
                 entity.ToTable("OrderProduct", "Stores");
 
@@ -200,7 +198,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<StoreInventory>(entity =>
             {
                 entity.HasKey(e => new { e.StoreId, e.ProductId })
-                    .HasName("PK__StoreInv__F0C23D6D9A3DC409");
+                    .HasName("PK__StoreInv__F0C23D6D11A5F08D");
 
                 entity.ToTable("StoreInventory", "Stores");
 

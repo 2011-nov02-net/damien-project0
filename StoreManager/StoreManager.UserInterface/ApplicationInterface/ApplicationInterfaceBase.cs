@@ -16,9 +16,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
         public abstract void Run();
 
-        public ApplicationInterfaceBase(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) {
-            StoreManagerApplication.Initialize(storage, configurationOptions);
-            // Prompt to see if the user wishes to have rabbit-hole prompts
+        public ApplicationInterfaceBase(IStorageRepository storage = null, ISerializer serializer = null, IConfigurationOptions configurationOptions = null) {
+            StoreManagerApplication.Initialize(storage, serializer, configurationOptions);
             _typeNames = new Dictionary<Type, string>
             {
                 { typeof(Customer), "customer" },
@@ -87,6 +86,33 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 done = task();
             } while (!done);
         }
+
+        #region IData to string[]
+
+        protected string[] CustomerDataToStringArray(CustomerData data) {
+            var address = (StoreManagerApplication.GetData<Address>(data.AddressId) as AddressData).ToString();
+            var items = new List<string>
+            {
+                //   Name
+                data.Name,
+                //   Email
+                data.Email,
+                //   PhoneNumber
+                data.PhoneNumber,
+                //   AddressId -> Address
+                address,
+                //   BirthDate
+                data.BirthDate.ToString()
+            };
+            var defaultStoreLocation = StoreManagerApplication.GetData<OperatingLocation>(data.DefaultStoreLocationId.Value) as OperatingLocationData;
+            var dslStoreName = StoreManagerApplication.GetName<Store>(defaultStoreLocation.StoreId);
+            var dslAddress = (StoreManagerApplication.GetData<Address>(defaultStoreLocation.AddressId) as AddressData).ToString();
+            items.Add($"{dslStoreName} - {dslAddress}");
+
+            return items.ToArray();
+        }
+
+        #endregion
 
         #endregion
 

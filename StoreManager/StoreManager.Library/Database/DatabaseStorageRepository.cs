@@ -10,10 +10,11 @@ using StoreManagerContext = StoreManager.DataModel.StoreManagerContext;
 
 using StoreManager.Library.Data;
 using StoreManager.Library.Entity;
+using Microsoft.Extensions.Logging;
 
 namespace StoreManager.Library.Database
 {
-    public class DatabaseStorageRepository : IStorageRepository
+    public class DatabaseStorageRepository : IStorageRepository, ISerializer
     {
         private DbSetInterfacerManager _interfacerManager;
         public void Configure(IConfigurationOptions configurationOptions) {
@@ -23,7 +24,7 @@ namespace StoreManager.Library.Database
             var configOptions = configurationOptions as DatabaseConfigurationOptions;
             var optionsBuilder = new DbContextOptionsBuilder<StoreManagerContext>();
             optionsBuilder.UseSqlServer(configOptions.ConnectionString);
-            // TODO: Set up the logging structure here
+            optionsBuilder.LogTo(configOptions.Logger.Log, LogLevel.Information);
 
             var contextOptions = optionsBuilder.Options;
             _interfacerManager = new DbSetInterfacerManager(contextOptions);
@@ -47,6 +48,7 @@ namespace StoreManager.Library.Database
         }
 
         public async Task WriteAsync(DataBundle dataBundle) {
+            // This is unneccesary since the data is persisted as it's written.
             await Task.Run(() => { });
         }
 

@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using StoreManager.Library.Logger;
+using StoreManager.Library.Data;
 
 namespace StoreManager.Library
 {
-    public interface IConfigurationOptions
+    public interface ISerializer
     {
+        Task<DataBundle> ReadAsync();
+        Task WriteAsync(DataBundle dataBundle);
     }
 }

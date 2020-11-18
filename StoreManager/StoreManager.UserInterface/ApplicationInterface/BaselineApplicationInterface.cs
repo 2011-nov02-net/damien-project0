@@ -17,8 +17,8 @@ namespace StoreManager.UserInterface.ApplicationInterface
     {
         private readonly Dictionary<string, Action> _actions;
 
-        public BaselineApplicationInterface(IStorageRepository storage = null, IConfigurationOptions configurationOptions = null) :
-            base(storage, configurationOptions) {
+        public BaselineApplicationInterface(IStorageRepository storage = null, ISerializer serializer = null, IConfigurationOptions configurationOptions = null) :
+            base(storage, serializer, configurationOptions) {
 
             _actions = new Dictionary<string, Action>
             {

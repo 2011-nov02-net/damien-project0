@@ -113,7 +113,7 @@ GO
 CREATE TABLE [Stores].[Address] (
     [AddressId]                     INT             NOT NULL PRIMARY KEY,
     [AddressLine1]                  NVARCHAR(128)   NOT NULL,
-    [AddressLine2]                  NVARCHAR(128)   NOT NULL,
+    [AddressLine2]                  NVARCHAR(128)   NULL,
     [City]                          NVARCHAR(128)   NOT NULL,
     [State]                         NVARCHAR(128)   NULL,
     [Country]                       NVARCHAR(128)   NOT NULL,

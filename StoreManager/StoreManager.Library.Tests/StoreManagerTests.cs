@@ -8,5 +8,8 @@ namespace StoreManager.Library.Tests
     {
         // [Fact] public void Test() { }
         // [Theory] public void Test(int param) { }
+        [Fact]
+        public void VeroExists() {
+        }
     }
 }

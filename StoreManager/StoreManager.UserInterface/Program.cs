@@ -5,6 +5,7 @@ using System.Text.Json;
 using StoreManager.Library;
 using StoreManager.Library.Data;
 using StoreManager.Library.Database;
+using StoreManager.Library.Logger;
 using StoreManager.UserInterface.ApplicationInterface;
 using StoreManager.UserInterface.StorageRepository;
 
@@ -23,7 +24,7 @@ namespace StoreManager.UserInterface
             // var options = new[] { "db", "xml", "json" };
             // int selectedOption = CUI.PromptForMenuSelection(options, true);
             IStorageRepository storageRepository = null;
-            IConfigurationOptions configurationOptions = new DatabaseConfigurationOptions(connString);
+            IConfigurationOptions configurationOptions = new DatabaseConfigurationOptions(new FileLogger("C:/Users/Khypr/Desktop/store_manager.log"), connString);
 
             // if(selectedOption == -1) {
             //     Console.WriteLine("Exiting...");
@@ -46,9 +47,9 @@ namespace StoreManager.UserInterface
             bool verbose = false; // CUI.PromptForBool("Do you wish to run the application verbosely?", "yes", "no");
 
             if(verbose) {
-                applicationInterface = new VerboseApplicationInterface(storageRepository, configurationOptions);
+                applicationInterface = new VerboseApplicationInterface(storageRepository, null, configurationOptions);
             } else {
-                applicationInterface = new BaselineApplicationInterface(storageRepository, configurationOptions);
+                applicationInterface = new BaselineApplicationInterface(storageRepository, null, configurationOptions);
             }
 
             applicationInterface.Run();

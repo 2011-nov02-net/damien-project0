@@ -10,7 +10,7 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.UserInterface.StorageRepository
 {
-    class XMLStorageRepository : IStorageRepository
+    class XMLStorageRepository : ISerializer
     {
         private string _filepath;
         public string Filepath
@@ -36,42 +36,6 @@ namespace StoreManager.UserInterface.StorageRepository
         }
 
         public Task WriteAsync(DataBundle dataBundle) {
-            throw new NotImplementedException();
-        }
-
-        public Task CreateManyAsync<T>(List<T> entities) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task CreateOneAsync<T>(T entity) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<T>> GetAllAsync<T>() where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<T>> GetManyAsync<T>(List<int> ids) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task<T> GetOneAsync<T>(int id) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateManyAsync<T>(List<T> items) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateOneAsync<T>(T entity) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteManyAsync<T>(List<T> entities) where T : SEntity {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteOneAsync<T>(T entity) where T : SEntity {
             throw new NotImplementedException();
         }
     }
