@@ -26,7 +26,7 @@ namespace StoreManager.Library
             return s_storeManager.GetAllEntities<T>();
         }
 
-        internal static List<T> GetSome<T>(List<int> ids)
+        internal static List<T> GetMany<T>(List<int> ids)
             where T : SEntity {
             return s_storeManager.GetManyEntities<T>(ids);
         }
@@ -175,6 +175,7 @@ namespace StoreManager.Library
 
         private List<IData> GetAllEntityData<T>()
             where T : SEntity {
+            UpdateEntities<T>();
             var entities = GetAllEntities<T>();
 
             if (!entities.Any())
@@ -185,6 +186,7 @@ namespace StoreManager.Library
 
         private List<IData> GetManyEntityData<T>(List<int> ids)
             where T : SEntity {
+            UpdateEntities<T>();
             var entities = GetManyEntities<T>(ids);
 
             if (!entities.Any())
@@ -195,6 +197,7 @@ namespace StoreManager.Library
 
         private IData GetEntityData<T>(int id)
             where T : SEntity {
+            UpdateEntities<T>();
             var item = GetEntity<T>(id);
             return item?.GetData();
         }
@@ -212,6 +215,7 @@ namespace StoreManager.Library
 
         private List<T> GetManyEntities<T>(List<int> ids)
             where T : SEntity {
+            UpdateEntities<T>();
             var entities = _storage.GetManyAsync<T>(ids).Result;
 
             if (!entities.Any())
@@ -223,6 +227,7 @@ namespace StoreManager.Library
 
         private T GetEntity<T>(int id)
             where T : SEntity {
+            UpdateEntities<T>();
             var entity = _storage.GetOneAsync<T>(id)?.Result;
             
             if (entity is null)
@@ -234,6 +239,7 @@ namespace StoreManager.Library
 
         private List<T> GetByName<T>(string name)
             where T : NamedSEntity {
+            UpdateEntities<T>();
             var entities = _storage.GetAllAsync<T>().Result;
 
             if (!entities.Any())
@@ -245,6 +251,7 @@ namespace StoreManager.Library
 
         private void UpdateEntity<T>(int id, IData data)
             where T : SEntity {
+            UpdateEntities<T>();
             var item = _factoryManager.Get<T>(id);
             _factoryManager.Update<T>(id, data);
             _storage.UpdateOneAsync<T>(item);
@@ -252,6 +259,7 @@ namespace StoreManager.Library
 
         private void DeleteEntity<T>(int id)
             where T : SEntity {
+            UpdateEntities<T>();
             var item = _factoryManager.Get<T>(id);
 
             _storage.DeleteOneAsync<T>(item);

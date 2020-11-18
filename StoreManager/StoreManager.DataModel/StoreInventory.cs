@@ -10,6 +10,7 @@ namespace StoreManager.DataModel
         public int StoreId { get; set; }
         public int ProductId { get; set; }
         public int Count { get; set; }
+        public int? Threshold { get; set; }
 
         public virtual Product Product { get; set; }
         public virtual Store Store { get; set; }

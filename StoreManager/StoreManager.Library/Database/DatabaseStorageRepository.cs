@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
-using StoreManager.DataModel;
+using StoreManagerContext = StoreManager.DataModel.StoreManagerContext;
+
 using StoreManager.Library.Data;
 using StoreManager.Library.Entity;
 
@@ -29,8 +30,20 @@ namespace StoreManager.Library.Database
         }
 
         public async Task<DataBundle> ReadAsync() {
-            DataBundle result = null;
-            return await Task.Run(() => result);
+            var stores = GetAllAsync<Store>().Result
+                .ConvertAll(s => s.Data);
+            var orders = GetAllAsync<Order>().Result
+                .ConvertAll(o => o.Data);
+            var customers = GetAllAsync<Customer>().Result
+                .ConvertAll(c => c.Data);
+            var addresses = GetAllAsync<Address>().Result
+                .ConvertAll(a => a.Data);
+            var operatingLocations = GetAllAsync<OperatingLocation>().Result
+                .ConvertAll(ol => ol.Data);
+            var products = GetAllAsync<Product>().Result
+                .ConvertAll(p => p.Data);
+
+            return await Task.Run(() => new DataBundle(stores, orders, customers, addresses, operatingLocations, products));
         }
 
         public async Task WriteAsync(DataBundle dataBundle) {

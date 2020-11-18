@@ -61,8 +61,8 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             var customers = context.Customers
-                .Include(c => c.AddressId)
-                .Include(c => c.OperatingLocationId);
+                .Include(c => c.Address)
+                .Include(c => c.OperatingLocation);
             // Convert the data for the Library to use
             return await Task.Run(() => customers.Select(c => ToCustomer(c)).ToList());
         }

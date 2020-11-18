@@ -109,10 +109,15 @@ namespace StoreManager.Library
 
         public List<T> GetByName<T>(string name)
             where T : NamedSEntity {
-            return Factories<T>().Items
-                .ConvertAll(item => item as T)
-                .Where(i => i.GetName().Contains(name))
-                .ToList();
+            var items = Factories<T>().Items;
+            var tItems = items.ConvertAll(item => item as T);
+
+            Console.WriteLine($"Type: {typeof(T)}, items_count: {items.Count()}");
+
+            return tItems.Where(i => {
+                var name = i.GetName();
+                return name.Contains(name);
+            }).ToList();
         }
 
         public void Update<T>(int id, IData data)

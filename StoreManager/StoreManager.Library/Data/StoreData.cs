@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace StoreManager.Library.Data
 {
@@ -7,11 +8,11 @@ namespace StoreManager.Library.Data
         public override string Name { get; set; }
         public List<int> OperatingLocationIds { get; set; }
         public List<int> OrderIds { get; set; }
-        public Dictionary<int, int> Inventory { get; set; }
+        public Dictionary<int, Tuple<int, int?>> Inventory { get; set; }
 
         public StoreData() { }
 
-        public StoreData(string name, List<int> operatingLocations, Dictionary<int, int> inventory) {
+        public StoreData(string name, List<int> operatingLocations, Dictionary<int, Tuple<int, int?>> inventory) {
             Name = name;
             OperatingLocationIds = operatingLocations;
             Inventory = inventory;

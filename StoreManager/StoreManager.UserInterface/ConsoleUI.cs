@@ -117,8 +117,8 @@ namespace ConsoleUI
                 int currentLength = optionsList[i].Length;
                 prompt += BorderOption(border.OptionsBorderChar, $"{i - 1} {border.SeparatingChar} {optionsList[i]}".PadRight(maxWidth, ' ')) + newLine;
             }
-            int final = optionsList.Count - 1 + (withQuit ? -1 : 0);
-            prompt += BorderOption(border.OptionsBorderChar, $"{final} {border.SeparatingChar} {optionsList[final]}".PadRight(maxWidth, ' '));
+            int final = optionsList.Count - 1;
+            prompt += BorderOption(border.OptionsBorderChar, $"{final - 1} {border.SeparatingChar} {optionsList[final]}".PadRight(maxWidth, ' '));
 
             // Display the prompts here
             if (border.BorderWidth > 0) {
@@ -130,7 +130,7 @@ namespace ConsoleUI
                 Console.WriteLine(prompt);
             }
 
-            return PromptRange("Enter your choice: ", withQuit ? -1 : 0, options.Length);
+            return PromptRange("Enter your choice: ", withQuit ? -1 : 0, options.Length - 1);
         }
 
         /// <summary>

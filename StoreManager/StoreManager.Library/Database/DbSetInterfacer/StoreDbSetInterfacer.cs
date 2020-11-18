@@ -37,26 +37,27 @@ namespace StoreManager.Library.Database.DbSetInterfacer
 
         internal static Store ToStore(DbStore dbStore) {
             var data = new StoreData(
-                dbStore.Name, 
+                dbStore.Name,
                 dbStore.OperatingLocations.Select(
                     ol => ol.OperatingLocationId
                 ).ToList(),
                 dbStore.StoreInventories.ToDictionary(
                     si => si.ProductId,
-                    si => si.Count
+                    si => new Tuple<int, int?>(si.Count, si.Threshold)
                 )
             );
             return new Store(dbStore.StoreId, data);
         }
 
-        internal static DbStoreInventory ToDbStoreInventory(KeyValuePair<int, int> pair) {
+        internal static DbStoreInventory ToDbStoreInventory(KeyValuePair<int, Tuple<int, int?>> pair) {
             var product = ProductDbSetInterfacer.ToDbProduct(
                 StoreManagerApplication.Get<Product>(pair.Key)
             );
             return new DbStoreInventory
             {
                 Product = product,
-                Count = pair.Value
+                Count = pair.Value.Item1,
+                Threshold = pair.Value.Item2
             };
         }
 

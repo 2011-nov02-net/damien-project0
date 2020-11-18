@@ -88,29 +88,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
             } while (!done);
         }
 
-        protected Dictionary<int, int> PromptForProductsWithCounts() {
-            Dictionary<int, int> result = new Dictionary<int, int>();
-
-            UntilItIsDone(() => {
-                // Add products and the inventory they have
-                int productId = PromptForCreateOrExist<Product>(
-                    () => {
-                        var data = CreateProductData();
-                        return StoreManagerApplication.Create<Product>(data);
-                    },
-                    () => PromptForId<Product>()
-                );
-
-                // Get the count
-                int count = CUI.PromptRange("Enter the count of said product", 0, int.MaxValue);
-                result[productId] = count;
-
-                return !CUI.PromptForBool("Add another product?", "yes", "no");
-            });
-
-            return result;
-        }
-
         #endregion
 
         #region Creation Methods
@@ -140,7 +117,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             string storeName = CUI.PromptForInput("Enter the store name", false);
             List<int> operatingLocationIds = new List<int>();
             List<int> customerIds = new List<int>();
-            Dictionary<int, int> inventory;
+            Dictionary<int, Tuple<int, int?>> inventory = new Dictionary<int, Tuple<int, int?>>();
 
             int locationId;
 
@@ -161,7 +138,26 @@ namespace StoreManager.UserInterface.ApplicationInterface
                 return !CUI.PromptForBool("Add another operating location?", "yes", "no");
             });
 
-            inventory = PromptForProductsWithCounts();
+            UntilItIsDone(() => {
+                // Add products and the inventory they have
+                int productId = PromptForCreateOrExist<Product>(
+                    () => {
+                        var data = CreateProductData();
+                        return StoreManagerApplication.Create<Product>(data);
+                    },
+                    () => PromptForId<Product>()
+                );
+
+                // Get the count
+                int count = CUI.PromptRange("Enter the count of said product", 0, int.MaxValue);
+
+                int? threshold = CUI.PromptForBool("Set a product threshold?", "yes", "no")
+                    ? CUI.PromptRange("Enter the product threshold", 1, count) : null;
+
+                inventory[productId] = new Tuple<int, int?>(count, threshold);
+
+                return !CUI.PromptForBool("Add another product?", "yes", "no");
+            });
 
             return new StoreData(storeName, operatingLocationIds, inventory);
         }
@@ -169,7 +165,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
         protected OrderData CreateOrderData() {
             int customerId = -1;
             int operatingLocationId = -1;
-            Dictionary<int, int> productsRequested = null;
+            Dictionary<int, int> productsRequested = new Dictionary<int, int>();
 
             // Get the customer id
             customerId = PromptForCreateOrExist<Customer>(
@@ -203,14 +199,34 @@ namespace StoreManager.UserInterface.ApplicationInterface
             operatingLocationId = store.OperatingLocationIds[selectedOption];
 
             // Get the products the user wants
-            productsRequested = PromptForProductsWithCounts();
+
+            UntilItIsDone(() => {
+                // Add products and the inventory they have
+                int productId = PromptForCreateOrExist<Product>(
+                    () => {
+                        var data = CreateProductData();
+                        return StoreManagerApplication.Create<Product>(data);
+                    },
+                    () => PromptForId<Product>()
+                );
+
+                int threshold = store.Inventory[productId].Item2.HasValue
+                    ? store.Inventory[productId].Item2.Value
+                    : store.Inventory[productId].Item1;
+
+                // Get the count
+                int count = CUI.PromptRange("Enter the count of said product", 0, threshold);
+                productsRequested[productId] = count;
+
+                return !CUI.PromptForBool("Add another product?", "yes", "no");
+            });
 
             return new OrderData(customerId, operatingLocationId, productsRequested);
         }
 
         protected AddressData CreateAddressData() {
             string addressLine1 = CUI.PromptForInput("Enter address line 1", false);
-            string addressLine2 = CUI.PromptForInput("Enter address line 2", false);
+            string addressLine2 = CUI.PromptForInput("Enter address line 2", true);
             string city = CUI.PromptForInput("Enter the city", false);
             string state = CUI.PromptForInput("Enter the state", true);
             state = string.IsNullOrWhiteSpace(state) ? null : state;

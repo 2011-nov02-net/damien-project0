@@ -227,7 +227,8 @@ GO
 CREATE TABLE [Stores].[StoreInventory] (
     [StoreId]                       INT             NOT NULL,
     [ProductId]                     INT             NOT NULL,
-    [Count]                         INT             NOT NULL
+    [Count]                         INT             NOT NULL,
+    [Threshold]                     INT             NULL
 );
 GO
 

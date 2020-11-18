@@ -200,7 +200,7 @@ namespace StoreManager.DataModel
             modelBuilder.Entity<StoreInventory>(entity =>
             {
                 entity.HasKey(e => new { e.StoreId, e.ProductId })
-                    .HasName("PK__StoreInv__F0C23D6D4677EAC4");
+                    .HasName("PK__StoreInv__F0C23D6D9A3DC409");
 
                 entity.ToTable("StoreInventory", "Stores");
 

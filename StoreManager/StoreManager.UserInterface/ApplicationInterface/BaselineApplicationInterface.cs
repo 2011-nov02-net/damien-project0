@@ -22,12 +22,12 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
             _actions = new Dictionary<string, Action>
             {
-                { "Place an Order to a store location", PlaceOrderToStoreLocation },
-                { "Add a new customer", AddCustomer },
-                { "Search customers by their name", SearchCustomersByName },
-                { "Display the details of an order", DisplayOrderDetails },
-                { "Display all of the orders of a store location", DisplayStoreOrderHistory },
-                { "Display all of a customer's order history", DisplayCustomerOrderHistory },
+                { "Place an Order to a store location", PlaceOrderToStoreLocation }, // <-
+                { "Add a new customer", AddCustomer }, // ✔
+                { "Search customers by their name", SearchCustomersByName },  // ✔
+                { "Display the details of an order", DisplayOrderDetails }, // <-
+                { "Display all of the orders of a store location", DisplayStoreOrderHistory }, // <-
+                { "Display all of a customer's order history", DisplayCustomerOrderHistory }, // <-
                 { "Clear the console", Console.Clear }
             };
         }
@@ -49,8 +49,13 @@ namespace StoreManager.UserInterface.ApplicationInterface
             string userInput = CUI.PromptForInput("Enter the name in the format of 'first, last'", false);
             // get a list of the results
             var customerIds = StoreManagerApplication.GetCustomerIdsByName(userInput);
-            // display the results
-            customerIds.ForEach(cid => DisplayCustomer(cid, true));
+
+            if(customerIds.Any()) {
+                // display the results
+                customerIds.ForEach(cid => DisplayCustomer(cid, true));
+            } else {
+                Console.WriteLine($"No customers found with name like '{userInput}'.");
+            }
         }
 
         private void DisplayOrderDetails() {
@@ -71,8 +76,13 @@ namespace StoreManager.UserInterface.ApplicationInterface
             int selectedOption = CUI.PromptForMenuSelection(storeNames, false);
             // Get the store they wish to see
             var selectedStore = stores.ElementAt(selectedOption);
-            // display all of the orders 
-            selectedStore.OrderIds.ForEach(o => DisplayOrder(o));
+
+            if (selectedStore.OrderIds.Any()) {
+                // display all of the orders 
+                selectedStore.OrderIds.ForEach(o => DisplayOrder(o));
+            } else {
+                Console.WriteLine($"No orders for '{selectedStore.Name}'");
+            }
         }
 
         private void DisplayCustomerOrderHistory() {
@@ -80,8 +90,13 @@ namespace StoreManager.UserInterface.ApplicationInterface
             int customerId = PromptForId<Customer>();
             // get the orders of the customer they're looking for
             var customerOrders = StoreManagerApplication.GetOrderIdsByCustomerId(customerId);
-            // display all of the order details
-            customerOrders.ForEach(co => DisplayOrder(co, true));
+
+            if(customerOrders.Any()) {
+                // display all of the order details
+                customerOrders.ForEach(co => DisplayOrder(co, true));
+            } else {
+                Console.WriteLine($"No orders for '{StoreManagerApplication.GetName<Customer>(customerId)}'");
+            }
         }
 
         public override void Run() {

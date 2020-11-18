@@ -91,8 +91,8 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             using var context = new StoreManagerContext(_contextOptions);
             // Make sure to include the other items
             var orders = context.Orders
-                .Include(o => o.OperatingLocationId)
-                .Include(o => o.CustomerId);
+                .Include(o => o.OperatingLocation)
+                .Include(o => o.Customer);
             // Convert the data for the Library to use
             return await Task.Run(() => orders.Select(o => ToOrder(o)).ToList());
         }
