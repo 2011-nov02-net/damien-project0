@@ -14,8 +14,8 @@ namespace StoreManager.Library
         Task WriteAsync(DataBundle dataBundle);
 
         // Create
-        Task CreateManyAsync<T>(List<SEntity> entities) where T : SEntity;
-        Task CreateOneAsync<T>(SEntity entity) where T : SEntity;
+        Task CreateManyAsync<T>(List<T> entities) where T : SEntity;
+        Task CreateOneAsync<T>(T entity) where T : SEntity;
 
         // Read
         Task<List<T>> GetAllAsync<T>() where T : SEntity;
@@ -23,11 +23,11 @@ namespace StoreManager.Library
         Task<T> GetOneAsync<T>(int id) where T : SEntity;
         
         // Update
-        Task UpdateManyAsync<T>(List<SEntity> items) where T : SEntity;
-        Task UpdateOneAsync<T>(SEntity entity) where T : SEntity;
+        Task UpdateManyAsync<T>(List<T> items) where T : SEntity;
+        Task UpdateOneAsync<T>(T entity) where T : SEntity;
         
         // Delete
-        Task DeleteManyAsync<T>(List<SEntity> entities) where T : SEntity;
-        Task DeleteOneAsync<T>(SEntity entity) where T : SEntity;
+        Task DeleteManyAsync<T>(List<T> entities) where T : SEntity;
+        Task DeleteOneAsync<T>(T entity) where T : SEntity;
     }
 }

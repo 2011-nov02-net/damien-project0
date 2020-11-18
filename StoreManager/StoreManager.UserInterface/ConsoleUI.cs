@@ -236,7 +236,6 @@ namespace ConsoleUI
 
             do {
                 DateTime result;
-                Console.Write($"{prompt}: ");
                 if (oneLine) {
                     string userInput = ConsoleUI.PromptForInput("Enter the date", false);
                     if (!DateTime.TryParse(userInput, out result)) {
@@ -319,7 +318,6 @@ namespace ConsoleUI
             int tries = 0;
 
             do {
-                Console.Write($"{prompt}: ");
                 string userInput = PromptForInput("Enter the phone number", false);
                 var regexString = @"^(\+[0-9]{0,3})?[ -]?[0-9]{3}[ -]?[0-9]{3}[ -]?[0-9]{4}";
                 var match = Regex.Match(userInput, regexString);

@@ -8,7 +8,9 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Database.DbSetInterfacer
 {
-    internal interface IDbSetInterfacer<T>
+    internal interface IInterfacer { }
+
+    internal interface IDbSetInterfacer<T> : IInterfacer
         where T : SEntity
     {
         Task<bool> Any();

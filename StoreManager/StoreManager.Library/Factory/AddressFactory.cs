@@ -7,7 +7,7 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Factory
 {
-    internal class AddressFactory : IFactory<Address>
+    internal class AddressFactory : ISEntityFactory<Address>
     {
         private readonly IdGenerator _idGenerator;
 

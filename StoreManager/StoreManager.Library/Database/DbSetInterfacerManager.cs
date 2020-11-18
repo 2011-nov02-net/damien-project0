@@ -13,69 +13,81 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Database
 {
-    internal class DbSetInterfacerManager
-    {
-        private readonly Dictionary<Type, IDbSetInterfacer<SEntity>> _interfacers;
+    internal class DbSetInterfacerManager {
+        private readonly Dictionary<Type, IInterfacer> _interfacers;
 
         internal DbSetInterfacerManager(DbContextOptions<StoreManagerContext> contextOptions) {
-            _interfacers = new Dictionary<Type, IDbSetInterfacer<SEntity>>
+            var storeInterfacer = new StoreDbSetInterfacer(contextOptions);
+            var customerInterfacer = new CustomerDbSetInterfacer(contextOptions);
+            var operatingLocationInterfacer = new OperatingLocationDbSetInterfacer(contextOptions);
+            var productInterfacer = new ProductDbSetInterfacer(contextOptions);
+            var orderInterfacer = new OrderDbSetInterfacer(contextOptions);
+            var addressInterfacer = new AddressDbSetInterfacer(contextOptions);
+
+            _interfacers = new Dictionary<Type, IInterfacer>
             {
-                { typeof(Store), new StoreDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
-                { typeof(Customer), new CustomerDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
-                { typeof(OperatingLocation), new OperatingLocationDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
-                { typeof(Product), new ProductDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
-                { typeof(Order), new CustomerDbSetInterfacer(contextOptions) as IDbSetInterfacer<SEntity> },
+                { typeof(Store), storeInterfacer },
+                { typeof(Customer), customerInterfacer },
+                { typeof(OperatingLocation), operatingLocationInterfacer },
+                { typeof(Product), productInterfacer },
+                { typeof(Order), orderInterfacer },
+                { typeof(Address), addressInterfacer }
             };
+        }
+
+        internal IDbSetInterfacer<T> Interfacers<T>()
+            where T : SEntity {
+            return _interfacers[typeof(T)] as IDbSetInterfacer<T>;
         }
 
         internal async Task<bool> AnyAsync<T>()
             where T : SEntity {
-            return await _interfacers[typeof(T)].Any();
+            return await Interfacers<T>().Any();
         }
 
-        internal async Task CreateManyAsync<T>(List<SEntity> items)
+        internal async Task CreateManyAsync<T>(List<T> items)
             where T : SEntity {
-            await _interfacers[typeof(T)].CreateManyAsync(items);
+            await Interfacers<T>().CreateManyAsync(items);
         }
 
-        internal async Task CreateOneAsync<T>(SEntity entity)
+        internal async Task CreateOneAsync<T>(T entity)
             where T : SEntity {
-            await _interfacers[typeof(T)].CreateOneAsync(entity);
+            await Interfacers<T>().CreateOneAsync(entity);
         }
 
-        internal async Task<List<SEntity>> GetAllAsync<T>()
+        internal async Task<List<T>> GetAllAsync<T>()
             where T : SEntity {
-            return await Task.Run(() => _interfacers[typeof(T)].GetAllAsync());
+            return await Task.Run(() => Interfacers<T>().GetAllAsync());
         }
 
-        internal async Task<List<SEntity>> GetSomeAsync<T>(List<int> ids)
+        internal async Task<List<T>> GetSomeAsync<T>(List<int> ids)
             where T : SEntity {
-            return await Task.Run(() => _interfacers[typeof(T)].GetManyAsync(ids));
+            return await Task.Run(() => Interfacers<T>().GetManyAsync(ids));
         }
 
         internal async Task<SEntity> GetOneAsync<T>(int id)
             where T : SEntity {
-            return await _interfacers[typeof(T)].GetOneAsync(id);
+            return await Interfacers<T>().GetOneAsync(id);
         }
 
-        internal async Task UpdateManyAsync<T>(List<SEntity> entities)
+        internal async Task UpdateManyAsync<T>(List<T> entities)
             where T : SEntity {
-            await _interfacers[typeof(T)].UpdateManyAsync(entities);
+            await Interfacers<T>().UpdateManyAsync(entities);
         }
 
-        internal async Task UpdateOneAsync<T>(SEntity item)
+        internal async Task UpdateOneAsync<T>(T item)
             where T : SEntity {
-            await _interfacers[typeof(T)].UpdateOneAsync(item);
+            await Interfacers<T>().UpdateOneAsync(item);
         }
 
-        internal async Task DeleteSomeAsync<T>(List<SEntity> entities)
+        internal async Task DeleteSomeAsync<T>(List<T> entities)
             where T : SEntity {
-            await _interfacers[typeof(T)].DeleteManyAsync(entities);
+            await Interfacers<T>().DeleteManyAsync(entities);
         }
 
-        internal async Task DeleteOneAsync<T>(SEntity item)
+        internal async Task DeleteOneAsync<T>(T item)
             where T : SEntity {
-            await _interfacers[typeof(T)].DeleteOneAsync(item);
+            await Interfacers<T>().DeleteOneAsync(item);
         }
     }
 }

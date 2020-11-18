@@ -6,7 +6,7 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Factory
 {
-    internal class OrderFactory : IFactory<Order>
+    internal class OrderFactory : ISEntityFactory<Order>
     {
         private readonly IdGenerator _idGenerator;
 

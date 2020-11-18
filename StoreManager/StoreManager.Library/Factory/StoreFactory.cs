@@ -9,7 +9,7 @@ using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Factory
 {
-    internal class StoreFactory : IFactory<Store>
+    internal class StoreFactory : ISEntityFactory<Store>
     {
         private readonly IdGenerator _idGenerator;
         public List<Store> Items { get; set; }
