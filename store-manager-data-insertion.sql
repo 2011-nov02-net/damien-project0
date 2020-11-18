@@ -5,14 +5,6 @@ SELECT * FROM [Stores].[Order]
 SELECT * FROM [Stores].[OperatingLocation]
 SELECT * FROM [Stores].[Product]
 
-INSERT INTO [Stores].[OperatingLocation]
-    (OperatingLocationId, StoreId, AddressId)
-VALUES
-    (0, 0, 0),
-    (1, 1, 1),
-    (2, 2, 2);
-GO
-
 INSERT INTO [Stores].[Address]
     (AddressId, AddressLine1, AddressLine2, City, State, Country, ZipCode)
 VALUES
@@ -37,4 +29,12 @@ VALUES
     (1, '4-pack of Monster Energy Drinks', 14.00, NULL),
     (2, 'Large Pack of Granola Bars', 10.00, 0.3),
     (3, 'Box of Dry Erase Markers', 5.00, NULL);
+GO
+
+INSERT INTO [Stores].[OperatingLocation]
+    (OperatingLocationId, StoreId, AddressId)
+VALUES
+    (0, 0, 0),
+    (1, 1, 1),
+    (2, 2, 2);
 GO

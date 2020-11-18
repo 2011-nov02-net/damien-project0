@@ -123,7 +123,7 @@ GO
 -- DROP TABLE [Stores].[OperatingLocation]
 CREATE TABLE [Stores].[OperatingLocation] (
     [OperatingLocationId]           INT             NOT NULL PRIMARY KEY,
-    [StoreId]                       INT             NOT NULL UNIQUE,
+    [StoreId]                       INT             NOT NULL,
     [AddressId]                     INT             NOT NULL
 );
 GO

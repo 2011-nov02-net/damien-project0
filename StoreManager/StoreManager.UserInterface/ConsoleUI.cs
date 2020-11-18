@@ -113,12 +113,13 @@ namespace ConsoleUI
             int maxWidth = optionsList.Max(str => str.Length) + 4;
             string prompt = "";
             string newLine = consoleOptions.SingleLine ? "" : "\n";
+            int mod = (withQuit ? -1 : 0);
             for (int i = 0; i < optionsList.Count - 1; i++) {
                 int currentLength = optionsList[i].Length;
-                prompt += BorderOption(border.OptionsBorderChar, $"{i - 1} {border.SeparatingChar} {optionsList[i]}".PadRight(maxWidth, ' ')) + newLine;
+                prompt += BorderOption(border.OptionsBorderChar, $"{i + mod} {border.SeparatingChar} {optionsList[i]}".PadRight(maxWidth, ' ')) + newLine;
             }
             int final = optionsList.Count - 1;
-            prompt += BorderOption(border.OptionsBorderChar, $"{final - 1} {border.SeparatingChar} {optionsList[final]}".PadRight(maxWidth, ' '));
+            prompt += BorderOption(border.OptionsBorderChar, $"{final + mod} {border.SeparatingChar} {optionsList[final]}".PadRight(maxWidth, ' '));
 
             // Display the prompts here
             if (border.BorderWidth > 0) {

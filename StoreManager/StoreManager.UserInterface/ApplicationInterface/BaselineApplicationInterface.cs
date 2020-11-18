@@ -50,7 +50,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             // get a list of the results
             var customerIds = StoreManagerApplication.GetCustomerIdsByName(userInput);
 
-            if(customerIds.Any()) {
+            if (customerIds.Any()) {
                 // display the results
                 customerIds.ForEach(cid => DisplayCustomer(cid, true));
             } else {
@@ -61,9 +61,13 @@ namespace StoreManager.UserInterface.ApplicationInterface
         private void DisplayOrderDetails() {
             // get the order id 
             // display its data
-            int orderId = PromptForId<Order>();
-            // Display the order
-            DisplayOrder(orderId);
+            if (!StoreManagerApplication.Any<Order>()) {
+                Console.WriteLine("No orders present");
+            } else {
+                int orderId = PromptForId<Order>();
+                // Display the order
+                DisplayOrder(orderId);
+            }
         }
 
         private void DisplayStoreOrderHistory() {
@@ -91,7 +95,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
             // get the orders of the customer they're looking for
             var customerOrders = StoreManagerApplication.GetOrderIdsByCustomerId(customerId);
 
-            if(customerOrders.Any()) {
+            if (customerOrders.Any()) {
                 // display all of the order details
                 customerOrders.ForEach(co => DisplayOrder(co, true));
             } else {
