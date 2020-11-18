@@ -237,7 +237,7 @@ namespace ConsoleUI
             do {
                 DateTime result;
                 if (oneLine) {
-                    string userInput = ConsoleUI.PromptForInput("Enter the date", false);
+                    string userInput = ConsoleUI.PromptForInput(prompt, false);
                     if (!DateTime.TryParse(userInput, out result)) {
                         ++tries;
                     }

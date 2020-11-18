@@ -10,6 +10,7 @@ using StoreManagerContext = StoreManager.DataModel.StoreManagerContext;
 
 using StoreManager.Library.Database.DbSetInterfacer;
 using StoreManager.Library.Entity;
+using StoreManager.Library.Data;
 
 namespace StoreManager.Library.Database
 {
@@ -43,6 +44,16 @@ namespace StoreManager.Library.Database
         internal async Task<bool> AnyAsync<T>()
             where T : SEntity {
             return await Interfacers<T>().Any();
+        }
+
+        internal async Task<bool> IdExistsAsync<T>(int id)
+            where T : SEntity {
+            return await Interfacers<T>().IdExistsAsync(id);
+        }
+
+        internal async Task<int> MaxIdAsync<T>()
+            where T : SEntity {
+            return await Interfacers<T>().MaxIdAsync();
         }
 
         internal async Task CreateManyAsync<T>(List<T> items)

@@ -33,7 +33,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
         }
 
         private void PlaceOrderToStoreLocation() {
-            var data = base.CreateOrderData();
+            var data = CreateOrderData();
             _ = StoreManagerApplication.Create<Order>(data);
             Console.WriteLine($"Order placed successfully.");
         }

@@ -21,35 +21,35 @@ namespace StoreManager.UserInterface
             string filepath = @"C:/Users/Khypr/Desktop/store_manager_configuration.json";
             string json = File.ReadAllText(filepath);
             string connString = JsonSerializer.Deserialize<string>(json);
-            // var options = new[] { "db", "xml", "json" };
+            // Console.WriteLine("Please choose one of the serialization options:");
+            // var options = new[] { "none", "xml", "json" };
             // int selectedOption = CUI.PromptForMenuSelection(options, true);
-            IStorageRepository storageRepository = null;
+            ISerializer serializer = null;
             IConfigurationOptions configurationOptions = new DatabaseConfigurationOptions(new FileLogger("C:/Users/Khypr/Desktop/store_manager.log"), connString);
 
-            // if(selectedOption == -1) {
+            // if (selectedOption == -1) {
             //     Console.WriteLine("Exiting...");
             //     return;
-            // } else if(selectedOption != 0) {
+            // } else if (selectedOption != 0) {
             //     // database not chosen
-            //     string filepath = CUI.PromptForInput("Enter the filepath to store:", // false);
-            // 
+            //     // string filepath = CUI.PromptForInput("Enter the filepath to store:", // false);
             //     switch (selectedOption) {
             //         case 1:
-            //             storageRepository = new XMLStorageRepository(filepath);
+            //             serializer = new XMLStorageRepository(filepath);
             //             break;
             // 
             //         case 2:
-            //             storageRepository = new JSONStorageRepository(filepath);
+            //             serializer = new JSONStorageRepository(filepath);
             //             break;
             //     }
             // } // else if database was chosen, leave storageRepository as null
 
             bool verbose = false; // CUI.PromptForBool("Do you wish to run the application verbosely?", "yes", "no");
 
-            if(verbose) {
-                applicationInterface = new VerboseApplicationInterface(storageRepository, null, configurationOptions);
+            if (verbose) {
+                applicationInterface = new VerboseApplicationInterface(null, serializer, configurationOptions);
             } else {
-                applicationInterface = new BaselineApplicationInterface(storageRepository, null, configurationOptions);
+                applicationInterface = new BaselineApplicationInterface(null, serializer, configurationOptions);
             }
 
             applicationInterface.Run();

@@ -1,5 +1,7 @@
 {
     "files.exclude": {
+        "**.csproj": true,
+        "**.vcxproj": true,
         "**/bin": true,
         "**/obj": true
     }

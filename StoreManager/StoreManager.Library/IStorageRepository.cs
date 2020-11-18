@@ -10,6 +10,10 @@ namespace StoreManager.Library
     {
         void Configure(IConfigurationOptions configurationOptions);
 
+        Task<bool> AnyAsync<T>() where T : SEntity;
+        Task<bool> IdExistsAsync<T>(int id) where T : SEntity;
+        Task<int> MaxIdAsync<T>() where T : SEntity;
+
         // Create
         Task CreateManyAsync<T>(List<T> entities) where T : SEntity;
         Task CreateOneAsync<T>(T entity) where T : SEntity;

@@ -67,6 +67,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
 
             if (itemExists)
                 createItem = CUI.PromptForBool($"Create a new {_typeNames[typeof(T)]} or use one that is existing?", "create", "existing");
+            else Console.WriteLine($"No {_typeNames[typeof(T)]}s exist; please create a {_typeNames[typeof(T)]}.");
 
             if (createItem) {
                 // create the item
@@ -119,10 +120,10 @@ namespace StoreManager.UserInterface.ApplicationInterface
         #region Creation Methods
 
         protected CustomerData CreateCustomerData() {
-            string firstName = CUI.PromptForInput("Enter the first name", false);
-            string lastName = CUI.PromptForInput("Enter the last name", false);
-            string email = CUI.PromptForEmail("Enter the email");
-            string phoneNumber = CUI.PromptForPhoneNumber("Enter the phone number");
+            string firstName = CUI.PromptForInput("Enter their first name", false);
+            string lastName = CUI.PromptForInput("Enter their last name", false);
+            string email = CUI.PromptForEmail("Enter their email");
+            string phoneNumber = CUI.PromptForPhoneNumber("Enter their phone number");
 
             int addressId = PromptForCreateOrExist<Address>(
                 () => {

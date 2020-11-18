@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using StoreManager.Library.Data;
 using StoreManager.Library.Entity;
 
 namespace StoreManager.Library.Database.DbSetInterfacer
@@ -14,6 +15,9 @@ namespace StoreManager.Library.Database.DbSetInterfacer
         where T : SEntity
     {
         Task<bool> Any();
+        Task<bool> IdExistsAsync(int id);
+
+        Task<int> MaxIdAsync();
 
         // Create
         Task CreateManyAsync(List<T> items);

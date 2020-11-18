@@ -38,6 +38,20 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await context.OperatingLocations.AnyAsync();
         }
 
+        public async Task<bool> IdExistsAsync(int id) {
+            using var context = new StoreManagerContext(_contextOptions);
+            if (!context.OperatingLocations.Any())
+                return false;
+            return await Task.Run(() => context.OperatingLocations.Find(id) is not null);
+        }
+
+        public async Task<int> MaxIdAsync() {
+            using var context = new StoreManagerContext(_contextOptions);
+            if (!context.OperatingLocations.Any())
+                return 0;
+            return await Task.Run(() => context.OperatingLocations.Max(ol => ol.OperatingLocationId));
+        }
+
         public async Task CreateManyAsync(List<OperatingLocation> items) {
             await Task.Run(() => items.ForEach(ol => CreateOneAsync(ol).Wait()));
         }

@@ -70,9 +70,6 @@ GO
 
 ******************************************************/
 
-DROP TABLE [Stores].[StoreOperatingLocation]
-GO
-
 DROP TABLE [Stores].[CustomerOrder]
 GO
 
@@ -127,7 +124,7 @@ GO
 CREATE TABLE [Stores].[OperatingLocation] (
     [OperatingLocationId]           INT             NOT NULL PRIMARY KEY,
     [StoreId]                       INT             NOT NULL,
-    [AddressId]                     INT             NOT NULL UNIQUE
+    [AddressId]                     INT             NOT NULL
 );
 GO
 

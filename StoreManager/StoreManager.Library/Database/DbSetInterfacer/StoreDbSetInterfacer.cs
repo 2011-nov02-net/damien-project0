@@ -72,6 +72,20 @@ namespace StoreManager.Library.Database.DbSetInterfacer
             return await context.Stores.AnyAsync();
         }
 
+        public async Task<bool> IdExistsAsync(int id) {
+            using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                return false;
+            return await Task.Run(() => context.Stores.Find(id) is not null);
+        }
+
+        public async Task<int> MaxIdAsync() {
+            using var context = new StoreManagerContext(_contextOptions);
+            if (!context.Stores.Any())
+                return 0;
+            return await Task.Run(() => context.Stores.Max(s => s.StoreId));
+        }
+
         public async Task CreateManyAsync(List<Store> items) {
             await Task.Run(() => items.ForEach(s => CreateOneAsync(s).Wait()));
         }
