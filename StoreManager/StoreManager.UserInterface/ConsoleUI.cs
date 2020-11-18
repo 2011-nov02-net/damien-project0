@@ -301,7 +301,7 @@ namespace ConsoleUI
                 // domain name length: 253 characters
                 string userInput = PromptForInput("Enter the email", false);
                 // Use Regex magic to match
-                var regexString = @"^[a-zA-Z]+[a-zA-Z0-9]*\.[a-zA-Z0-9]+\@[a-zA-Z]+[a-zA-Z0-9]+\.([a-zA-Z]+[a-zA-Z0-9]+){0,253}";
+                var regexString = @"^[a-zA-Z]+[a-zA-Z0-9\.]*\@[a-zA-Z]+[a-zA-Z0-9]+\.([a-zA-Z]+[a-zA-Z0-9]+){0,253}";
                 var match = Regex.Match(userInput, regexString);
                 if (match.Success) {
                     return userInput;

@@ -128,7 +128,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
                 return null;
 
             // Make sure to include the other items
-            _ = context.Stores
+            var stores = context.Stores
                 .Include(s => s.OperatingLocations)
                 .Include(s => s.StoreInventories);
             // Convert the data for the Library to use
@@ -147,7 +147,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
                 return;
 
             // Make sure to include the other items
-            _ = context.Stores
+            var stores = context.Stores
                 .Include(s => s.OperatingLocations)
                 .Include(s => s.StoreInventories);
             // Convert the data for the DbContext to use
@@ -168,7 +168,7 @@ namespace StoreManager.Library.Database.DbSetInterfacer
                 return;
 
             // Make sure to include the other items
-            _ = context.Stores
+            var stores = context.Stores
                 .Include(s => s.OperatingLocations)
                 .Include(s => s.StoreInventories);
             // Convert the data for the DbContext to use

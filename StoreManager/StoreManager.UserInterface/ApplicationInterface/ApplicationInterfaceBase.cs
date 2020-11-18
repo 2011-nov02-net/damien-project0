@@ -226,7 +226,6 @@ namespace StoreManager.UserInterface.ApplicationInterface
             operatingLocationId = store.OperatingLocationIds[selectedOption];
 
             // Get the products the user wants
-
             UntilItIsDone(() => {
                 // Add products and the inventory they have
                 int productId = PromptForCreateOrExist<Product>(
@@ -237,9 +236,7 @@ namespace StoreManager.UserInterface.ApplicationInterface
                     () => PromptForId<Product>()
                 );
 
-                int threshold = store.Inventory[productId].Item2.HasValue
-                    ? store.Inventory[productId].Item2.Value
-                    : store.Inventory[productId].Item1;
+                int threshold = store.Inventory[productId].Item2 ?? store.Inventory[productId].Item1;
 
                 // Get the count
                 int count = CUI.PromptRange("Enter the count of said product", 0, threshold);
