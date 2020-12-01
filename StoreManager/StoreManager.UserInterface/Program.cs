@@ -24,6 +24,7 @@ namespace StoreManager.UserInterface
             ISerializer serializer = null;
             IConfigurationOptions configurationOptions = new DatabaseConfigurationOptions(new FileLogger("C:/Users/Khypr/Desktop/store_manager.log"), connString);
 
+
             bool verbose = false; // CUI.PromptForBool("Do you wish to run the application verbosely?", "yes", "no");
 
             if (verbose) {
